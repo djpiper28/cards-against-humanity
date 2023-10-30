@@ -6,7 +6,7 @@ import (
 
 type WhiteCard struct {
 	Id       uuid.UUID `json:"id"`
-	BodyText string    `json:"body-text"`
+	BodyText string    `json:"bodyText"`
 }
 
 func NewWhiteCard(Id uuid.UUID, BodyText string) *WhiteCard {
