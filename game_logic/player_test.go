@@ -47,6 +47,27 @@ func TestPlayerInit(t *testing.T) {
 	}
 }
 
+func TestAddCardToHand(t *testing.T) {
+	player := game_logic.NewPlayer("Dave")
+	id := uuid.New()
+	err := player.AddCardToHand(game_logic.NewWhiteCard(id, "testing 123"))
+	if err != nil {
+		t.Log("Card adding failed when it should not have", err)
+		t.FailNow()
+	}
+
+	if len(player.Hand) != 1 {
+		t.Log("Card was not added")
+		t.FailNow()
+	}
+
+	err = player.AddCardToHand(player.Hand[id])
+	if err == nil {
+		t.Log("Should not be able to add duplicate cards to the hand")
+		t.FailNow()
+	}
+}
+
 func TestAddCard(t *testing.T) {
 	player := game_logic.NewPlayer("Dave")
 	cards := []*game_logic.WhiteCard{game_logic.NewWhiteCard(uuid.New(), "Testing 123"),
