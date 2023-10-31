@@ -2,6 +2,7 @@ package gameLogic
 
 import (
 	"errors"
+	"fmt"
 	"github.com/google/uuid"
 	"log"
 	"sync"
@@ -16,11 +17,20 @@ type Player struct {
 	lock        sync.Mutex
 }
 
-func NewPlayer(Name string) *Player {
+const (
+	maxLength = 20
+	minLength = 3
+)
+
+func NewPlayer(Name string) (*Player, error) {
+	if len(Name) > maxLength || len(Name) < minLength {
+		return nil, errors.New(fmt.Sprintf("Length of name must be between %d and %d (exclusive exclusive)", minLength, maxLength))
+	}
+
 	return &Player{Id: uuid.New(),
 		Name:      Name,
 		Hand:      make(map[uuid.UUID]*WhiteCard),
-		Connected: true}
+		Connected: true}, nil
 }
 
 func (p *Player) hasCard(card *WhiteCard) bool {
@@ -32,8 +42,12 @@ func (p *Player) PlayCard(cards []*WhiteCard) error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
+	if cards == nil {
+		return errors.New("Cannot play nil cards")
+	}
+
 	if p.CurrentPlay != nil {
-		return errors.New("Cannot play two cards")
+		return errors.New("Cards have already been played")
 	}
 
 	for _, card := range cards {

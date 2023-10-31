@@ -8,7 +8,12 @@ import (
 
 func TestPlayerInit(t *testing.T) {
 	name := "Dave"
-	player := gameLogic.NewPlayer(name)
+	player, err := gameLogic.NewPlayer(name)
+
+	if err != nil {
+		t.Log("There should not be an error", err)
+		t.FailNow()
+	}
 
 	if player == nil {
 		t.Log("Player is nil")
@@ -48,9 +53,14 @@ func TestPlayerInit(t *testing.T) {
 }
 
 func TestAddCardToHand(t *testing.T) {
-	player := gameLogic.NewPlayer("Dave")
+	player, err := gameLogic.NewPlayer("Dave")
+	if err != nil {
+		t.Log("Should be able to make the player", err)
+		t.FailNow()
+	}
+
 	id := uuid.New()
-	err := player.AddCardToHand(gameLogic.NewWhiteCard(id, "testing 123"))
+	err = player.AddCardToHand(gameLogic.NewWhiteCard(id, "testing 123"))
 	if err != nil {
 		t.Log("Card adding failed when it should not have", err)
 		t.FailNow()
@@ -68,8 +78,13 @@ func TestAddCardToHand(t *testing.T) {
 	}
 }
 
-func TestAddCard(t *testing.T) {
-	player := gameLogic.NewPlayer("Dave")
+func TestPlayHand(t *testing.T) {
+	player, err := gameLogic.NewPlayer("Dave")
+	if err != nil {
+		t.Log("Should be able to make the player", err)
+		t.FailNow()
+	}
+
 	cards := []*gameLogic.WhiteCard{gameLogic.NewWhiteCard(uuid.New(), "Testing 123"),
 		gameLogic.NewWhiteCard(uuid.New(), "Testing 234"),
 		gameLogic.NewWhiteCard(uuid.New(), "Testing 345"),
@@ -86,7 +101,7 @@ func TestAddCard(t *testing.T) {
 	}
 
 	play := cards[0:2]
-	err := player.PlayCard(play)
+	err = player.PlayCard(play)
 	if err != nil {
 		t.Log("Cannot play cards")
 		t.FailNow()
@@ -118,5 +133,20 @@ func TestAddCard(t *testing.T) {
 			t.Log("Current play is not what is expected")
 			t.FailNow()
 		}
+	}
+}
+
+func TestPlayNilHand(t *testing.T) {
+	player, err := gameLogic.NewPlayer("Dave")
+	if err != nil {
+		t.Log("Should be able to make the player", err)
+		t.FailNow()
+	}
+
+	err = player.PlayCard(nil)
+
+	if err == nil {
+		t.Log("Should not be able to play a nil hand")
+		t.FailNow()
 	}
 }
