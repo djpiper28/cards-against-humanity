@@ -7,12 +7,12 @@ import (
 	"github.com/google/uuid"
 )
 
-const testCards = 100
+const testCardsLength = 100
 
 func GetTestWhiteCards() []*gameLogic.WhiteCard {
-	cards := make([]*gameLogic.WhiteCard, testCards)
+	cards := make([]*gameLogic.WhiteCard, testCardsLength)
 
-	for i := 0; i < testCards; i++ {
+	for i := 0; i < testCardsLength; i++ {
 		cards = append(cards, gameLogic.NewWhiteCard(uuid.New(), fmt.Sprintf("Test white card #%d", i)))
 	}
 
@@ -20,9 +20,9 @@ func GetTestWhiteCards() []*gameLogic.WhiteCard {
 }
 
 func GetTestBlackCards() []*gameLogic.BlackCard {
-	cards := make([]*gameLogic.BlackCard, testCards)
+	cards := make([]*gameLogic.BlackCard, testCardsLength)
 
-	for i := 0; i < testCards; i++ {
+	for i := 0; i < testCardsLength; i++ {
 		cards = append(cards, gameLogic.NewBlackCard(uuid.New(), fmt.Sprintf("Test black card #%d", i), uint(i%5)))
 	}
 
