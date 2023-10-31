@@ -1,14 +1,14 @@
-package game_logic_test
+package gameLogic_test
 
 import (
-	"github.com/djpiper28/cards-against-humanity/game_logic"
+	"github.com/djpiper28/cards-against-humanity/gameLogic"
 	"github.com/google/uuid"
 	"testing"
 )
 
 func TestPlayerInit(t *testing.T) {
 	name := "Dave"
-	player := game_logic.NewPlayer(name)
+	player := gameLogic.NewPlayer(name)
 
 	if player == nil {
 		t.Log("Player is nil")
@@ -48,9 +48,9 @@ func TestPlayerInit(t *testing.T) {
 }
 
 func TestAddCardToHand(t *testing.T) {
-	player := game_logic.NewPlayer("Dave")
+	player := gameLogic.NewPlayer("Dave")
 	id := uuid.New()
-	err := player.AddCardToHand(game_logic.NewWhiteCard(id, "testing 123"))
+	err := player.AddCardToHand(gameLogic.NewWhiteCard(id, "testing 123"))
 	if err != nil {
 		t.Log("Card adding failed when it should not have", err)
 		t.FailNow()
@@ -69,12 +69,12 @@ func TestAddCardToHand(t *testing.T) {
 }
 
 func TestAddCard(t *testing.T) {
-	player := game_logic.NewPlayer("Dave")
-	cards := []*game_logic.WhiteCard{game_logic.NewWhiteCard(uuid.New(), "Testing 123"),
-		game_logic.NewWhiteCard(uuid.New(), "Testing 234"),
-		game_logic.NewWhiteCard(uuid.New(), "Testing 345"),
-		game_logic.NewWhiteCard(uuid.New(), "Testing 456"),
-		game_logic.NewWhiteCard(uuid.New(), "Testing 567"),
+	player := gameLogic.NewPlayer("Dave")
+	cards := []*gameLogic.WhiteCard{gameLogic.NewWhiteCard(uuid.New(), "Testing 123"),
+		gameLogic.NewWhiteCard(uuid.New(), "Testing 234"),
+		gameLogic.NewWhiteCard(uuid.New(), "Testing 345"),
+		gameLogic.NewWhiteCard(uuid.New(), "Testing 456"),
+		gameLogic.NewWhiteCard(uuid.New(), "Testing 567"),
 	}
 
 	for _, card := range cards {

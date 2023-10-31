@@ -1,7 +1,7 @@
-package game_logic_test
+package gameLogic_test
 
 import (
-	"github.com/djpiper28/cards-against-humanity/game_logic"
+	"github.com/djpiper28/cards-against-humanity/gameLogic"
 	"github.com/google/uuid"
 	"testing"
 )
@@ -9,7 +9,7 @@ import (
 func TestWhiteCardNew(t *testing.T) {
 	id := uuid.New()
 	bodyText := "bodyText"
-	card := game_logic.NewWhiteCard(id, bodyText)
+	card := gameLogic.NewWhiteCard(id, bodyText)
 
 	if card == nil {
 		t.Log("Card was null")
@@ -32,7 +32,7 @@ func TestBlackCardNew(t *testing.T) {
 	bodyText := "bodyText"
 	var cardsToPlay uint = 12
 
-	card := game_logic.NewBlackCard(id, bodyText, cardsToPlay)
+	card := gameLogic.NewBlackCard(id, bodyText, cardsToPlay)
 
 	if card == nil {
 		t.Log("Card was null")
