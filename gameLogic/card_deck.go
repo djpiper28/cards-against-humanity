@@ -29,5 +29,6 @@ func (cd *CardDeck) GetNewWhiteCards(cardsToAdd uint) ([]*WhiteCard, error) {
 	}
 
 	cards := cd.WhiteCards[0:cardsToAdd]
+	cd.WhiteCards = cd.WhiteCards[cardsToAdd:]
 	return cards, nil
 }
