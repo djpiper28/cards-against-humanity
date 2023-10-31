@@ -14,6 +14,7 @@ type Player struct {
 	Hand        map[uuid.UUID]*WhiteCard
 	CurrentPlay []*WhiteCard
 	Connected   bool
+	Points      int
 	lock        sync.Mutex
 }
 
@@ -79,4 +80,11 @@ func (p *Player) AddCardToHand(card *WhiteCard) error {
 
 	p.Hand[card.Id] = card
 	return nil
+}
+
+func (p *Player) FinaliseRound() {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+
+	p.CurrentPlay = nil
 }

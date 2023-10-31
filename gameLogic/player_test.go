@@ -50,6 +50,11 @@ func TestPlayerInit(t *testing.T) {
 		t.Log("Player is not connected")
 		t.FailNow()
 	}
+
+	if player.Points != 0 {
+		t.Log("Player points should be 0")
+		t.FailNow()
+	}
 }
 
 func TestAddCardToHand(t *testing.T) {
@@ -147,6 +152,22 @@ func TestPlayNilHand(t *testing.T) {
 
 	if err == nil {
 		t.Log("Should not be able to play a nil hand")
+		t.FailNow()
+	}
+}
+
+func TestFinaliseRound(t *testing.T) {
+	player, err := gameLogic.NewPlayer("Dave")
+	if err != nil {
+		t.Log("Should be able to make the player", err)
+		t.FailNow()
+	}
+
+	player.CurrentPlay = make([]*gameLogic.WhiteCard, 0)
+	player.FinaliseRound()
+
+	if player.CurrentPlay != nil {
+		t.Log("Current play was not cleared")
 		t.FailNow()
 	}
 }
