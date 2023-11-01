@@ -1,6 +1,8 @@
 package gameLogic
 
 import (
+	"errors"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -33,8 +35,8 @@ type GameSettings struct {
 	PlayingToPoints uint `json:"playingToPoints"`
 	// Allows a game to have a password, this will be stored in plaintext like a chad
 	// Empty string is no password
-	Password string `json:"GamePassword"`
-	MaxPlayers   uint   `json:"maxPlayers"`
+	Password   string `json:"GamePassword"`
+	MaxPlayers uint   `json:"maxPlayers"`
 }
 
 func DefaultGameSettings() *GameSettings {
@@ -80,4 +82,21 @@ type Game struct {
 	CurrentRound      uint
 	Settings          *GameSettings
 	CreationTime      time.Time
+}
+
+func NewGame(gameSettings *GameSettings, hostPlayerName string) (*Game, error) {
+	if !gameSettings.Validate() {
+		return nil, errors.New("Cannot validate the game settings")
+	}
+
+	hostPlayer, err := NewPlayer(hostPlayerName)
+	if err != nil {
+		log.Println("Cannot create game due to an error making the player", err)
+		return nil, err
+	}
+
+	players := make(map[uuid.UUID]*Player)
+	players[hostPlayer.Id] = hostPlayer
+
+	return &Game{Players: players, GameOwnerId: hostPlayer.Id, Settings: gameSettings, CreationTime: time.Now()}, nil
 }
