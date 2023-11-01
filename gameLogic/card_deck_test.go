@@ -94,7 +94,18 @@ func TestCardDeckGetNewBlackCard(t *testing.T) {
 
   cardDeck, err := gameLogic.NewCardDeck(whiteCards, blackCards)
   if err != nil {
+    t.Log("Cannot create deck")
+    t.FailNow()
+  }
+
+  card, err := cardDeck.GetNewBlackCard()
+  if err != nil {
     t.Log("Should have got a new black card")
+    t.FailNow()
+  }
+
+  if card == nil {
+    t.Log("Black card was nil")
     t.FailNow()
   }
 

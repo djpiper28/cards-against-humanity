@@ -40,7 +40,7 @@ func DefaultCardPack() *CardPack {
     return packValue
   }
 
-  log.Fatal("Cannot find any packs for the default")
+  log.Println("Cannot find any packs for the default")
   return nil
 }
 
