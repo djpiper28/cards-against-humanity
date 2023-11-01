@@ -172,3 +172,170 @@ func TestNewGame(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestAddInvalidPlayer(t *testing.T) {
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	if err != nil {
+		t.Log("Cannot make the game")
+		t.FailNow()
+	}
+
+	_, err = game.AddPlayer("")
+	if err == nil {
+		t.Log("Should not be able to add an invalid player")
+		t.FailNow()
+	}
+}
+
+func TestAddingDuplicatePlayer(t *testing.T) {
+	name := "Dave"
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, name)
+	if err != nil {
+		t.Log("Cannot make the game")
+		t.FailNow()
+	}
+
+	_, err = game.AddPlayer(name)
+	if err == nil {
+		t.Log("Should not be able to add an invalid player")
+		t.FailNow()
+	}
+}
+
+func TestAddPlayer(t *testing.T) {
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	if err != nil {
+		t.Log("Cannot make the game")
+		t.FailNow()
+	}
+
+	id, err := game.AddPlayer("Steve")
+	if err != nil {
+		t.Log("Should not be able to add an invalid player")
+		t.FailNow()
+	}
+
+	var nilUuid uuid.UUID
+	if id == nilUuid {
+		t.Log("Id was not set")
+		t.FailNow()
+	}
+
+	player, found := game.PlayersMap[id]
+	if !found {
+		t.Log("Cannot find the player in the player map")
+		t.FailNow()
+	}
+
+	if player.Id != id {
+		t.Log("Player ID mismatch between list and map")
+		t.FailNow()
+	}
+
+	if len(game.Players) != 2 {
+		t.Log("There should be two players")
+		t.FailNow()
+	}
+
+	if game.Players[len(game.Players)-1] != id {
+		t.Log("Player not at end of players list")
+		t.FailNow()
+	}
+}
+
+func TestAddingPlayers(t *testing.T) {
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	if err != nil {
+		t.Log("Cannot make the game")
+		t.FailNow()
+	}
+
+	for i := 0; i < int(settings.MaxPlayers)-1; i++ {
+		id, err := game.AddPlayer(fmt.Sprintf("Steve %d", i))
+		if err != nil {
+			t.Log("Should not be able to add an invalid player")
+			t.FailNow()
+		}
+
+		var nilUuid uuid.UUID
+		if id == nilUuid {
+			t.Log("Id was not set")
+			t.FailNow()
+		}
+
+		player, found := game.PlayersMap[id]
+		if !found {
+			t.Log("Cannot find the player in the player map")
+			t.FailNow()
+		}
+
+		if player.Id != id {
+			t.Log("Player ID mismatch between list and map")
+			t.FailNow()
+		}
+
+		if len(game.Players) != 2+i {
+			t.Log("There should be two players")
+			t.FailNow()
+		}
+
+		if game.Players[len(game.Players)-1] != id {
+			t.Log("Player not at end of players list")
+			t.FailNow()
+		}
+	}
+}
+
+func TestAddingMaxPlayers(t *testing.T) {
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	if err != nil {
+		t.Log("Cannot make the game")
+		t.FailNow()
+	}
+
+	for i := 0; i < int(settings.MaxPlayers)-1; i++ {
+		id, err := game.AddPlayer(fmt.Sprintf("Steve %d", i))
+		if err != nil {
+			t.Log("Should not be able to add an invalid player")
+			t.FailNow()
+		}
+
+		var nilUuid uuid.UUID
+		if id == nilUuid {
+			t.Log("Id was not set")
+			t.FailNow()
+		}
+
+		player, found := game.PlayersMap[id]
+		if !found {
+			t.Log("Cannot find the player in the player map")
+			t.FailNow()
+		}
+
+		if player.Id != id {
+			t.Log("Player ID mismatch between list and map")
+			t.FailNow()
+		}
+
+		if len(game.Players) != 2+i {
+			t.Log("There should be two players")
+			t.FailNow()
+		}
+
+		if game.Players[len(game.Players)-1] != id {
+			t.Log("Player not at end of players list")
+			t.FailNow()
+		}
+	}
+
+	_, err = game.AddPlayer(fmt.Sprintf("Final Steve"))
+	if err == nil {
+		t.Log("Should not be able to add beyond the maximum amount of players")
+		t.FailNow()
+	}
+}

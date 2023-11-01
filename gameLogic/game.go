@@ -2,6 +2,7 @@ package gameLogic
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -84,16 +85,30 @@ func (gs *GameSettings) Validate() bool {
 	return true
 }
 
+type GameState int
+
+const (
+	GameStateInLobby GameState = iota + 1
+	GameStateWhiteCardsBeingSelected
+	GameStateCzarJudgingCards
+	GameStateDisplayingWinningCard
+)
+
 type Game struct {
-	Id                uuid.UUID
-	Players           []uuid.UUID
-	PlayersMap        map[uuid.UUID]*Player
+	Id         uuid.UUID
+	Players    []uuid.UUID
+	PlayersMap map[uuid.UUID]*Player
+
 	CurrentCardCzarId uuid.UUID
 	GameOwnerId       uuid.UUID
-	CurrentRound      uint
-	Settings          *GameSettings
-	CreationTime      time.Time
-	lock              sync.Mutex
+
+	CurrentRound     uint
+	Settings         *GameSettings
+	CurrentBlackCard *BlackCard
+	CardDeck         *CardDeck
+	CreationTime     time.Time
+	GameState        GameState
+	lock             sync.Mutex
 }
 
 func NewGame(gameSettings *GameSettings, hostPlayerName string) (*Game, error) {
@@ -110,9 +125,72 @@ func NewGame(gameSettings *GameSettings, hostPlayerName string) (*Game, error) {
 	playersMap := make(map[uuid.UUID]*Player)
 	playersMap[hostPlayer.Id] = hostPlayer
 
-  players := make([]uuid.UUID, 1)
-  players[0] = hostPlayer.Id
+	players := make([]uuid.UUID, 1)
+	players[0] = hostPlayer.Id
 
-	return &Game{Id: uuid.New(), PlayersMap: playersMap, Players: players, GameOwnerId: hostPlayer.Id, Settings: gameSettings, CreationTime: time.Now()}, nil
+	return &Game{Id: uuid.New(),
+		PlayersMap:   playersMap,
+		Players:      players,
+		GameOwnerId:  hostPlayer.Id,
+		Settings:     gameSettings,
+		CreationTime: time.Now(),
+		GameState:    GameStateInLobby}, nil
 }
 
+func (g *Game) AddPlayer(playerName string) (uuid.UUID, error) {
+	g.lock.Lock()
+	defer g.lock.Unlock()
+
+	if len(g.Players) >= int(g.Settings.MaxPlayers) {
+		return uuid.UUID{}, errors.New("Cannot add more than max players")
+	}
+
+	player, err := NewPlayer(playerName)
+	if err != nil {
+		return uuid.UUID{}, errors.New(fmt.Sprintf("Cannot create player %s", err))
+	}
+
+	for _, playerId := range g.Players {
+		player, _ := g.PlayersMap[playerId]
+		if player == nil {
+			return uuid.UUID{}, errors.New("Cannot find the player from the map within the map")
+		}
+
+		if playerName == player.Name {
+			return uuid.UUID{}, errors.New("Players cannot have the same name as each other")
+		}
+	}
+
+	g.Players = append(g.Players, player.Id)
+	g.PlayersMap[player.Id] = player
+	return player.Id, nil
+}
+
+func (g *Game) StartGame() error {
+	g.lock.Lock()
+	defer g.lock.Unlock()
+
+	if g.GameState != GameStateInLobby {
+		return errors.New("The game is not in the lobby so cannot be started")
+	}
+
+	if len(g.Players) < MinPlayers {
+		return errors.New(fmt.Sprintf("Cannot start game until the minimum amount of players %d have joined the game", MinPlayers))
+	}
+
+	deck, err := AccumalateCardPacks(g.Settings.CardPacks)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Cannot create the game deck %s", err))
+	}
+	g.CardDeck = deck
+
+	blackCard, err := g.CardDeck.GetNewBlackCard()
+	if err != nil {
+		return errors.New("Cannot get a black card")
+	}
+
+	g.CurrentBlackCard = blackCard
+	g.GameState = GameStateWhiteCardsBeingSelected
+	g.CurrentRound++
+	return nil
+}
