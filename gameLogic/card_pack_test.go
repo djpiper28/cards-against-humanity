@@ -52,3 +52,61 @@ func TestLoadCards(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestBlackCardLookup(t *testing.T) {
+  card, err := gameLogic.GetBlackCard(0)
+  if err != nil {
+    t.Log("Should be able to get black card 0", err)
+    t.FailNow()
+  }
+
+  if card == nil {
+    t.Log("Card was nil")
+    t.FailNow()
+  }
+}
+
+func TestBlackCardLookupNegative(t *testing.T) {
+	_, err := gameLogic.GetBlackCard(-1)
+	if err == nil {
+		t.Log("Should not be able to find a card with ID -1")
+		t.FailNow()
+	}
+}
+
+func TestBlackCardLookupTooHigh(t *testing.T) {
+	_, err := gameLogic.GetBlackCard(len(gameLogic.AllBlackCards))
+	if err == nil {
+		t.Log("Should not be able tof ind a card with ID = len")
+		t.FailNow()
+	}
+}
+
+func TestWhiteCardLookup(t *testing.T) {
+  card, err := gameLogic.GetWhiteCard(0)
+  if err != nil {
+    t.Log("Should be able to get white card 0", err)
+    t.FailNow()
+  }
+
+  if card == nil {
+    t.Log("Card was nil")
+    t.FailNow()
+  }
+}
+
+func TestWhiteCardLookupNegative(t *testing.T) {
+	_, err := gameLogic.GetWhiteCard(-1)
+	if err == nil {
+		t.Log("Should not be able to find a card with ID -1")
+		t.FailNow()
+	}
+}
+
+func TestWhiteCardLookupTooHigh(t *testing.T) {
+	_, err := gameLogic.GetWhiteCard(len(gameLogic.AllWhiteCards))
+	if err == nil {
+		t.Log("Should not be able tof ind a card with ID = len")
+		t.FailNow()
+	}
+}

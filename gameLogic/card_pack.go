@@ -17,8 +17,31 @@ type CardPack struct {
 	CardDeck *CardDeck `json:"-"`
 }
 
+var AllPacks map[uuid.UUID]*CardPack
+var AllWhiteCards []*WhiteCard
+var AllBlackCards []*BlackCard
+
+func GetWhiteCard(id int) (*WhiteCard, error) {
+  if id < 0 || id >= len(AllWhiteCards) {
+    return nil, errors.New("White card does not exist")
+  }
+  return AllWhiteCards[id], nil
+}
+
+func GetBlackCard(id int) (*BlackCard, error) {
+  if id < 0 || id >= len(AllBlackCards) {
+    return nil, errors.New("Black card does not exist")
+  }
+  return AllBlackCards[id], nil
+}
+
 func DefaultCardPack() *CardPack {
-	return &CardPack{}
+  for _, packValue := range AllPacks {
+    return packValue
+  }
+
+  log.Fatal("Cannot find any packs for the default")
+  return nil
 }
 
 func AccumalateCardPacks(packs []*CardPack) (*CardDeck, error) {
@@ -50,10 +73,6 @@ type cahJson struct {
 	BlackCards []cahJsonBlackCard `json:"black"`
 	Packs      []cahJsonPack      `json:"packs"`
 }
-
-var AllPacks map[uuid.UUID]*CardPack
-var AllWhiteCards []*WhiteCard
-var AllBlackCards []*BlackCard
 
 const cahJsonFile = "packs/cah-all-compact.json"
 
