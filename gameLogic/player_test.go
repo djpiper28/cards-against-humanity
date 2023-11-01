@@ -64,7 +64,7 @@ func TestAddCardToHand(t *testing.T) {
 		t.FailNow()
 	}
 
-	id := uuid.New()
+	id := 123
 	err = player.AddCardToHand(gameLogic.NewWhiteCard(id, "testing 123"))
 	if err != nil {
 		t.Log("Card adding failed when it should not have", err)
@@ -90,11 +90,11 @@ func TestPlayHand(t *testing.T) {
 		t.FailNow()
 	}
 
-	cards := []*gameLogic.WhiteCard{gameLogic.NewWhiteCard(uuid.New(), "Testing 123"),
-		gameLogic.NewWhiteCard(uuid.New(), "Testing 234"),
-		gameLogic.NewWhiteCard(uuid.New(), "Testing 345"),
-		gameLogic.NewWhiteCard(uuid.New(), "Testing 456"),
-		gameLogic.NewWhiteCard(uuid.New(), "Testing 567"),
+	cards := []*gameLogic.WhiteCard{gameLogic.NewWhiteCard(0, "Testing 123"),
+		gameLogic.NewWhiteCard(1, "Testing 234"),
+		gameLogic.NewWhiteCard(2, "Testing 345"),
+		gameLogic.NewWhiteCard(3, "Testing 456"),
+		gameLogic.NewWhiteCard(4, "Testing 567"),
 	}
 
 	for _, card := range cards {
@@ -149,6 +149,37 @@ func TestPlayNilHand(t *testing.T) {
 	}
 
 	err = player.PlayCard(nil)
+
+	if err == nil {
+		t.Log("Should not be able to play a nil hand")
+		t.FailNow()
+	}
+}
+
+func TestPlayDuplicateHand(t *testing.T) {
+	player, err := gameLogic.NewPlayer("Dave")
+	if err != nil {
+		t.Log("Should be able to make the player", err)
+		t.FailNow()
+	}
+
+	cards := []*gameLogic.WhiteCard{gameLogic.NewWhiteCard(0, "Testing 123"),
+		gameLogic.NewWhiteCard(1, "Testing 234"),
+		gameLogic.NewWhiteCard(2, "Testing 345"),
+		gameLogic.NewWhiteCard(3, "Testing 456"),
+		gameLogic.NewWhiteCard(4, "Testing 567"),
+	}
+
+	for _, card := range cards {
+		err := player.AddCardToHand(card)
+		if err != nil {
+			t.Log("Cannot add card to hand")
+			t.FailNow()
+		}
+	}
+
+	hand := []*gameLogic.WhiteCard{cards[0], cards[1], cards[2], cards[2]}
+	err = player.PlayCard(hand)
 
 	if err == nil {
 		t.Log("Should not be able to play a nil hand")

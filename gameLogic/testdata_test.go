@@ -15,7 +15,7 @@ func GetTestWhiteCards() []*gameLogic.WhiteCard {
 	cards := make([]*gameLogic.WhiteCard, 0, testCardsLength)
 
 	for i := 0; i < testCardsLength; i++ {
-		cards = append(cards, gameLogic.NewWhiteCard(uuid.New(), fmt.Sprintf("Test white card #%d", i)))
+		cards = append(cards, gameLogic.NewWhiteCard(i, fmt.Sprintf("Test white card #%d", i)))
 	}
 
 	return cards
@@ -39,7 +39,7 @@ func GetTestBlackCards() []*gameLogic.BlackCard {
 	cards := make([]*gameLogic.BlackCard, 0, testCardsLength)
 
 	for i := 0; i < testCardsLength; i++ {
-		cards = append(cards, gameLogic.NewBlackCard(uuid.New(), fmt.Sprintf("Test black card #%d", i), uint(i%5)))
+		cards = append(cards, gameLogic.NewBlackCard(i, fmt.Sprintf("Test black card #%d", i), uint(i%5)))
 	}
 
 	return cards
@@ -51,12 +51,12 @@ func GetTestPacks() []*gameLogic.CardPack {
 	for i := 0; i < len(packs); i++ {
 		whiteCards := make([]*gameLogic.WhiteCard, 0, testCardsLength)
 		for j := 0; j < testCardsLength; j++ {
-			whiteCards = append(whiteCards, gameLogic.NewWhiteCard(uuid.New(), fmt.Sprintf("Test white card #%d-%d", i, j)))
+			whiteCards = append(whiteCards, gameLogic.NewWhiteCard(j, fmt.Sprintf("Test white card #%d-%d", i, j)))
 		}
 
 		blackCards := make([]*gameLogic.BlackCard, 0, testCardsLength)
 		for j := 0; j < testCardsLength; j++ {
-			blackCards = append(blackCards, gameLogic.NewBlackCard(uuid.New(), fmt.Sprintf("Test black card #%d-%d", i, j), uint(j%5)))
+			blackCards = append(blackCards, gameLogic.NewBlackCard(j, fmt.Sprintf("Test black card #%d-%d", i, j), uint(j%5)))
 		}
 
 		deck, err := gameLogic.NewCardDeck(whiteCards, blackCards)

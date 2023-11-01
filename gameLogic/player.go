@@ -10,7 +10,7 @@ import (
 type Player struct {
 	Id          uuid.UUID
 	Name        string
-	Hand        map[uuid.UUID]*WhiteCard
+	Hand        map[int]*WhiteCard
 	CurrentPlay []*WhiteCard
 	Connected   bool
 	Points      int
@@ -28,7 +28,7 @@ func NewPlayer(Name string) (*Player, error) {
 
 	return &Player{Id: uuid.New(),
 		Name:      Name,
-		Hand:      make(map[uuid.UUID]*WhiteCard),
+		Hand:      make(map[int]*WhiteCard),
 		Connected: true}, nil
 }
 
@@ -46,7 +46,14 @@ func (p *Player) PlayCard(cards []*WhiteCard) error {
 		return errors.New("Cards have already been played")
 	}
 
+	cardsSeen := make(map[int]bool)
 	for _, card := range cards {
+		_, found := cardsSeen[card.Id]
+		if found {
+			return errors.New("Card is in your play more than once")
+		}
+		cardsSeen[card.Id] = true
+
 		if !p.hasCard(card) {
 			return errors.New("Cannot find the card in the hand")
 		}

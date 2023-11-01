@@ -2,12 +2,11 @@ package gameLogic_test
 
 import (
 	"github.com/djpiper28/cards-against-humanity/gameLogic"
-	"github.com/google/uuid"
 	"testing"
 )
 
 func TestWhiteCardNew(t *testing.T) {
-	id := uuid.New()
+	id := 123
 	bodyText := "bodyText"
 	card := gameLogic.NewWhiteCard(id, bodyText)
 
@@ -28,7 +27,7 @@ func TestWhiteCardNew(t *testing.T) {
 }
 
 func TestBlackCardNew(t *testing.T) {
-	id := uuid.New()
+	id := 123
 	bodyText := "bodyText"
 	var cardsToPlay uint = 12
 

@@ -65,14 +65,14 @@ func translateCahCards(data *cahJson) error {
 		defer wg.Done()
 		AllWhiteCards = make([]*WhiteCard, 0, len(data.WhiteCards))
 
-		for _, cardText := range data.WhiteCards {
-			AllWhiteCards = append(AllWhiteCards, NewWhiteCard(uuid.New(), cardText))
+		for i, cardText := range data.WhiteCards {
+			AllWhiteCards = append(AllWhiteCards, NewWhiteCard(i, cardText))
 		}
 	}()
 
 	AllBlackCards = make([]*BlackCard, 0, len(data.BlackCards))
-	for _, blackCard := range data.BlackCards {
-		AllBlackCards = append(AllBlackCards, NewBlackCard(uuid.New(), blackCard.Text, uint(blackCard.Pick)))
+	for i, blackCard := range data.BlackCards {
+		AllBlackCards = append(AllBlackCards, NewBlackCard(i, blackCard.Text, uint(blackCard.Pick)))
 	}
 
 	wg.Wait()
