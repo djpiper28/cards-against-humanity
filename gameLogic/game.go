@@ -83,7 +83,7 @@ type Game struct {
 	CurrentRound      uint
 	Settings          *GameSettings
 	CreationTime      time.Time
-	lock       sync.Mutex
+	lock              sync.Mutex
 }
 
 func NewGame(gameSettings *GameSettings, hostPlayerName string) (*Game, error) {
