@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	log.SetFlags(log.Lshortfile | log.LUTC)
+	log.SetFlags(log.Lshortfile | log.Ltime | log.Ldate)
 	log.Println("Starting up Cards Against Humanity server")
 	err := gameLogic.LoadPacks()
 	if err != nil {
