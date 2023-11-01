@@ -146,9 +146,19 @@ func TestNewGame(t *testing.T) {
 		t.FailNow()
 	}
 
-	_, found := game.Players[game.GameOwnerId]
+	_, found := game.PlayersMap[game.GameOwnerId]
 	if !found {
 		t.Log("The owner is not in the game")
+		t.FailNow()
+	}
+
+	if len(game.Players) != 1 {
+		t.Log("There should be a player in the list")
+		t.FailNow()
+	}
+
+	if game.Players[0] != game.GameOwnerId {
+		t.Log("Player is not in the player turn list")
 		t.FailNow()
 	}
 
