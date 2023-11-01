@@ -85,6 +85,7 @@ func (gs *GameSettings) Validate() bool {
 }
 
 type Game struct {
+	Id                uuid.UUID
 	Players           map[uuid.UUID]*Player
 	CurrentCardCzarId uuid.UUID
 	GameOwnerId       uuid.UUID
@@ -108,5 +109,5 @@ func NewGame(gameSettings *GameSettings, hostPlayerName string) (*Game, error) {
 	players := make(map[uuid.UUID]*Player)
 	players[hostPlayer.Id] = hostPlayer
 
-	return &Game{Players: players, GameOwnerId: hostPlayer.Id, Settings: gameSettings, CreationTime: time.Now()}, nil
+	return &Game{Id: uuid.New(), Players: players, GameOwnerId: hostPlayer.Id, Settings: gameSettings, CreationTime: time.Now()}, nil
 }

@@ -156,4 +156,9 @@ func TestNewGame(t *testing.T) {
 		t.Log("The current round should be set to 0")
 		t.FailNow()
 	}
+
+	if nilUuid == game.Id {
+		t.Log("Game ID was not set")
+		t.FailNow()
+	}
 }
