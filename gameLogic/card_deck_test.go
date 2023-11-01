@@ -89,3 +89,37 @@ func TestGetNewWhiteCards(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestCardAccumlate(t *testing.T) {
+	whiteCards := GetTestWhiteCards()
+	testWhiteCardsLength := len(whiteCards)
+
+	blackCards := GetTestBlackCards()
+	testBlackCardsLength := len(blackCards)
+
+	deckCount := 0
+	decks := make([]*gameLogic.CardDeck, deckCount)
+	for i := 0; i < deckCount; i++ {
+		cardDeck, err := gameLogic.NewCardDeck(whiteCards, blackCards)
+		if err != nil {
+			t.Log("Cannot create the test card deck")
+			t.FailNow()
+		}
+
+		decks = append(decks, cardDeck)
+	}
+
+	accDeck := gameLogic.AccumlateDecks(decks)
+
+	expectedWhiteCards := testWhiteCardsLength * deckCount
+	if len(accDeck.WhiteCards) != expectedWhiteCards {
+		t.Log(fmt.Sprintf("Expeceted %d cards. found %d", expectedWhiteCards, len(accDeck.WhiteCards)))
+		t.FailNow()
+	}
+
+	expectedBlackCards := testBlackCardsLength * deckCount
+	if len(accDeck.BlackCards) != expectedBlackCards {
+		t.Log(fmt.Sprintf("Expeceted %d cards. found %d", expectedBlackCards, len(accDeck.BlackCards)))
+		t.FailNow()
+	}
+}

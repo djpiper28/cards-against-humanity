@@ -28,21 +28,26 @@ func NewCardDeck(WhiteCards []*WhiteCard, BlackCards []*BlackCard) (*CardDeck, e
 	BlackCardsCopy := make([]*BlackCard, len(BlackCards))
 	copy(BlackCardsCopy, BlackCards)
 
+	deck := &CardDeck{WhiteCards: WhiteCardsCopy, BlackCards: BlackCardsCopy}
+	deck.Shuffle()
+	return deck, nil
+}
+
+func (cd *CardDeck) Shuffle() {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
 	go func() {
-		rand.Shuffle(len(WhiteCardsCopy), func(i, j int) {
-			WhiteCardsCopy[i], WhiteCardsCopy[j] = WhiteCardsCopy[j], WhiteCardsCopy[i]
+		defer wg.Done()
+		rand.Shuffle(len(cd.WhiteCards), func(i, j int) {
+			cd.WhiteCards[i], cd.WhiteCards[j] = cd.WhiteCards[j], cd.WhiteCards[i]
 		})
-		wg.Done()
 	}()
 
-	rand.Shuffle(len(WhiteCardsCopy), func(i, j int) {
-		BlackCardsCopy[i], BlackCardsCopy[j] = BlackCardsCopy[j], BlackCardsCopy[i]
+	rand.Shuffle(len(cd.WhiteCards), func(i, j int) {
+		cd.BlackCards[i], cd.BlackCards[j] = cd.BlackCards[j], cd.BlackCards[i]
 	})
 	wg.Wait()
-	return &CardDeck{WhiteCards: WhiteCardsCopy, BlackCards: BlackCardsCopy}, nil
 }
 
 func (cd *CardDeck) GetNewWhiteCards(cardsToAdd uint) ([]*WhiteCard, error) {
@@ -53,4 +58,36 @@ func (cd *CardDeck) GetNewWhiteCards(cardsToAdd uint) ([]*WhiteCard, error) {
 	cards := cd.WhiteCards[0:cardsToAdd]
 	cd.WhiteCards = cd.WhiteCards[cardsToAdd:]
 	return cards, nil
+}
+
+func AccumlateDecks(decks []*CardDeck) *CardDeck {
+	// Count the cards to preallocate them
+	whiteCardsCount := 0
+	blackCardsCount := 0
+	for _, deck := range decks {
+		whiteCardsCount += len(deck.WhiteCards)
+		blackCardsCount += len(deck.BlackCards)
+	}
+
+	returnDeck := &CardDeck{}
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	go func() {
+		defer wg.Done()
+		returnDeck.BlackCards = make([]*BlackCard, blackCardsCount)
+		for _, deck := range decks {
+			returnDeck.WhiteCards = append(returnDeck.WhiteCards, deck.WhiteCards...)
+		}
+	}()
+
+	returnDeck.WhiteCards = make([]*WhiteCard, whiteCardsCount)
+	for _, deck := range decks {
+		returnDeck.BlackCards = append(returnDeck.BlackCards, deck.BlackCards...)
+	}
+	wg.Wait()
+
+	returnDeck.Shuffle()
+	return returnDeck
 }
