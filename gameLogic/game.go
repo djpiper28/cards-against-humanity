@@ -23,9 +23,6 @@ const (
 
 	MinPlayers = 3
 	MaxPlayers = 20
-
-	// Games are deleted after an hour
-	MaxAge = time.Hour
 )
 
 // Game settings used for the internal state and game creation
