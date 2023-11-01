@@ -55,7 +55,7 @@ func TestCreateGame(t *testing.T) {
 	repo := gameRepo.New()
 
 	gameSettings := gameLogic.DefaultGameSettings()
-  gameSettings.CardPacks = []*gameLogic.CardPack{{}}
+	gameSettings.CardPacks = []*gameLogic.CardPack{{}}
 	name := "Dave"
 	id, err := repo.CreateGame(gameSettings, name)
 	if err != nil {

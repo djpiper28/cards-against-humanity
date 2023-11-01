@@ -89,47 +89,47 @@ func TestGetNewWhiteCards(t *testing.T) {
 }
 
 func TestCardDeckGetNewBlackCard(t *testing.T) {
-  whiteCards := GetTestWhiteCards()
-  blackCards := GetTestBlackCards()
+	whiteCards := GetTestWhiteCards()
+	blackCards := GetTestBlackCards()
 
-  cardDeck, err := gameLogic.NewCardDeck(whiteCards, blackCards)
-  if err != nil {
-    t.Log("Cannot create deck")
-    t.FailNow()
-  }
+	cardDeck, err := gameLogic.NewCardDeck(whiteCards, blackCards)
+	if err != nil {
+		t.Log("Cannot create deck")
+		t.FailNow()
+	}
 
-  card, err := cardDeck.GetNewBlackCard()
-  if err != nil {
-    t.Log("Should have got a new black card")
-    t.FailNow()
-  }
+	card, err := cardDeck.GetNewBlackCard()
+	if err != nil {
+		t.Log("Should have got a new black card")
+		t.FailNow()
+	}
 
-  if card == nil {
-    t.Log("Black card was nil")
-    t.FailNow()
-  }
+	if card == nil {
+		t.Log("Black card was nil")
+		t.FailNow()
+	}
 
-  if len(cardDeck.BlackCards) != testCardsLength - 1 {
-    t.Log("A black card was not removed")
-    t.FailNow()
-  }
+	if len(cardDeck.BlackCards) != testCardsLength-1 {
+		t.Log("A black card was not removed")
+		t.FailNow()
+	}
 }
 
 func TestCardDeckGetNewBlackCardNoneLeft(t *testing.T) {
-  whiteCards := GetTestWhiteCards()
-  blackCards := []*gameLogic.BlackCard{}
+	whiteCards := GetTestWhiteCards()
+	blackCards := []*gameLogic.BlackCard{}
 
-  cardDeck, err := gameLogic.NewCardDeck(whiteCards, blackCards)
-  if err != nil {
-    t.Log("An error occurred making the card deck", err)
-    t.FailNow()
-  }
+	cardDeck, err := gameLogic.NewCardDeck(whiteCards, blackCards)
+	if err != nil {
+		t.Log("An error occurred making the card deck", err)
+		t.FailNow()
+	}
 
-  _, err = cardDeck.GetNewBlackCard()
-  if err == nil {
-    t.Log("Should not have been able to get a new black card")
-    t.FailNow()
-  }
+	_, err = cardDeck.GetNewBlackCard()
+	if err == nil {
+		t.Log("Should not have been able to get a new black card")
+		t.FailNow()
+	}
 }
 
 func TestCardDeckAccumalate(t *testing.T) {

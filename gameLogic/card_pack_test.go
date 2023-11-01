@@ -54,16 +54,16 @@ func TestLoadCards(t *testing.T) {
 }
 
 func TestBlackCardLookup(t *testing.T) {
-  card, err := gameLogic.GetBlackCard(0)
-  if err != nil {
-    t.Log("Should be able to get black card 0", err)
-    t.FailNow()
-  }
+	card, err := gameLogic.GetBlackCard(0)
+	if err != nil {
+		t.Log("Should be able to get black card 0", err)
+		t.FailNow()
+	}
 
-  if card == nil {
-    t.Log("Card was nil")
-    t.FailNow()
-  }
+	if card == nil {
+		t.Log("Card was nil")
+		t.FailNow()
+	}
 }
 
 func TestBlackCardLookupNegative(t *testing.T) {
@@ -83,16 +83,16 @@ func TestBlackCardLookupTooHigh(t *testing.T) {
 }
 
 func TestWhiteCardLookup(t *testing.T) {
-  card, err := gameLogic.GetWhiteCard(0)
-  if err != nil {
-    t.Log("Should be able to get white card 0", err)
-    t.FailNow()
-  }
+	card, err := gameLogic.GetWhiteCard(0)
+	if err != nil {
+		t.Log("Should be able to get white card 0", err)
+		t.FailNow()
+	}
 
-  if card == nil {
-    t.Log("Card was nil")
-    t.FailNow()
-  }
+	if card == nil {
+		t.Log("Card was nil")
+		t.FailNow()
+	}
 }
 
 func TestWhiteCardLookupNegative(t *testing.T) {

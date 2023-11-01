@@ -22,26 +22,26 @@ var AllWhiteCards []*WhiteCard
 var AllBlackCards []*BlackCard
 
 func GetWhiteCard(id int) (*WhiteCard, error) {
-  if id < 0 || id >= len(AllWhiteCards) {
-    return nil, errors.New("White card does not exist")
-  }
-  return AllWhiteCards[id], nil
+	if id < 0 || id >= len(AllWhiteCards) {
+		return nil, errors.New("White card does not exist")
+	}
+	return AllWhiteCards[id], nil
 }
 
 func GetBlackCard(id int) (*BlackCard, error) {
-  if id < 0 || id >= len(AllBlackCards) {
-    return nil, errors.New("Black card does not exist")
-  }
-  return AllBlackCards[id], nil
+	if id < 0 || id >= len(AllBlackCards) {
+		return nil, errors.New("Black card does not exist")
+	}
+	return AllBlackCards[id], nil
 }
 
 func DefaultCardPack() *CardPack {
-  for _, packValue := range AllPacks {
-    return packValue
-  }
+	for _, packValue := range AllPacks {
+		return packValue
+	}
 
-  log.Println("Cannot find any packs for the default")
-  return nil
+	log.Println("Cannot find any packs for the default")
+	return nil
 }
 
 func AccumalateCardPacks(packs []*CardPack) (*CardDeck, error) {

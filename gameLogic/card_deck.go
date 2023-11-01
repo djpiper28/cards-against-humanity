@@ -61,9 +61,9 @@ func (cd *CardDeck) GetNewWhiteCards(cardsToAdd uint) ([]*WhiteCard, error) {
 }
 
 func (cd *CardDeck) GetNewBlackCard() (*BlackCard, error) {
-  if len(cd.BlackCards) == 0 {
-    return nil, errors.New("There are no more black cards")
-  }
+	if len(cd.BlackCards) == 0 {
+		return nil, errors.New("There are no more black cards")
+	}
 
 	card := cd.BlackCards[0]
 	cd.BlackCards = cd.BlackCards[1:]
