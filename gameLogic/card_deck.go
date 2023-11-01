@@ -14,12 +14,12 @@ type CardDeck struct {
 const handSize = 7
 
 func NewCardDeck(WhiteCards []*WhiteCard, BlackCards []*BlackCard) (*CardDeck, error) {
-	if WhiteCards == nil || len(WhiteCards) == 0 {
-		return nil, errors.New("No white cards")
+	if WhiteCards == nil {
+		return nil, errors.New("White cards cannot be nil")
 	}
 
-	if BlackCards == nil || len(BlackCards) == 0 {
-		return nil, errors.New("No black cards")
+	if BlackCards == nil {
+		return nil, errors.New("Black cards cannot be nil")
 	}
 
 	WhiteCardsCopy := make([]*WhiteCard, len(WhiteCards))
@@ -44,7 +44,7 @@ func (cd *CardDeck) Shuffle() {
 		})
 	}()
 
-	rand.Shuffle(len(cd.WhiteCards), func(i, j int) {
+	rand.Shuffle(len(cd.BlackCards), func(i, j int) {
 		cd.BlackCards[i], cd.BlackCards[j] = cd.BlackCards[j], cd.BlackCards[i]
 	})
 	wg.Wait()
@@ -60,7 +60,7 @@ func (cd *CardDeck) GetNewWhiteCards(cardsToAdd uint) ([]*WhiteCard, error) {
 	return cards, nil
 }
 
-func AccumlateDecks(decks []*CardDeck) *CardDeck {
+func AccumalateDecks(decks []*CardDeck) (*CardDeck, error) {
 	// Count the cards to preallocate them
 	whiteCardsCount := 0
 	blackCardsCount := 0
@@ -76,18 +76,26 @@ func AccumlateDecks(decks []*CardDeck) *CardDeck {
 
 	go func() {
 		defer wg.Done()
-		returnDeck.BlackCards = make([]*BlackCard, 0, blackCardsCount)
+		returnDeck.WhiteCards = make([]*WhiteCard, 0, whiteCardsCount)
 		for _, deck := range decks {
 			returnDeck.WhiteCards = append(returnDeck.WhiteCards, deck.WhiteCards...)
 		}
 	}()
 
-	returnDeck.WhiteCards = make([]*WhiteCard, 0, whiteCardsCount)
+	returnDeck.BlackCards = make([]*BlackCard, 0, blackCardsCount)
 	for _, deck := range decks {
 		returnDeck.BlackCards = append(returnDeck.BlackCards, deck.BlackCards...)
 	}
 	wg.Wait()
 
+	if len(returnDeck.WhiteCards) == 0 {
+		return nil, errors.New("No white cards")
+	}
+
+	if len(returnDeck.BlackCards) == 0 {
+		return nil, errors.New("No black cards")
+	}
+
 	returnDeck.Shuffle()
-	return returnDeck
+	return returnDeck, nil
 }

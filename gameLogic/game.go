@@ -23,6 +23,8 @@ const (
 
 	MinPlayers = 3
 	MaxPlayers = 20
+
+	MinCardPacks = 1
 )
 
 // Game settings used for the internal state and game creation
@@ -33,12 +35,17 @@ type GameSettings struct {
 	PlayingToPoints uint `json:"playingToPoints"`
 	// Allows a game to have a password, this will be stored in plaintext like a chad
 	// Empty string is no password
-	Password   string `json:"GamePassword"`
-	MaxPlayers uint   `json:"maxPlayers"`
+	Password   string      `json:"GamePassword"`
+	MaxPlayers uint        `json:"maxPlayers"`
+	CardPacks  []*CardPack `json:"cardPacks"`
 }
 
 func DefaultGameSettings() *GameSettings {
-	return &GameSettings{MaxRounds: MaxRounds, PlayingToPoints: 10, Password: "", MaxPlayers: 10}
+	return &GameSettings{MaxRounds: MaxRounds,
+		PlayingToPoints: 10,
+		Password:        "",
+		MaxPlayers:      10,
+		CardPacks:       []*CardPack{DefaultCardPack()}}
 }
 
 func (gs *GameSettings) Validate() bool {
@@ -67,6 +74,10 @@ func (gs *GameSettings) Validate() bool {
 	}
 
 	if gs.MaxPlayers > MaxPlayers {
+		return false
+	}
+
+	if len(gs.CardPacks) < MinCardPacks {
 		return false
 	}
 

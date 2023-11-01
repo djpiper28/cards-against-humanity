@@ -7,22 +7,20 @@ import (
 	"github.com/djpiper28/cards-against-humanity/gameLogic"
 )
 
-func TestNewCardDeckNoWhiteCards(t *testing.T) {
-	whiteCards := make([]*gameLogic.WhiteCard, 0)
+func TestNewCardDeckNilWhiteCards(t *testing.T) {
 	blackCards := make([]*gameLogic.BlackCard, 2)
 
-	_, err := gameLogic.NewCardDeck(whiteCards, blackCards)
+	_, err := gameLogic.NewCardDeck(nil, blackCards)
 	if err == nil {
 		t.Log("Should not be able to make a deck with no white cards")
 		t.FailNow()
 	}
 }
 
-func TestNewCardDeckNoBlackCards(t *testing.T) {
+func TestNewCardDeckNilBlackCards(t *testing.T) {
 	whiteCards := make([]*gameLogic.WhiteCard, 2)
-	blackCards := make([]*gameLogic.BlackCard, 0)
 
-	_, err := gameLogic.NewCardDeck(whiteCards, blackCards)
+	_, err := gameLogic.NewCardDeck(whiteCards, nil)
 	if err == nil {
 		t.Log("Should not be able to make a deck with no black cards")
 		t.FailNow()
@@ -90,36 +88,70 @@ func TestGetNewWhiteCards(t *testing.T) {
 	}
 }
 
-func TestCardAccumlate(t *testing.T) {
-	whiteCards := GetTestWhiteCards()
-	testWhiteCardsLength := len(whiteCards)
-
-	blackCards := GetTestBlackCards()
-	testBlackCardsLength := len(blackCards)
-
-	deckCount := 0
+func TestCardDeckAccumalate(t *testing.T) {
+	deckCount := 10
 	decks := make([]*gameLogic.CardDeck, deckCount)
 	for i := 0; i < deckCount; i++ {
+		whiteCards := GetTestWhiteCards()
+		blackCards := GetTestBlackCards()
 		cardDeck, err := gameLogic.NewCardDeck(whiteCards, blackCards)
 		if err != nil {
 			t.Log("Cannot create the test card deck")
 			t.FailNow()
 		}
 
-		decks = append(decks, cardDeck)
+		decks[i] = cardDeck
 	}
 
-	accDeck := gameLogic.AccumlateDecks(decks)
+	accDeck, err := gameLogic.AccumalateDecks(decks)
+	if err != nil {
+		t.Log("Error accumalting cards should be nil", err)
+		t.FailNow()
+	}
 
-	expectedWhiteCards := testWhiteCardsLength * deckCount
+	expectedWhiteCards := testCardsLength * deckCount
 	if len(accDeck.WhiteCards) != expectedWhiteCards {
 		t.Log(fmt.Sprintf("Expeceted %d cards. found %d", expectedWhiteCards, len(accDeck.WhiteCards)))
 		t.FailNow()
 	}
 
-	expectedBlackCards := testBlackCardsLength * deckCount
+	expectedBlackCards := testCardsLength * deckCount
 	if len(accDeck.BlackCards) != expectedBlackCards {
 		t.Log(fmt.Sprintf("Expeceted %d cards. found %d", expectedBlackCards, len(accDeck.BlackCards)))
+		t.FailNow()
+	}
+}
+
+func TestCardAccumlateNoWhiteCards(t *testing.T) {
+	whiteCards := make([]*gameLogic.WhiteCard, 0)
+	blackCards := make([]*gameLogic.BlackCard, 20)
+	deck, err := gameLogic.NewCardDeck(whiteCards, blackCards)
+	if err != nil {
+		t.Log("Should be able to make a deck with no white cards")
+		t.FailNow()
+	}
+
+	decks := []*gameLogic.CardDeck{deck}
+	_, err = gameLogic.AccumalateDecks(decks)
+	if err == nil {
+		t.Log("Should error when there are no white cards in resultant deck")
+		t.FailNow()
+	}
+}
+
+func TestCardAccumlateNoBlackCards(t *testing.T) {
+	whiteCards := make([]*gameLogic.WhiteCard, 20)
+	blackCards := make([]*gameLogic.BlackCard, 0)
+	deck, err := gameLogic.NewCardDeck(whiteCards, blackCards)
+	if err != nil {
+		t.Log("Should be able to make a deck with no black cards")
+		t.FailNow()
+	}
+
+	decks := []*gameLogic.CardDeck{deck}
+	_, err = gameLogic.AccumalateDecks(decks)
+	if err == nil {
+		t.Log("Should error when there are no black cards in resultant deck")
 		t.FailNow()
 	}
 }
