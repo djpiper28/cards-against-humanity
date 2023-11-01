@@ -3,6 +3,7 @@ package gameLogic
 import (
 	"errors"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -37,6 +38,7 @@ type GameSettings struct {
 	// Empty string is no password
 	Password   string `json:"GamePassword"`
 	MaxPlayers uint   `json:"maxPlayers"`
+	lock       sync.Mutex
 }
 
 func DefaultGameSettings() *GameSettings {
@@ -44,6 +46,9 @@ func DefaultGameSettings() *GameSettings {
 }
 
 func (gs *GameSettings) Validate() bool {
+	gs.lock.Lock()
+	defer gs.lock.Unlock()
+
 	if gs.MaxRounds < MinRounds {
 		return false
 	}
