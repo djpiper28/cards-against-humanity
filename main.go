@@ -1,14 +1,20 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+
+	"github.com/djpiper28/cards-against-humanity/gameLogic"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	log.SetFlags(log.Lshortfile | log.LUTC)
 	log.Println("Starting up Cards Against Humanity server")
+	err := gameLogic.LoadPacks()
+	if err != nil {
+		log.Fatal("Cannot create the card packs", err)
+	}
 
 	r := gin.Default()
 
