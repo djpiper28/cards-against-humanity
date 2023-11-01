@@ -42,5 +42,6 @@ func (gr *GameRepo) CreateGame(gameSettings *gameLogic.GameSettings, playerName 
 	gr.GameMap[id] = game
 	gr.GameAgeMap[id] = game.CreationTime
 
+	log.Println("Created game for", playerName)
 	return id, nil
 }
