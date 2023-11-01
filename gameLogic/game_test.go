@@ -412,3 +412,31 @@ func TestStartGameNoCardsInDeckFails(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestStartGameSuccess(t *testing.T) {
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	if err != nil {
+		t.Log("Cannot make the game")
+		t.FailNow()
+	}
+
+	for i := 0; i < int(settings.MaxPlayers)-1; i++ {
+		_, err = game.AddPlayer(fmt.Sprintf("Player %d", i))
+		if err != nil {
+			t.Log("Cannot add a player", err)
+			t.FailNow()
+		}
+	}
+
+	err = game.StartGame()
+	if err != nil {
+		t.Log("Cannot start game", err)
+	}
+
+	for _, player := range game.PlayersMap {
+		if player.CardsInHand() != gameLogic.HandSize {
+			t.Log("Player does not have", gameLogic.HandSize, "cards in the hand")
+		}
+	}
+}

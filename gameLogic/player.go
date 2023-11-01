@@ -81,6 +81,15 @@ func (p *Player) AddCardToHand(card *WhiteCard) error {
 	return nil
 }
 
+// Used in tests
+func (p *Player) CardsInHand() int {
+	count := 0
+	for range p.Hand {
+		count++
+	}
+	return count
+}
+
 func (p *Player) FinaliseRound() {
 	p.CurrentPlay = nil
 }

@@ -26,6 +26,8 @@ const (
 	MaxPlayers = 20
 
 	MinCardPacks = 1
+
+	HandSize = 7
 )
 
 // Game settings used for the internal state and game creation
@@ -193,5 +195,18 @@ func (g *Game) StartGame() error {
 	g.CurrentBlackCard = blackCard
 	g.GameState = GameStateWhiteCardsBeingSelected
 	g.CurrentRound++
+
+	for _, player := range g.PlayersMap {
+		cards, err := g.CardDeck.GetNewWhiteCards(HandSize)
+		if err != nil {
+			return errors.New(fmt.Sprintf("Cannot create game %s", err))
+		}
+
+		cardIndexSlice := make(map[int]*WhiteCard)
+		for _, card := range cards {
+			cardIndexSlice[card.Id] = card
+		}
+		player.Hand = cardIndexSlice
+	}
 	return nil
 }
