@@ -1,0 +1,3 @@
+[submodule "packs"]
+	path = packs
+	url = https://github.com/crhallberg/json-against-humanity
