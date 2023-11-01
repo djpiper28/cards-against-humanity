@@ -186,6 +186,7 @@ func (g *Game) StartGame() error {
 
 	blackCard, err := g.CardDeck.GetNewBlackCard()
 	if err != nil {
+		// Allegedly impossible to get here
 		return errors.New("Cannot get a black card")
 	}
 

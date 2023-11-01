@@ -339,3 +339,76 @@ func TestAddingMaxPlayers(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestStartGameOnePlayerFails(t *testing.T) {
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	if err != nil {
+		t.Log("Cannot make the game")
+		t.FailNow()
+	}
+
+	err = game.StartGame()
+	if err == nil {
+		t.Log("Should not be able to start a game with 1 players")
+		t.FailNow()
+	}
+}
+
+func TestStartGameLessThanMinPlayerFails(t *testing.T) {
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	if err != nil {
+		t.Log("Cannot make the game")
+		t.FailNow()
+	}
+
+	for i := 0; i < gameLogic.MinPlayers-2; i++ {
+		_, err = game.AddPlayer(fmt.Sprintf("Player %d", i))
+		if err != nil {
+			t.Log("Cannot add a player", err)
+			t.FailNow()
+		}
+	}
+
+	err = game.StartGame()
+	if err == nil {
+		t.Log("Should not be able to start a game with min players")
+		t.FailNow()
+	}
+}
+
+func TestStartGameNotInLobbyFails(t *testing.T) {
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	if err != nil {
+		t.Log("Cannot make the game")
+		t.FailNow()
+	}
+
+	game.GameState = gameLogic.GameStateCzarJudgingCards
+
+	err = game.StartGame()
+	if err == nil {
+		t.Log("Should not be able to start a game with invalid state")
+		t.FailNow()
+	}
+}
+
+func TestStartGameNoCardsInDeckFails(t *testing.T) {
+	settings := gameLogic.DefaultGameSettings()
+	settings.CardPacks = []*gameLogic.CardPack{{}}
+	game, err := gameLogic.NewGame(settings, "Dave")
+	if err != nil {
+		t.Log("Cannot make the game")
+		t.FailNow()
+	}
+
+	game.GameState = gameLogic.GameStateCzarJudgingCards
+
+	err = game.StartGame()
+	if err == nil {
+		t.Log("Should not be able to start a game with no cards in the deck")
+		t.FailNow()
+	}
+}
