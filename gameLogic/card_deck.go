@@ -60,6 +60,16 @@ func (cd *CardDeck) GetNewWhiteCards(cardsToAdd uint) ([]*WhiteCard, error) {
 	return cards, nil
 }
 
+func (cd *CardDeck) GetNewBlackCard() (*BlackCard, error) {
+  if len(cd.BlackCards) == 0 {
+    return nil, errors.New("There are no more black cards")
+  }
+
+	card := cd.BlackCards[0]
+	cd.BlackCards = cd.BlackCards[1:]
+	return card, nil
+}
+
 func AccumalateDecks(decks []*CardDeck) (*CardDeck, error) {
 	// Count the cards to preallocate them
 	whiteCardsCount := 0
