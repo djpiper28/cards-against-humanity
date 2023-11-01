@@ -93,7 +93,7 @@ func TestCardDeckGetNewBlackCard(t *testing.T) {
   blackCards := GetTestBlackCards()
 
   cardDeck, err := gameLogic.NewCardDeck(whiteCards, blackCards)
-  if err == nil {
+  if err != nil {
     t.Log("Should have got a new black card")
     t.FailNow()
   }
