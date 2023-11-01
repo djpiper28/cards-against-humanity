@@ -76,13 +76,13 @@ func AccumlateDecks(decks []*CardDeck) *CardDeck {
 
 	go func() {
 		defer wg.Done()
-		returnDeck.BlackCards = make([]*BlackCard, blackCardsCount)
+		returnDeck.BlackCards = make([]*BlackCard, 0, blackCardsCount)
 		for _, deck := range decks {
 			returnDeck.WhiteCards = append(returnDeck.WhiteCards, deck.WhiteCards...)
 		}
 	}()
 
-	returnDeck.WhiteCards = make([]*WhiteCard, whiteCardsCount)
+	returnDeck.WhiteCards = make([]*WhiteCard, 0, whiteCardsCount)
 	for _, deck := range decks {
 		returnDeck.BlackCards = append(returnDeck.BlackCards, deck.BlackCards...)
 	}
