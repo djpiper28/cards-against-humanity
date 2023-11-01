@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"log"
-	"sync"
 )
 
 type Player struct {
@@ -15,7 +14,6 @@ type Player struct {
 	CurrentPlay []*WhiteCard
 	Connected   bool
 	Points      int
-	lock        sync.Mutex
 }
 
 const (
@@ -40,9 +38,6 @@ func (p *Player) hasCard(card *WhiteCard) bool {
 }
 
 func (p *Player) PlayCard(cards []*WhiteCard) error {
-	p.lock.Lock()
-	defer p.lock.Unlock()
-
 	if cards == nil {
 		return errors.New("Cannot play nil cards")
 	}
@@ -69,9 +64,6 @@ func (p *Player) PlayCard(cards []*WhiteCard) error {
 }
 
 func (p *Player) AddCardToHand(card *WhiteCard) error {
-	p.lock.Lock()
-	defer p.lock.Unlock()
-
 	if p.hasCard(card) {
 		msg := "Cannot add duplicate cards to the hand"
 		log.Println(msg)
@@ -83,8 +75,5 @@ func (p *Player) AddCardToHand(card *WhiteCard) error {
 }
 
 func (p *Player) FinaliseRound() {
-	p.lock.Lock()
-	defer p.lock.Unlock()
-
 	p.CurrentPlay = nil
 }
