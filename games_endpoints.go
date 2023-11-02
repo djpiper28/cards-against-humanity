@@ -24,6 +24,6 @@ func getGames(c *gin.Context) {
 func SetupGamesEndpoints(r *gin.Engine) {
 	gamesRoute := r.Group("/games")
 	{
-		gamesRoute.GET("/games", getGames)
+		gamesRoute.GET("/notFull", getGames)
 	}
 }
