@@ -3,6 +3,7 @@ package gameRepo
 import (
 	"container/list"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/djpiper28/cards-against-humanity/gameLogic"
@@ -23,6 +24,7 @@ type GameRepo struct {
 	GamesByAge *list.List
 	GameMap    map[uuid.UUID]*gameLogic.Game
 	GameAgeMap map[uuid.UUID]time.Time
+  lock       sync.RWMutex
 }
 
 func New() *GameRepo {
@@ -30,6 +32,9 @@ func New() *GameRepo {
 }
 
 func (gr *GameRepo) CreateGame(gameSettings *gameLogic.GameSettings, playerName string) (uuid.UUID, error) {
+  gr.lock.Lock()
+  defer gr.lock.Unlock()
+
 	log.Println("Creating game for", playerName)
 	game, err := gameLogic.NewGame(gameSettings, playerName)
 	if err != nil {
@@ -44,4 +49,20 @@ func (gr *GameRepo) CreateGame(gameSettings *gameLogic.GameSettings, playerName 
 
 	log.Println("Created game for", playerName)
 	return id, nil
+}
+
+func (gr *GameRepo) GetGames() []*gameLogic.Game {
+  gr.lock.RLock()
+  defer gr.lock.RUnlock()
+
+  length := gr.GamesByAge.Len()
+  games := make([]*gameLogic.Game, length)
+
+  current := gr.GamesByAge.Front()
+  for i := 0; i < length; i++ {
+    games[i] = current.Value.(GameListPtr)
+    current = current.Next()
+  }
+
+  return games
 }

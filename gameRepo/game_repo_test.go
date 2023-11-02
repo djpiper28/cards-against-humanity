@@ -5,6 +5,7 @@ import (
 
 	"github.com/djpiper28/cards-against-humanity/gameLogic"
 	"github.com/djpiper28/cards-against-humanity/gameRepo"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNew(t *testing.T) {
@@ -83,4 +84,24 @@ func TestCreateGame(t *testing.T) {
 		t.Log("The games by age should have length 1")
 		t.FailNow()
 	}
+}
+
+func TestGetGames(t *testing.T) {
+  repo := gameRepo.New()
+
+  assert.Equal(t, repo.GetGames(), []*gameLogic.Game{}, "There should be no games in the repo yet")
+
+	gameSettings := gameLogic.DefaultGameSettings()
+	gameSettings.CardPacks = []*gameLogic.CardPack{{}}
+	gameSettings.CardPacks = []*gameLogic.CardPack{{}}
+	name := "Dave"
+	id, err := repo.CreateGame(gameSettings, name)
+	if err != nil {
+		t.Log("The game should have been made", err)
+		t.FailNow()
+	}
+
+  games := repo.GetGames()
+  assert.Contains(t, games, repo.GameMap[id], "The game should be in the games returned by the repo")
+  assert.Len(t, games, 1, "There should only be one game in the repo")
 }
