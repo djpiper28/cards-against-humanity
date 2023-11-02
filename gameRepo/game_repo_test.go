@@ -87,9 +87,9 @@ func TestCreateGame(t *testing.T) {
 }
 
 func TestGetGames(t *testing.T) {
-  repo := gameRepo.New()
+	repo := gameRepo.New()
 
-  assert.Equal(t, repo.GetGames(), []*gameLogic.Game{}, "There should be no games in the repo yet")
+	assert.Equal(t, repo.GetGames(), []*gameLogic.Game{}, "There should be no games in the repo yet")
 
 	gameSettings := gameLogic.DefaultGameSettings()
 	gameSettings.CardPacks = []*gameLogic.CardPack{{}}
@@ -101,7 +101,7 @@ func TestGetGames(t *testing.T) {
 		t.FailNow()
 	}
 
-  games := repo.GetGames()
-  assert.Contains(t, games, repo.GameMap[id], "The game should be in the games returned by the repo")
-  assert.Len(t, games, 1, "There should only be one game in the repo")
+	games := repo.GetGames()
+	assert.Contains(t, games, repo.GameMap[id], "The game should be in the games returned by the repo")
+	assert.Len(t, games, 1, "There should only be one game in the repo")
 }

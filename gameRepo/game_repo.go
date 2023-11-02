@@ -24,7 +24,7 @@ type GameRepo struct {
 	GamesByAge *list.List
 	GameMap    map[uuid.UUID]*gameLogic.Game
 	GameAgeMap map[uuid.UUID]time.Time
-  lock       sync.RWMutex
+	lock       sync.RWMutex
 }
 
 func New() *GameRepo {
@@ -32,8 +32,8 @@ func New() *GameRepo {
 }
 
 func (gr *GameRepo) CreateGame(gameSettings *gameLogic.GameSettings, playerName string) (uuid.UUID, error) {
-  gr.lock.Lock()
-  defer gr.lock.Unlock()
+	gr.lock.Lock()
+	defer gr.lock.Unlock()
 
 	log.Println("Creating game for", playerName)
 	game, err := gameLogic.NewGame(gameSettings, playerName)
@@ -52,17 +52,17 @@ func (gr *GameRepo) CreateGame(gameSettings *gameLogic.GameSettings, playerName 
 }
 
 func (gr *GameRepo) GetGames() []*gameLogic.Game {
-  gr.lock.RLock()
-  defer gr.lock.RUnlock()
+	gr.lock.RLock()
+	defer gr.lock.RUnlock()
 
-  length := gr.GamesByAge.Len()
-  games := make([]*gameLogic.Game, length)
+	length := gr.GamesByAge.Len()
+	games := make([]*gameLogic.Game, length)
 
-  current := gr.GamesByAge.Front()
-  for i := 0; i < length; i++ {
-    games[i] = current.Value.(GameListPtr)
-    current = current.Next()
-  }
+	current := gr.GamesByAge.Front()
+	for i := 0; i < length; i++ {
+		games[i] = current.Value.(GameListPtr)
+		current = current.Next()
+	}
 
-  return games
+	return games
 }

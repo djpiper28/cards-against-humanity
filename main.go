@@ -4,17 +4,14 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/djpiper28/cards-against-humanity/gameLogic"
+	gpmiddleware "github.com/carousell/gin-prometheus-middleware"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	log.SetFlags(log.Lshortfile | log.Ltime | log.Ldate)
 	log.Println("Starting up Cards Against Humanity server")
-	err := gameLogic.LoadPacks()
-	if err != nil {
-		log.Fatal("Cannot create the card packs", err)
-	}
+	InitGlobals()
 
 	r := gin.Default()
 
@@ -25,9 +22,17 @@ func main() {
 		})
 	})
 
-	r.GET("/metrics", func(c *gin.Context) {
+	// Add metrics for the amount of games and users
+	r.GET("/game-metrics", func(c *gin.Context) {
 		c.TOML(http.StatusOK, GetMetrics())
 	})
+
+	// Setup all endpoints
+	SetupGamesEndpoints(r)
+
+	// Add metrics for the performance of Gin
+	p := gpmiddleware.NewPrometheus("gin")
+	p.Use(r)
 
 	r.Run()
 }

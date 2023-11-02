@@ -8,6 +8,7 @@ import (
 
 	"github.com/djpiper28/cards-against-humanity/gameLogic"
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDefaultGameSettings(t *testing.T) {
@@ -171,6 +172,24 @@ func TestNewGame(t *testing.T) {
 		t.Log("Game ID was not set")
 		t.FailNow()
 	}
+}
+
+func TestGameInfo(t *testing.T) {
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.Nil(t, err, "There should not be an error with making the game", err)
+
+	info := game.Info()
+
+	assert.Equal(t, game.Id, info.Id, "Game IDs should be equal")
+	assert.Equal(t, 1, info.PlayerCount, "There should only be one player")
+	assert.Equal(t, game.Settings.MaxPlayers, info.MaxPlayers, "Max players should be equal")
+	assert.False(t, info.HasPassword, "The game should not be marked as having a password")
+
+	game.Settings.Password = "poop"
+	info = game.Info()
+
+	assert.True(t, info.HasPassword, "The game should be marked as having a password")
 }
 
 func TestAddInvalidPlayer(t *testing.T) {

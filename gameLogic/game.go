@@ -139,6 +139,26 @@ func NewGame(gameSettings *GameSettings, hostPlayerName string) (*Game, error) {
 		GameState:    GameStateInLobby}, nil
 }
 
+// Information that the client sees about a game
+type GameInfo struct {
+	Id          uuid.UUID `json:"id"`
+	PlayerCount int       `json:"playerCount"`
+	MaxPlayers  uint      `json:"maxPlayers"`
+	PlayingTo   uint      `json:"playingTo"`
+	HasPassword bool      `json:"hasPassword"`
+}
+
+func (g *Game) Info() GameInfo {
+	g.lock.Lock()
+	defer g.lock.Unlock()
+
+	return GameInfo{Id: g.Id,
+		PlayerCount: len(g.Players),
+		MaxPlayers:  g.Settings.MaxPlayers,
+		PlayingTo:   g.Settings.PlayingToPoints,
+		HasPassword: g.Settings.Password != ""}
+}
+
 func (g *Game) AddPlayer(playerName string) (uuid.UUID, error) {
 	g.lock.Lock()
 	defer g.lock.Unlock()
