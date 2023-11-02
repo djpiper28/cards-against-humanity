@@ -21,7 +21,7 @@ var wsupgrader = websocket.Upgrader{
 func WsUpgrade(w http.ResponseWriter, r *http.Request, playerId, gameId uuid.UUID) (*WsConnection, error) {
 	c, err := wsupgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println("Failed to set websocket upgrade: %+v", err)
+		log.Printf("Failed to set websocket upgrade: %s", err)
 		return nil, err
 	}
 
