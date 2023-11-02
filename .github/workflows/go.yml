@@ -25,7 +25,7 @@ jobs:
       - run: go version
 
       - name: Build the package
-        run: go get; go build -v ./...
+        run: go get; go build
 
       - name: Test the package and, generate coverage reports
         run: |
