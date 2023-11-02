@@ -4,11 +4,9 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-  "log"
 
 	"github.com/djpiper28/cards-against-humanity/gameLogic"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
 )
 
 func getGames(c *gin.Context) {
@@ -47,7 +45,11 @@ func createGame(c *gin.Context) {
     c.Error(err)
   }
 
-  conn := WsUpgrade(c.Writer, c.Request, gameId, playerId)
+  _, err = WsUpgrade(c.Writer, c.Request, gameId, playerId)
+  if err != nil {
+    c.Error(err)
+  }
+  // TODO: use the connection
 }
 
 func SetupGamesEndpoints(r *gin.Engine) {
