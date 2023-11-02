@@ -8,7 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func main() {
+// A function to start for use in e2e testing
+func Start() {
 	log.SetFlags(log.Lshortfile | log.Ltime | log.Ldate)
 	log.Println("Starting up Cards Against Humanity server")
 	InitGlobals()
@@ -35,4 +36,8 @@ func main() {
 	SetupGamesEndpoints(r)
 
 	r.Run()
+}
+
+func main() {
+	Start()
 }
