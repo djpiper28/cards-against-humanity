@@ -27,12 +27,12 @@ func main() {
 		c.TOML(http.StatusOK, GetMetrics())
 	})
 
+	// Add metrics for the performance of Gin
+	p := gpmiddleware.NewPrometheus("cards_against_humanity")
+	p.Use(r)
+
 	// Setup all endpoints
 	SetupGamesEndpoints(r)
-
-	// Add metrics for the performance of Gin
-	p := gpmiddleware.NewPrometheus("gin")
-	p.Use(r)
 
 	r.Run()
 }
