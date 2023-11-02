@@ -3,7 +3,6 @@ package gameLogic
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -135,7 +134,7 @@ func translateCahJson(data *cahJson) error {
 
 			deck, err := NewCardDeck(whiteCards, blackCards)
 			if err != nil {
-				log.Print(fmt.Sprintf("Pack %s cannot be turned into a deck %s", pack.Name, err))
+				log.Printf("Pack %s cannot be turned into a deck %s", pack.Name, err)
 				lock.Lock()
 				defer lock.Unlock()
 
