@@ -5,33 +5,34 @@ name: Go
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: 1.20
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.20
 
-    - name: Build the package
-      run: go build -v ./...
+      - name: Build the package
+        run: go build -v ./...
 
-    - name: Test the package and, generate coverage reports
-      run: |
-        go test -v -benchmem -parallel 16 ./... -covermode=atomic -coverprofile=coverage.out
+      - name: Test the package and, generate coverage reports
+        run: |
+          go test -v -benchmem -parallel 16 ./... -covermode=atomic -coverprofile=coverage.out
 
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        files: ./coverage.out
-        fail_ci_if_error: true
-        verbose: true
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.out
+          fail_ci_if_error: true
+          verbose: true
