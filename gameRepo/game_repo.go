@@ -31,7 +31,8 @@ func New() *GameRepo {
 	return &GameRepo{GamesByAge: list.New(), GameMap: make(map[uuid.UUID]*gameLogic.Game), GameAgeMap: make(map[uuid.UUID]time.Time)}
 }
 
-func (gr *GameRepo) CreateGame(gameSettings *gameLogic.GameSettings, playerName string) (uuid.UUID, error) {
+// Creates a game and return the game ID, player ID and any errors
+func (gr *GameRepo) CreateGame(gameSettings *gameLogic.GameSettings, playerName string) (uuid.UUID, uuid.UUID, error) {
 	gr.lock.Lock()
 	defer gr.lock.Unlock()
 
@@ -39,7 +40,7 @@ func (gr *GameRepo) CreateGame(gameSettings *gameLogic.GameSettings, playerName 
 	game, err := gameLogic.NewGame(gameSettings, playerName)
 	if err != nil {
 		log.Println("Cannot create game", err)
-		return uuid.UUID{}, err
+		return uuid.UUID{}, uuid.UUID{}, err
 	}
 
 	id := game.Id
@@ -48,7 +49,7 @@ func (gr *GameRepo) CreateGame(gameSettings *gameLogic.GameSettings, playerName 
 	gr.GameAgeMap[id] = game.CreationTime
 
 	log.Println("Created game for", playerName)
-	return id, nil
+	return id, game.GameOwnerId, nil
 }
 
 func (gr *GameRepo) GetGames() []*gameLogic.Game {

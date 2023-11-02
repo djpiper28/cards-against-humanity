@@ -1,10 +1,14 @@
 package main
 
 import (
+	"encoding/json"
+	"io"
 	"net/http"
+  "log"
 
 	"github.com/djpiper28/cards-against-humanity/gameLogic"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 )
 
 func getGames(c *gin.Context) {
@@ -21,9 +25,35 @@ func getGames(c *gin.Context) {
 	c.JSON(http.StatusOK, info)
 }
 
+type gameCreateSettings struct {
+  PlayerName string `json:"playerName"`
+  Settings gameLogic.GameSettings `json:"settings"`
+}
+
+func createGame(c *gin.Context) {
+  settingsStr, err := io.ReadAll(c.Request.Body)
+  if err != nil {
+    c.Error(err)
+  }
+
+  var settings gameCreateSettings
+  err = json.Unmarshal(settingsStr, settings)
+  if err != nil {
+    c.Error(err)
+  }
+
+  gameId, playerId, err := GameRepo.CreateGame(&settings.Settings, settings.PlayerName)
+  if err != nil {
+    c.Error(err)
+  }
+
+  conn := WsUpgrade(c.Writer, c.Request, gameId, playerId)
+}
+
 func SetupGamesEndpoints(r *gin.Engine) {
 	gamesRoute := r.Group("/games")
 	{
 		gamesRoute.GET("/notFull", getGames)
+    gamesRoute.POST("/create", createGame)
 	}
 }

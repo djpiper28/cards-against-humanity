@@ -16,4 +16,6 @@ func InitGlobals() {
 
 	log.Println("Initialising Game Repo")
 	GameRepo = gameRepo.New()
+
+  InitGlobalConnectionManager()
 }

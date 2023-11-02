@@ -28,7 +28,7 @@ func TestNew(t *testing.T) {
 
 func TestCreateGameFail(t *testing.T) {
 	repo := gameRepo.New()
-	id, err := repo.CreateGame(gameLogic.DefaultGameSettings(), "")
+	id, _, err := repo.CreateGame(gameLogic.DefaultGameSettings(), "")
 	if err == nil {
 		t.Log("When a game errors it should not be made")
 		t.FailNow()
@@ -58,7 +58,7 @@ func TestCreateGame(t *testing.T) {
 	gameSettings := gameLogic.DefaultGameSettings()
 	gameSettings.CardPacks = []*gameLogic.CardPack{{}}
 	name := "Dave"
-	id, err := repo.CreateGame(gameSettings, name)
+	id, pid, err := repo.CreateGame(gameSettings, name)
 	if err != nil {
 		t.Log("The game should have been made", err)
 		t.FailNow()
@@ -69,6 +69,8 @@ func TestCreateGame(t *testing.T) {
 		t.Log("The player was not made with the correct name")
 		t.FailNow()
 	}
+
+  assert.Equal(t, pid, game.GameOwnerId, "Game owner should be the returned player ID")
 
 	if game.CreationTime != repo.GameAgeMap[id] {
 		t.Log("The age map does not have the game in it")
@@ -95,7 +97,7 @@ func TestGetGames(t *testing.T) {
 	gameSettings.CardPacks = []*gameLogic.CardPack{{}}
 	gameSettings.CardPacks = []*gameLogic.CardPack{{}}
 	name := "Dave"
-	id, err := repo.CreateGame(gameSettings, name)
+	id, _, err := repo.CreateGame(gameSettings, name)
 	if err != nil {
 		t.Log("The game should have been made", err)
 		t.FailNow()
