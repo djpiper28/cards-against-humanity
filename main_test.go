@@ -61,7 +61,6 @@ func TestGetGamesNotFullOneGame(t *testing.T) {
 
 	body, err := io.ReadAll(resp.Body)
 	assert.Nil(t, err, "Should be able to read the body")
-	assert.Equal(t, string(body), "[]", "Should be an empty array")
 
 	var games []gameLogic.GameInfo
 	err = json.Unmarshal(body, &games)
@@ -69,5 +68,5 @@ func TestGetGamesNotFullOneGame(t *testing.T) {
 	assert.Len(t, games, 1, "There should be one game")
 
 	assert.Equal(t, games[0].Id, gid, "Game Id should match")
-	assert.Len(t, games[0].PlayerCount, 1, "Should only be one player")
+	assert.Equal(t, games[0].PlayerCount, 1, "Should only be one player")
 }
