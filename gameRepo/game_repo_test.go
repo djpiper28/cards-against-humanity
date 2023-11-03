@@ -70,7 +70,7 @@ func TestCreateGame(t *testing.T) {
 		t.FailNow()
 	}
 
-  assert.Equal(t, pid, game.GameOwnerId, "Game owner should be the returned player ID")
+	assert.Equal(t, pid, game.GameOwnerId, "Game owner should be the returned player ID")
 
 	if game.CreationTime != repo.GameAgeMap[id] {
 		t.Log("The age map does not have the game in it")

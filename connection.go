@@ -1,10 +1,8 @@
 package main
 
 import (
-	"errors"
 	"log"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -26,7 +24,6 @@ func WsUpgrade(w http.ResponseWriter, r *http.Request, playerId, gameId uuid.UUI
 	}
 
 	conn := NewConnection(c, playerId, gameId)
-	go conn.Process()
 	return conn, nil
 }
 
@@ -48,7 +45,7 @@ type WsConnection struct {
 }
 
 func NewConnection(conn *websocket.Conn, gameId, playerId uuid.UUID) *WsConnection {
-	return &WsConnection{Conn: conn,
+	c := &WsConnection{Conn: conn,
 		PlayerId:     playerId,
 		GameID:       gameId,
 		JoinTime:     time.Now(),
@@ -57,6 +54,10 @@ func NewConnection(conn *websocket.Conn, gameId, playerId uuid.UUID) *WsConnecti
 		WsBroadcast:  make(chan string),
 		shutdown:     make(chan bool),
 	}
+	go c.Process()
+
+	globalConnectionManager.RegisterConnection(gameId, playerId, c)
+	return c
 }
 
 func (c *WsConnection) Process() {
@@ -66,9 +67,12 @@ func (c *WsConnection) Process() {
 			case <-c.shutdown:
 				return
 			case msg := <-c.WsBroadcast:
-				c.Conn.WriteMessage(websocket.TextMessage, []byte(msg))
-				globalConnectionManager.Close(c.GameID, c.PlayerId)
-				return
+				err := c.Conn.WriteMessage(websocket.TextMessage, []byte(msg))
+				if err != nil {
+					log.Printf("Player %s had a network error %s", c.PlayerId, err)
+					globalConnectionManager.Close(c.GameID, c.PlayerId)
+					return
+				}
 			}
 		}
 	}()
@@ -107,49 +111,4 @@ func (c *WsConnection) Close() {
 		close(c.WsBroadcast)
 		close(c.WsRecieve)
 	}()
-}
-
-type GameConnection struct {
-	// Maps a player ID to a ws connection
-	PlayerConnectionMap map[uuid.UUID]*WsConnection
-	Broadcast           chan string
-	lock                sync.Mutex
-}
-
-func (gc *GameConnection) Close(playerId uuid.UUID) error {
-	gc.lock.Lock()
-	defer gc.lock.Unlock()
-
-	conn, found := gc.PlayerConnectionMap[playerId]
-	if !found {
-		return errors.New("Cannot remove a wensocket that has been closed already")
-	}
-
-	conn.Close()
-	delete(gc.PlayerConnectionMap, playerId)
-	return nil
-}
-
-var globalConnectionManager GlobalConnectionManager
-
-type GlobalConnectionManager struct {
-	// Maps a game ID to the game connection pool
-	GameConnectionMap map[uuid.UUID]*GameConnection
-	lock              sync.Mutex
-}
-
-func InitGlobalConnectionManager() {
-	globalConnectionManager = GlobalConnectionManager{GameConnectionMap: make(map[uuid.UUID]*GameConnection)}
-}
-
-func (g *GlobalConnectionManager) Close(gameId, playerId uuid.UUID) error {
-	g.lock.Lock()
-	defer g.lock.Unlock()
-
-	gameConnectionMgr, found := g.GameConnectionMap[gameId]
-	if !found {
-		return errors.New("Cannot close a player connection from a game that has been closed")
-	}
-
-	return gameConnectionMgr.Close(playerId)
 }

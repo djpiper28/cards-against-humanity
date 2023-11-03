@@ -24,38 +24,38 @@ func getGames(c *gin.Context) {
 }
 
 type gameCreateSettings struct {
-  PlayerName string `json:"playerName"`
-  Settings gameLogic.GameSettings `json:"settings"`
+	PlayerName string                 `json:"playerName"`
+	Settings   gameLogic.GameSettings `json:"settings"`
 }
 
 func createGame(c *gin.Context) {
-  settingsStr, err := io.ReadAll(c.Request.Body)
-  if err != nil {
-    c.Error(err)
-  }
+	settingsStr, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		c.Error(err)
+	}
 
-  var settings gameCreateSettings
-  err = json.Unmarshal(settingsStr, settings)
-  if err != nil {
-    c.Error(err)
-  }
+	var settings gameCreateSettings
+	err = json.Unmarshal(settingsStr, settings)
+	if err != nil {
+		c.Error(err)
+	}
 
-  gameId, playerId, err := GameRepo.CreateGame(&settings.Settings, settings.PlayerName)
-  if err != nil {
-    c.Error(err)
-  }
+	gameId, playerId, err := GameRepo.CreateGame(&settings.Settings, settings.PlayerName)
+	if err != nil {
+		c.Error(err)
+	}
 
-  _, err = WsUpgrade(c.Writer, c.Request, gameId, playerId)
-  if err != nil {
-    c.Error(err)
-  }
-  // TODO: use the connection
+	_, err = WsUpgrade(c.Writer, c.Request, gameId, playerId)
+	if err != nil {
+		c.Error(err)
+	}
+	// TODO: use the connection
 }
 
 func SetupGamesEndpoints(r *gin.Engine) {
 	gamesRoute := r.Group("/games")
 	{
 		gamesRoute.GET("/notFull", getGames)
-    gamesRoute.POST("/create", createGame)
+		gamesRoute.POST("/create", createGame)
 	}
 }
