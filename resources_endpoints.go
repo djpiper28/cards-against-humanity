@@ -10,13 +10,13 @@ import (
 
 type getPacksResp map[uuid.UUID]*gameLogic.CardPack
 
-// @Summary Gets all of the resource cards packs
-// @Description Gets all of the card packs as a map
-// @Tags resources
-// @Accept json
-// @Produce json
-// @Success 200 {object} getPacksResp
-// @Router /res/packs [get]
+//	@Summary		Gets all of the resource cards packs
+//	@Description	Gets all of the card packs as a map
+//	@Tags			resources
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	getPacksResp
+//	@Router			/res/packs [get]
 func getPacks(c *gin.Context) {
 	c.JSON(http.StatusOK, gameLogic.AllPacks)
 }

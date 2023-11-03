@@ -18,19 +18,23 @@ The backend is in Go and uses Gin and Gorilla.
 go test ./...
 
 # Build and execute
-# Generate the swagger docs
-swag i
-# Build and execute the program
-go build
-./cards-against-humanity
+make
 
+# If you do not have make, you can do the steps manually
+# Generate the swagger docs
+#swag i
+## Build and execute the program
+#go build
+
+
+./cards-against-humanity
 # or .\cards-against-humanity.exe if you use WinDoze
 ```
 
 > Setting Up Swag To Generate Swagger Docs
 
 ```sh
-go install github.com/swaggo/swag
+go install github.com/swaggo/swag/cmd/swag@latest
 swag i # this should now work
 ```
 
