@@ -5,7 +5,10 @@ import (
 	"net/http"
 
 	gpmiddleware "github.com/carousell/gin-prometheus-middleware"
+	docs "github.com/djpiper28/cards-against-humanity/docs"
 	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // A function to start for use in e2e testing
@@ -15,6 +18,10 @@ func Start() {
 	InitGlobals()
 
 	r := gin.Default()
+
+	// Setup swagger
+	docs.SwaggerInfo.BasePath = "/"
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	// System routes
 	r.GET("/healthcheck", func(c *gin.Context) {
@@ -38,6 +45,21 @@ func Start() {
 	r.Run()
 }
 
+// @title           Cards Against Humanity API
+// @version         1.0
+// @description     A FOSS Cards Against Humanity server written in Go
+
+// @contact.name   Danny Piper
+// @contact.url    https://github.com/djpiper28/cards-against-humanity
+// @contact.email  djpiper28@gmail.com 
+
+// @license.name  GNU GPL 3
+// @license.url   https://github.com/djpiper28/cards-against-humanity
+
+// @host      localhost:8080
+// @BasePath  /
+
+// @securityDefinitions.basic  Bearer token
 func main() {
 	Start()
 }

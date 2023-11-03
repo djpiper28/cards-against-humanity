@@ -1,0 +1,112 @@
+basePath: /
+definitions:
+  gameLogic.CardPack:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  gameLogic.GameInfo:
+    properties:
+      hasPassword:
+        type: boolean
+      id:
+        type: string
+      maxPlayers:
+        type: integer
+      playerCount:
+        type: integer
+      playingTo:
+        type: integer
+    type: object
+  gameLogic.GameSettings:
+    properties:
+      GamePassword:
+        description: |-
+          Allows a game to have a password, this will be stored in plaintext like a chad
+          Empty string is no password
+        type: string
+      cardPacks:
+        items:
+          $ref: '#/definitions/gameLogic.CardPack'
+        type: array
+      maxPlayers:
+        type: integer
+      maxRounds:
+        description: Game ends when this amount of rounds is reached
+        type: integer
+      playingToPoints:
+        description: Game ends when someone reaches this amount of points
+        type: integer
+    type: object
+  main.gameCreateSettings:
+    properties:
+      playerName:
+        type: string
+      settings:
+        $ref: '#/definitions/gameLogic.GameSettings'
+    type: object
+  main.gameCreatedResp:
+    properties:
+      gameId:
+        type: string
+      playerId:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: djpiper28@gmail.com
+    name: Danny Piper
+    url: https://github.com/djpiper28/cards-against-humanity
+  description: A FOSS Cards Against Humanity server written in Go
+  license:
+    name: GNU GPL 3
+    url: https://github.com/djpiper28/cards-against-humanity
+  title: Cards Against Humanity API
+  version: "1.0"
+paths:
+  /create:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new game for you to connect to via websocket afterwards
+      parameters:
+      - description: create settings
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.gameCreateSettings'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/main.gameCreatedResp'
+      summary: Creates a new game
+      tags:
+      - games
+  /notFull:
+    get:
+      consumes:
+      - application/json
+      description: Returns a list of the games
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/gameLogic.GameInfo'
+            type: array
+      summary: Gets all of the games that are not full
+      tags:
+      - games
+securityDefinitions:
+  Bearer token:
+    type: basic
+swagger: "2.0"
