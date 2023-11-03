@@ -1,6 +1,3 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGithub } from "@fortawesome/free-brands-svg-icons";
-
 export default function About() {
   return (
     <section class="flex flex-col gap-3 p-8">
@@ -16,13 +13,16 @@ export default function About() {
       </p>
 
       <h2 class="text-xl font-bold">Contributing</h2>
-      <a
-        href="https://github.com/MonarchDevelopment/mtg-search-engine"
-        class="w-8 text-black hover:scale-125 flex flex-row gap-3"
-      >
-        <FontAwesomeIcon icon={faGithub} />
-        <p class="text-blue-300">Github</p>
-      </a>
+      <span>
+        The project is open source and you can contribute by going go the{' '}
+        <a
+          href="https://github.com/MonarchDevelopment/mtg-search-engine"
+          class="w-8 text-blue-600"
+        >
+          Github
+        </a>
+        {' '}page.
+      </span>
     </section>
   );
 }
