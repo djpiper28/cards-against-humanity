@@ -29,6 +29,13 @@ func TestAccumalateCardPacks(t *testing.T) {
 	}
 }
 
+func BenchmarkAccumalateCardPakcs(b *testing.B) {
+	packs := GetTestPacks()
+	for i := 0; i < b.N; i++ {
+		gameLogic.AccumalateCardPacks(packs)
+	}
+}
+
 func TestLoadCards(t *testing.T) {
 	os.Chdir("..")
 	err := gameLogic.LoadPacks()

@@ -7,6 +7,7 @@ import (
 
 	"github.com/djpiper28/cards-against-humanity/gameLogic"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func getGames(c *gin.Context) {
@@ -28,6 +29,11 @@ type gameCreateSettings struct {
 	Settings   gameLogic.GameSettings `json:"settings"`
 }
 
+type gameCreatedResp struct {
+	GameId   uuid.UUID `json:"gameId"`
+	PlayerId uuid.UUID `json:"playerId"`
+}
+
 func createGame(c *gin.Context) {
 	settingsStr, err := io.ReadAll(c.Request.Body)
 	if err != nil {
@@ -35,7 +41,7 @@ func createGame(c *gin.Context) {
 	}
 
 	var settings gameCreateSettings
-	err = json.Unmarshal(settingsStr, settings)
+	err = json.Unmarshal(settingsStr, &settings)
 	if err != nil {
 		c.Error(err)
 	}
@@ -45,11 +51,8 @@ func createGame(c *gin.Context) {
 		c.Error(err)
 	}
 
-	_, err = WsUpgrade(c.Writer, c.Request, gameId, playerId)
-	if err != nil {
-		c.Error(err)
-	}
-	// TODO: use the connection
+	resp := gameCreatedResp{GameId: gameId, PlayerId: playerId}
+	c.JSON(http.StatusCreated, resp)
 }
 
 func SetupGamesEndpoints(r *gin.Engine) {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -69,4 +70,29 @@ func TestGetGamesNotFullOneGame(t *testing.T) {
 
 	assert.Equal(t, games[0].Id, gid, "Game Id should match")
 	assert.Equal(t, games[0].PlayerCount, 1, "Should only be one player")
+}
+
+const jsonContentType = "application/json"
+
+func TestCreateGameEndpoint(t *testing.T) {
+	name := "Dave"
+	gs := gameLogic.DefaultGameSettings()
+
+	postBody, err := json.Marshal(gameCreateSettings{Settings: *gs, PlayerName: name})
+	assert.Nil(t, err, "Should be able to create json body")
+
+	reader := bytes.NewReader(postBody)
+
+	resp, err := http.Post(baseUrl+"/games/create", jsonContentType, reader)
+	assert.Nil(t, err, "Should be able to POST")
+	assert.Equal(t, http.StatusCreated, resp.StatusCode, "Game should have been made and is ready for connecting to")
+
+	body, err := io.ReadAll(resp.Body)
+	assert.Nil(t, err, "Should be able to read the body")
+
+	var gameIds gameCreatedResp
+	err = json.Unmarshal(body, &gameIds)
+	assert.Nil(t, err, "There should not be an error reading the game ids")
+	assert.NotEmpty(t, gameIds.GameId, "Game ID should be set")
+	assert.NotEmpty(t, gameIds.PlayerId, "Player ID should be set")
 }
