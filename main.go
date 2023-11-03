@@ -41,7 +41,7 @@ func Start() {
 
 	// Setup all endpoints
 	SetupGamesEndpoints(r)
-  SetupResoucesEndpoints(r)
+	SetupResoucesEndpoints(r)
 
 	r.Run()
 }
@@ -52,7 +52,7 @@ func Start() {
 
 // @contact.name   Danny Piper (djpiper28)
 // @contact.url    https://github.com/djpiper28/cards-against-humanity
-// @contact.email  djpiper28@gmail.com 
+// @contact.email  djpiper28@gmail.com
 
 // @license.name  GNU GPL 3
 // @license.url   https://github.com/djpiper28/cards-against-humanity

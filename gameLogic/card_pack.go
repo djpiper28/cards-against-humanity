@@ -142,7 +142,7 @@ func translateCahJson(data *cahJson) error {
 				return
 			}
 
-			cardPack := CardPack{Id: id, CardDeck: deck}
+			cardPack := CardPack{Id: id, CardDeck: deck, Name: pack.Name}
 			lock.Lock()
 			defer lock.Unlock()
 			AllPacks[id] = &cardPack

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/djpiper28/cards-against-humanity/gameLogic"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAccumalateCardPacks(t *testing.T) {
@@ -57,6 +58,12 @@ func TestLoadCards(t *testing.T) {
 	if len(gameLogic.AllPacks) == 0 {
 		t.Log("There are no packs")
 		t.FailNow()
+	}
+
+	for id, pack := range gameLogic.AllPacks {
+		assert.NotEmpty(t, id, "ID should not be nil")
+		assert.NotEmpty(t, pack.Name, "Name should not be nil")
+		assert.Equal(t, id, pack.Id, "IDs should be equal")
 	}
 }
 
