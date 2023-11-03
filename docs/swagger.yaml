@@ -54,11 +54,15 @@ definitions:
       playerId:
         type: string
     type: object
+  main.getPacksResp:
+    additionalProperties:
+      $ref: '#/definitions/gameLogic.CardPack'
+    type: object
 host: localhost:8080
 info:
   contact:
     email: djpiper28@gmail.com
-    name: Danny Piper
+    name: Danny Piper (djpiper28)
     url: https://github.com/djpiper28/cards-against-humanity
   description: A FOSS Cards Against Humanity server written in Go
   license:
@@ -67,7 +71,7 @@ info:
   title: Cards Against Humanity API
   version: "1.0"
 paths:
-  /create:
+  /games/create:
     post:
       consumes:
       - application/json
@@ -89,7 +93,7 @@ paths:
       summary: Creates a new game
       tags:
       - games
-  /notFull:
+  /games/notFull:
     get:
       consumes:
       - application/json
@@ -106,7 +110,19 @@ paths:
       summary: Gets all of the games that are not full
       tags:
       - games
-securityDefinitions:
-  Bearer token:
-    type: basic
+  /res/packs:
+    get:
+      consumes:
+      - application/json
+      description: Gets all of the card packs as a map
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.getPacksResp'
+      summary: Gets all of the resource cards packs
+      tags:
+      - resources
 swagger: "2.0"

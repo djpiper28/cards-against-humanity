@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/djpiper28/cards-against-humanity/gameLogic"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -95,4 +96,17 @@ func TestCreateGameEndpoint(t *testing.T) {
 	assert.Nil(t, err, "There should not be an error reading the game ids")
 	assert.NotEmpty(t, gameIds.GameId, "Game ID should be set")
 	assert.NotEmpty(t, gameIds.PlayerId, "Player ID should be set")
+}
+
+func TestGetCardPacks(t *testing.T) {
+	resp, err := http.Get(baseUrl + "/res/packs")
+	assert.Nil(t, err, "Should not get an error getting packs")
+	assert.Equal(t, http.StatusOK, resp.StatusCode, "Should return a 200")
+
+	body, err := io.ReadAll(resp.Body)
+	assert.Nil(t, err, "Should be able to read the body")
+
+	var packs map[uuid.UUID]gameLogic.CardPack
+	err = json.Unmarshal(body, &packs)
+	assert.Nil(t, err, "There should not be any errors getting the card packs")
 }

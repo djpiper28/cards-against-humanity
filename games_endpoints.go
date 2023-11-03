@@ -10,15 +10,13 @@ import (
 	"github.com/google/uuid"
 )
 
-// @BasePath /games
-
 // @Summary Gets all of the games that are not full
 // @Description Returns a list of the games
 // @Tags games
 // @Accept json
 // @Produce json
 // @Success 200 {object} []gameLogic.GameInfo
-// @Router /notFull [get]
+// @Router /games/notFull [get]
 func getGames(c *gin.Context) {
 	games := GameRepo.GetGames()
 	info := make([]gameLogic.GameInfo, 0, len(games))
@@ -50,7 +48,7 @@ type gameCreatedResp struct {
 // @Produce json
 // @Param request body gameCreateSettings true "create settings"
 // @Success 204 {object} gameCreatedResp
-// @Router /create [post]
+// @Router /games/create [post]
 func createGame(c *gin.Context) {
 	settingsStr, err := io.ReadAll(c.Request.Body)
 	if err != nil {

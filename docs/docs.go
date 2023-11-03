@@ -10,7 +10,7 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {
-            "name": "Danny Piper",
+            "name": "Danny Piper (djpiper28)",
             "url": "https://github.com/djpiper28/cards-against-humanity",
             "email": "djpiper28@gmail.com"
         },
@@ -23,7 +23,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/create": {
+        "/games/create": {
             "post": {
                 "description": "Creates a new game for you to connect to via websocket afterwards",
                 "consumes": [
@@ -57,7 +57,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/notFull": {
+        "/games/notFull": {
             "get": {
                 "description": "Returns a list of the games",
                 "consumes": [
@@ -78,6 +78,29 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/gameLogic.GameInfo"
                             }
+                        }
+                    }
+                }
+            }
+        },
+        "/res/packs": {
+            "get": {
+                "description": "Gets all of the card packs as a map",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "resources"
+                ],
+                "summary": "Gets all of the resource cards packs",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.getPacksResp"
                         }
                     }
                 }
@@ -163,11 +186,12 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        }
-    },
-    "securityDefinitions": {
-        "Bearer token": {
-            "type": "basic"
+        },
+        "main.getPacksResp": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/gameLogic.CardPack"
+            }
         }
     }
 }`

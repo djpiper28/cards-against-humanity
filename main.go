@@ -41,6 +41,7 @@ func Start() {
 
 	// Setup all endpoints
 	SetupGamesEndpoints(r)
+  SetupResoucesEndpoints(r)
 
 	r.Run()
 }
@@ -49,7 +50,7 @@ func Start() {
 // @version         1.0
 // @description     A FOSS Cards Against Humanity server written in Go
 
-// @contact.name   Danny Piper
+// @contact.name   Danny Piper (djpiper28)
 // @contact.url    https://github.com/djpiper28/cards-against-humanity
 // @contact.email  djpiper28@gmail.com 
 
@@ -58,8 +59,6 @@ func Start() {
 
 // @host      localhost:8080
 // @BasePath  /
-
-// @securityDefinitions.basic  Bearer token
 func main() {
 	Start()
 }
