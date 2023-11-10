@@ -3,10 +3,10 @@ build:
 	go build
 
 test:
-	go test ./..
+	go test './...'
 
 bench:
-	go test -bench=./..
+	go test '-bench=./...'
 
 fmt:
 	gofmt -l -w .

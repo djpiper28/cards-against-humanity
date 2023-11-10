@@ -6,7 +6,7 @@ const App: Component = () => {
   const Route = useRoutes(routes);
 
   return (
-    <div class="min-h-screen bg-azure-100">
+    <div class="min-h-screen bg-gray-50">
       <nav class="bg-gray-200 text-gray-900 px-4">
         <ul class="flex items-center">
           <li class="py-2 px-4">
@@ -22,7 +22,7 @@ const App: Component = () => {
         </ul>
       </nav>
 
-      <main class="p-2 md:p-5 flex flex-col w-full">
+      <main class="p-2 md:p-5 flex flex-col w-full gap-5">
         <Route />
       </main>
     </div>

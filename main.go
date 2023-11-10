@@ -57,8 +57,8 @@ func Start() {
 //	@license.name	GNU GPL 3
 //	@license.url	https://github.com/djpiper28/cards-against-humanity
 
-//	@host		localhost:8080
-//	@BasePath	/
+// @host		localhost:8080
+// @BasePath	/
 func main() {
 	Start()
 }
