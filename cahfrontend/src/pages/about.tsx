@@ -14,14 +14,14 @@ export default function About() {
 
       <h2 class="text-xl font-bold">Contributing</h2>
       <span>
-        The project is open source and you can contribute by going go the{' '}
+        The project is open source and you can contribute by going go the{" "}
         <a
           href="https://github.com/MonarchDevelopment/mtg-search-engine"
           class="w-8 text-blue-600"
         >
           Github
-        </a>
-        {' '}page.
+        </a>{" "}
+        page.
       </span>
     </section>
   );
