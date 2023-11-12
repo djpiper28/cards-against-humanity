@@ -8,7 +8,7 @@ export default function Home() {
       </div>
       <button>
         <Card
-          isWhite={true}
+          isWhite={false}
           cardText="Create a Game"
           packName="Click me to make a game"
         />

@@ -21,3 +21,7 @@
 go.work
 
 cards-against-humanity
+
+# Auto-generated code
+docs
+cahfrontend/src/api.ts
