@@ -16,3 +16,4 @@ bench:
 fmt:
 	gofmt -l -w .
 	swag fmt
+	cd ./cahfrontend/ && prettier -w .
