@@ -1,27 +1,26 @@
 interface Props {
-  checked: boolean;
   onSetChecked: (checked: boolean) => void;
   label: string;
+  checked: boolean;
 }
 
-export default function Checkbox({
-  checked,
-  onSetChecked,
-  label,
-}: Readonly<Props>) {
-  const background = checked ? "bg-blue-300" : "bg-white";
+export default function Checkbox(props: Readonly<Props>) {
   return (
     <label
-      class={`flex flex-row gap-3 rounded-xl border-2 w-fit p-1 px-2 ${background}`}
+      class={`flex flex-row gap-3 rounded-xl border-2 w-fit p-1 px-2 ${
+        props.checked ? "bg-blue-300" : "bg-white"
+      }`}
     >
       <input
-        id={`${label} - input - checkbox`}
+        id={`${props.label}-input-checkbox`}
         type="checkbox"
-        checked={checked}
-        onChange={() => onSetChecked(!checked)}
-        value={label}
+        checked={props.checked}
+        onChange={() => {
+          props.onSetChecked(!props.checked);
+        }}
+        value={props.label}
       />
-      {label}
+      {props.label}
     </label>
   );
 }
