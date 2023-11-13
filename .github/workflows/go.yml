@@ -1,6 +1,6 @@
 name: Go
 
-yes:
+on:
   pull_request:
     branches:
       - main
