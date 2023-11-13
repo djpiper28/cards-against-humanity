@@ -27,9 +27,9 @@ export default function Create() {
       <h1 class="text-2xl font-bold">
         Create A Game of Cards Against Humanity
       </h1>
-      <h2 class="text-xl">Choose Some Card Packs</h2>
       <div class="flex flex-col gap-5 rounded-2xl border-2 p-5 bg-gray-100">
-        <div class="flex flex-row flex-wrap gap-2 md:gap-1">
+        <h2 class="text-xl">Choose Some Card Packs</h2>
+        <div class="flex flex-row flex-wrap gap-2 md:gap-1 overflow-auto max-h-64">
           <For each={packs()}>
             {(pack, index) => {
               return (
