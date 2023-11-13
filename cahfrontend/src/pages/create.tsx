@@ -54,7 +54,7 @@ export default function Create() {
       <div class={editPanelCss}>
         <h2
           class={`${panelTitleCss} ${
-            selectedPacks().length === 0 ? "text-red-500" : ""
+            selectedPacks().length === 0 ? "text-error-colour" : ""
           }`}
         >
           {`Choose Some Card Packs ${
@@ -157,7 +157,7 @@ export default function Create() {
           />
         </div>
 
-        <p class="text-red-500 text-lg">{errorMessage()}</p>
+        <p class="text-error-colour text-lg">{errorMessage()}</p>
 
         <button
           onclick={() => {
