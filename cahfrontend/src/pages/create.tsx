@@ -1,6 +1,7 @@
 import { Api, GameLogicCardPack } from "../api";
 import { For, createSignal, onMount } from "solid-js";
 import Checkbox from "../components/inputs/Checkbox";
+import Input from "../components/inputs/Input";
 
 interface Checked {
   checked: boolean;
@@ -22,9 +23,10 @@ export default function Create() {
   });
 
   const [selectedPacks, setSelectedPacks] = createSignal<string[]>([]);
+  const [gamePassword, setGamePassword] = createSignal("");
 
   const editPanelCss =
-    "flex flex-col gap-5 rounded-2xl border-2 p-5 bg-gray-100";
+    "flex flex-col gap-5 rounded-2xl border-2 p-3 md:p-5 bg-gray-100";
   const panelTitleCss = "text-xl";
   return (
     <>
@@ -72,6 +74,18 @@ export default function Create() {
             .map((x) => x.blackCards)
             .reduce((a, b) => a + b, 0)} black cards.`}
         </p>
+      </div>
+
+      <div class={editPanelCss}>
+        <h2 class={panelTitleCss}>Other Game Settings</h2>
+        <div class="flex flex-row flex-wrap">
+          <Input
+            placeHolder="password"
+            value={gamePassword()}
+            onChanged={setGamePassword}
+            label="Game Password"
+          />
+        </div>
       </div>
     </>
   );
