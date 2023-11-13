@@ -64,7 +64,7 @@ export default function Create() {
         </div>
 
         <p class={panelTitleCss}>
-          {`You have ${selectedPacks()
+          {`You have added ${selectedPacks()
             .map((x) => packs().find((y) => y.id === x))
             .filter((x) => !!x)
             .map((x) => x.whiteCards)
