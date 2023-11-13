@@ -11,9 +11,11 @@ import (
 )
 
 type CardPack struct {
-	Id       uuid.UUID `json:"id"`
-	Name     string    `json:"name"`
-	CardDeck *CardDeck `json:"-"`
+	Id         uuid.UUID `json:"id"`
+	Name       string    `json:"name"`
+	WhiteCards int       `json:"whiteCards"`
+	BlackCards int       `json:"blackCards"`
+	CardDeck   *CardDeck `json:"-"`
 }
 
 var AllPacks map[uuid.UUID]*CardPack
@@ -142,7 +144,11 @@ func translateCahJson(data *cahJson) error {
 				return
 			}
 
-			cardPack := CardPack{Id: id, CardDeck: deck, Name: pack.Name}
+			cardPack := CardPack{Id: id,
+				CardDeck:   deck,
+				Name:       pack.Name,
+				WhiteCards: len(deck.WhiteCards),
+				BlackCards: len(deck.BlackCards)}
 			lock.Lock()
 			defer lock.Unlock()
 			AllPacks[id] = &cardPack

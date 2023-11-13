@@ -19,13 +19,17 @@ export default function Create() {
     <>
       <h1>Create A Game of Cards Against Humanity</h1>
       <div class="flex flex=row flex-wrap">
-        {packs().map((pack: GameLogicCardPack) => (
-          <Checkbox
-            label={pack.name}
-            checked={false}
-            onSetChecked={console.log}
-          />
-        ))}
+        {packs()
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((pack: GameLogicCardPack) => (
+            <Checkbox
+              label={`${pack.name} (${
+                pack.whiteCards + pack.blackCards
+              } Cards)`}
+              checked={false}
+              onSetChecked={console.log}
+            />
+          ))}
       </div>
     </>
   );
