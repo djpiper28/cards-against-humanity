@@ -41,10 +41,10 @@ jobs:
           verbose: yes
       - name: Build the frontend
         run: |
-          cd ./cahFrontend || exit 1
+          cd ./cahFrontend
           npm i
           npm run build
       - name: Build Storybook
         run: |-
-          cd ./cahFrontend || exit 1
+          cd ./cahFrontend
           npm run build-storybook
