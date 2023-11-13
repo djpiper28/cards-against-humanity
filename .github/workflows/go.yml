@@ -28,7 +28,7 @@ jobs:
         run: |
           go install github.com/swaggo/swag/cmd/swag@latest
       - name: Build the package
-        run: go get; make
+        run: make
       - name: Test the package and, generate coverage reports
         run: go test -v -benchmem -parallel 16 ./... -covermode=atomic -coverprofile=coverage.out
       - name: Upload coverage reports to Codecov
