@@ -52,7 +52,15 @@ export default function Create() {
         Create A Game of Cards Against Humanity
       </h1>
       <div class={editPanelCss}>
-        <h2 class={panelTitleCss}>Choose Some Card Packs</h2>
+        <h2
+          class={`${panelTitleCss} ${
+            selectedPacks().length === 0 ? "text-red-500" : ""
+          }`}
+        >
+          {`Choose Some Card Packs ${
+            selectedPacks().length === 0 ? "(No Packs Selected)" : ""
+          }`}
+        </h2>
         <div class="flex flex-row flex-wrap gap-2 md:gap-1 overflow-auto max-h-64">
           <For each={packs()}>
             {(pack, index) => {
