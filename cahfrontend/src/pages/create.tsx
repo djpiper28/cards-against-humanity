@@ -22,13 +22,17 @@ export default function Create() {
   });
 
   const [selectedPacks, setSelectedPacks] = createSignal<string[]>([]);
+
+  const editPanelCss =
+    "flex flex-col gap-5 rounded-2xl border-2 p-5 bg-gray-100";
+  const panelTitleCss = "text-xl";
   return (
     <>
       <h1 class="text-2xl font-bold">
         Create A Game of Cards Against Humanity
       </h1>
-      <div class="flex flex-col gap-5 rounded-2xl border-2 p-5 bg-gray-100">
-        <h2 class="text-xl">Choose Some Card Packs</h2>
+      <div class={editPanelCss}>
+        <h2 class={panelTitleCss}>Choose Some Card Packs</h2>
         <div class="flex flex-row flex-wrap gap-2 md:gap-1 overflow-auto max-h-64">
           <For each={packs()}>
             {(pack, index) => {
@@ -57,7 +61,7 @@ export default function Create() {
           </For>
         </div>
 
-        <p class="text-xl">
+        <p class={panelTitleCss}>
           {`You have ${selectedPacks()
             .map((x) => packs().find((y) => y.id === x))
             .filter((x) => !!x)
