@@ -38,7 +38,7 @@ type GameSettings struct {
 	PlayingToPoints uint `json:"playingToPoints"`
 	// Allows a game to have a password, this will be stored in plaintext like a chad
 	// Empty string is no password
-	Password   string      `json:"GamePassword"`
+	Password   string      `json:"gamePassword"`
 	MaxPlayers uint        `json:"maxPlayers"`
 	CardPacks  []*CardPack `json:"cardPacks"`
 }
@@ -53,34 +53,58 @@ func DefaultGameSettings() *GameSettings {
 
 func (gs *GameSettings) Validate() bool {
 	if gs.MaxRounds < MinRounds {
+		log.Printf("Max rounds (%d) is less than min rounds (%d)",
+			gs.MaxRounds,
+			MinRounds)
 		return false
 	}
 
 	if gs.MaxRounds > MaxRounds {
+		log.Printf("Max Rounds (%d) is greater than max rounds (%d)",
+			gs.MaxRounds,
+			MaxRounds)
 		return false
 	}
 
 	if gs.PlayingToPoints < MinPlayingToPoints {
+		log.Printf("Playing to points (%d) is less than min playing to points (%d)",
+			gs.PlayingToPoints,
+			MinPlayingToPoints)
 		return false
 	}
 
 	if gs.PlayingToPoints > MaxPlayingToPoints {
+		log.Printf("Playing to points (%d) is greater than max playing to points (%d)",
+			gs.PlayingToPoints,
+			MaxPlayingToPoints)
 		return false
 	}
 
 	if len(gs.Password) > MaxPasswordLength {
+		log.Printf("Game password (%d) is too long (%d))",
+			len(gs.Password),
+			MaxPasswordLength)
 		return false
 	}
 
 	if gs.MaxPlayers < MinPlayers {
+		log.Printf("Max players (%d) is less than min players (%d)",
+			gs.MaxPlayers,
+			MinPlayers)
 		return false
 	}
 
 	if gs.MaxPlayers > MaxPlayers {
+		log.Printf("Max players (%d) is greater than max players (%d)",
+			gs.MaxPlayers,
+			MaxPlayers)
 		return false
 	}
 
 	if len(gs.CardPacks) < MinCardPacks {
+		log.Printf("Card packs length (%d) is less than min card packs length (%d)",
+			len(gs.CardPacks),
+			MinCardPacks)
 		return false
 	}
 

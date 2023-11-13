@@ -1,7 +1,8 @@
 import { Api, GameLogicCardPack } from "../api";
 import { For, createSignal, onMount } from "solid-js";
 import Checkbox from "../components/inputs/Checkbox";
-import Input from "../components/inputs/Input";
+import Input, { InputType } from "../components/inputs/Input";
+import { useNavigate } from "@solidjs/router";
 
 interface Checked {
   checked: boolean;
@@ -10,6 +11,7 @@ interface Checked {
 type CardPack = GameLogicCardPack & Checked;
 
 export default function Create() {
+  const navigate = useNavigate();
   const [packs, setPacks] = createSignal<CardPack[]>([]);
   onMount(async () => {
     const api = new Api();
@@ -24,6 +26,11 @@ export default function Create() {
 
   const [selectedPacks, setSelectedPacks] = createSignal<string[]>([]);
   const [gamePassword, setGamePassword] = createSignal("");
+  const [maxPlayers, setMaxPlayers] = createSignal(6);
+  const [gameRounds, setGameRounds] = createSignal(25);
+  const [playingToPoints, setPlayingToPoints] = createSignal(10);
+  const [playerName, setPlayerName] = createSignal("");
+  const [errorMessage, setErrorMessage] = createSignal("");
 
   const editPanelCss =
     "flex flex-col gap-5 rounded-2xl border-2 p-3 md:p-5 bg-gray-100";
@@ -78,14 +85,78 @@ export default function Create() {
 
       <div class={editPanelCss}>
         <h2 class={panelTitleCss}>Other Game Settings</h2>
-        <div class="flex flex-row flex-wrap">
+        <div class="flex flex-row flex-wrap gap-2 md:gap-1">
           <Input
+            inputType={InputType.Text}
+            placeHolder="John Smith"
+            value={playerName()}
+            onChanged={setPlayerName}
+            label="Player Name"
+            errorState={playerName().length < 3 || playerName().length > 30}
+          />
+
+          <Input
+            inputType={InputType.Text}
             placeHolder="password"
             value={gamePassword()}
             onChanged={setGamePassword}
             label="Game Password"
           />
+
+          <Input
+            inputType={InputType.PositiveNumber}
+            placeHolder="max players"
+            value={maxPlayers().toString()}
+            onChanged={(text) => setMaxPlayers(parseInt(text))}
+            label="Max Players"
+          />
+
+          <Input
+            inputType={InputType.PositiveNumber}
+            placeHolder="points to play to"
+            value={playingToPoints().toString()}
+            onChanged={(text) => setPlayingToPoints(parseInt(text))}
+            label="Points To Play To"
+          />
+
+          <Input
+            inputType={InputType.PositiveNumber}
+            placeHolder="max game rounds"
+            value={gameRounds().toString()}
+            onChanged={(text) => setGameRounds(parseInt(text))}
+            label="Max Game Rounds"
+          />
         </div>
+
+        <p class="text-red-500 text-lg">{errorMessage()}</p>
+
+        <button
+          onclick={() => {
+            const api = new Api();
+            api.games
+              .createCreate({
+                settings: {
+                  cardPacks: selectedPacks().map((packId) => {
+                    const ret: GameLogicCardPack = { id: packId };
+                    return ret;
+                  }),
+                  gamePassword: gamePassword(),
+                  maxPlayers: maxPlayers(),
+                  maxRounds: gameRounds(),
+                  playingToPoints: playingToPoints(),
+                },
+                playerName: playerName(),
+              })
+              .then((newGame) => {
+                console.log(newGame);
+              })
+              .catch((err) => {
+                setErrorMessage(err.error.error);
+              });
+          }}
+        >
+          Create Game
+        </button>
       </div>
     </>
   );

@@ -1,15 +1,37 @@
 import { Meta } from "@storybook/react";
-import Input from "./Input";
+import Input, { InputType } from "./Input";
 
 export default {
   component: Input,
 } as Meta;
 
-export const Checked = {
+export const Text = {
   args: {
     value: "",
     onchange: console.log,
-    label: 'Game Name',
-    placeholder: 'Big coconut'
+    label: "Game Name",
+    placeholder: "Big coconut",
+    inputType: InputType.Text,
+  },
+};
+
+export const Numeric = {
+  args: {
+    value: "",
+    onchange: console.log,
+    label: "Game Name",
+    placeholder: "Big coconut",
+    inputType: InputType.PositiveNumber,
+  },
+};
+
+export const ErrorState = {
+  args: {
+    value: "",
+    onchange: console.log,
+    label: "Game Name",
+    placeholder: "Big coconut",
+    inputType: InputType.PositiveNumber,
+    isError: true
   },
 };
