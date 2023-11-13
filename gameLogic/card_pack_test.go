@@ -64,6 +64,8 @@ func TestLoadCards(t *testing.T) {
 		assert.NotEmpty(t, id, "ID should not be nil")
 		assert.NotEmpty(t, pack.Name, "Name should not be nil")
 		assert.Equal(t, id, pack.Id, "IDs should be equal")
+    assert.Equal(t, pack.WhiteCards, len(pack.CardDeck.WhiteCards), "Length of white cards should be set")
+    assert.Equal(t, pack.BlackCards, len(pack.CardDeck.BlackCards), "Length of black cards should be set")
 	}
 }
 
