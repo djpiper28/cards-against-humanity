@@ -1,6 +1,6 @@
 interface Props {
   checked: boolean;
-  onSetChecked: (checked: boolean) => boolean;
+  onSetChecked: (checked: boolean) => void;
   label: string;
 }
 
