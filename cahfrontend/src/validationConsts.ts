@@ -1,0 +1,12 @@
+//TODO: Don't hardcode this lol
+export const MinRounds = 1;
+export const MaxRounds = 100;
+export const MinPlayingToPoints = 2;
+export const MaxPlayingToPoints = 50;
+export const MaxPasswordLength = 50;
+export const MinPlayers = 3;
+export const MaxPlayers = 20;
+export const MinCardPacks = 1;
+export const HandSize = 7;
+export const MinPlayerNameLength = 3;
+export const MaxPlayerNameLength = 30;

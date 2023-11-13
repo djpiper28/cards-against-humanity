@@ -32,6 +32,6 @@ export const ErrorState = {
     label: "Game Name",
     placeholder: "Big coconut",
     inputType: InputType.PositiveNumber,
-    isError: true
+    isError: true,
   },
 };

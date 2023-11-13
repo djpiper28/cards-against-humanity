@@ -17,7 +17,9 @@ export default function Input(props: Readonly<Props>) {
     <label class="flex flex-row gap-2 items-center bg-white w-fit rounded-xl">
       <p class="p-2 md:px-5">{props.label}</p>
       <input
-        class={`rounded-xl border-2 ${props.errorState && 'border-red-600 bg-red-100'} p-1 placeholder-gray-400 font-mono h-full`}
+        class={`rounded-xl border-2 ${
+          props.errorState && "border-red-600 bg-red-100"
+        } p-1 placeholder-gray-400 font-mono h-full`}
         value={props.value}
         onChange={(e) => {
           let text = e.target.value;

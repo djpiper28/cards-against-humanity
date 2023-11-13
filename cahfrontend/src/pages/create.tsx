@@ -3,6 +3,17 @@ import { For, createSignal, onMount } from "solid-js";
 import Checkbox from "../components/inputs/Checkbox";
 import Input, { InputType } from "../components/inputs/Input";
 import { useNavigate } from "@solidjs/router";
+import {
+  MaxPasswordLength,
+  MaxPlayerNameLength,
+  MinPlayerNameLength,
+  MinPlayers,
+  MaxPlayers,
+  MinPlayingToPoints,
+  MaxPlayingToPoints,
+  MinRounds,
+  MaxRounds,
+} from "../validationConsts";
 
 interface Checked {
   checked: boolean;
@@ -92,7 +103,10 @@ export default function Create() {
             value={playerName()}
             onChanged={setPlayerName}
             label="Player Name"
-            errorState={playerName().length < 3 || playerName().length > 30}
+            errorState={
+              playerName().length < MinPlayerNameLength ||
+              playerName().length > MaxPlayerNameLength
+            }
           />
 
           <Input
@@ -101,6 +115,7 @@ export default function Create() {
             value={gamePassword()}
             onChanged={setGamePassword}
             label="Game Password"
+            errorState={gamePassword().length > MaxPasswordLength}
           />
 
           <Input
@@ -109,6 +124,7 @@ export default function Create() {
             value={maxPlayers().toString()}
             onChanged={(text) => setMaxPlayers(parseInt(text))}
             label="Max Players"
+            errorState={maxPlayers() < MinPlayers || maxPlayers() > MaxPlayers}
           />
 
           <Input
@@ -117,6 +133,10 @@ export default function Create() {
             value={playingToPoints().toString()}
             onChanged={(text) => setPlayingToPoints(parseInt(text))}
             label="Points To Play To"
+            errorState={
+              playingToPoints() < MinPlayingToPoints ||
+              playingToPoints() > MaxPlayingToPoints
+            }
           />
 
           <Input
@@ -125,6 +145,7 @@ export default function Create() {
             value={gameRounds().toString()}
             onChanged={(text) => setGameRounds(parseInt(text))}
             label="Max Game Rounds"
+            errorState={gameRounds() < MinRounds || gameRounds() > MaxRounds}
           />
         </div>
 
