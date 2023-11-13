@@ -6,8 +6,8 @@ const App: Component = () => {
   const Route = useRoutes(routes);
 
   return (
-    <div class="min-h-screen bg-gray-50">
-      <nav class="bg-gray-200 text-gray-900 px-4">
+    <div class="min-h-screen bg-gray-200">
+      <nav class="bg-gray-50 text-gray-900 px-4">
         <ul class="flex items-center">
           <li class="py-2 px-4">
             <Link href="/" class="no-underline hover:underline">
