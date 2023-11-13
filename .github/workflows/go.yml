@@ -27,7 +27,6 @@ jobs:
       - name: Install dependancies
         run: |
           go install github.com/swaggo/swag/cmd/swag@latest
-          npm i -g prettier npx
       - name: Build the package
         run: go get; make
       - name: Test the package and, generate coverage reports
