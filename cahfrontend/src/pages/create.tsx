@@ -24,7 +24,10 @@ export default function Create() {
   const [selectedPacks, setSelectedPacks] = createSignal<string[]>([]);
   return (
     <>
-      <h1>Create A Game of Cards Against Humanity</h1>
+      <h1 class="text-2xl font-bold">
+        Create A Game of Cards Against Humanity
+      </h1>
+      <h2 class="text-xl">Choose Some Card Packs</h2>
       <div class="flex flex-row flex-wrap gap-2 md:gap-1">
         <For each={packs()}>
           {(pack, index) => {
@@ -52,6 +55,18 @@ export default function Create() {
           }}
         </For>
       </div>
+
+      <p class="text-bold">
+        {`You have ${selectedPacks()
+          .map((x) => packs().find((y) => y.id === x))
+          .filter((x) => !!x)
+          .map((x) => x.whiteCards)
+          .reduce((a, b) => a + b, 0)} white cards and ${selectedPacks()
+          .map((x) => packs().find((y) => y.id === x))
+          .filter((x) => !!x)
+          .map((x) => x.blackCards)
+          .reduce((a, b) => a + b, 0)} black cards.`}
+      </p>
     </>
   );
 }
