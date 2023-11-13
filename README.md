@@ -19,15 +19,8 @@ go test ./...
 
 # Build and execute
 make
-
-# If you do not have make, you can do the steps manually
-# Generate the swagger docs
-#swag i
-## Build and execute the program
-#go build
-
-
 ./cards-against-humanity
+
 # or .\cards-against-humanity.exe if you use WinDoze
 ```
 
