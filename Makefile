@@ -1,7 +1,7 @@
 swagger:
 	swag init
 
-frontendapi: swagger:
+frontendapi: swagger
 	npx swagger-typescript-api -p ./docs/swagger.json -o ./cahfrontend/src/ -n api.ts
 
 frontend: swagger frontendapi
