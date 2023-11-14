@@ -1,10 +1,10 @@
 swagger:
-	# Generate Swagger Docs
 	swag init
-	# Generate the API types for the frontend
+
+frontendapi: swagger:
 	npx swagger-typescript-api -p ./docs/swagger.json -o ./cahfrontend/src/ -n api.ts
 
-frontend: swagger
+frontend: swagger frontendapi
 	cd ./cahfrontend && npm i && npm run build
 
 backend: swagger
