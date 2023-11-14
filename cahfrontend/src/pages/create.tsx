@@ -13,7 +13,7 @@ import {
   MaxPlayingToPoints,
   MinRounds,
   MaxRounds,
-} from "../validationConsts";
+} from "../gameLogicTypes";
 
 interface Checked {
   checked: boolean;

@@ -17,13 +17,13 @@ type Player struct {
 }
 
 const (
-	maxLength = 20
-	minLength = 3
+	MaxPlayerNameLength = 20
+	MinPlayerNameLength = 3
 )
 
 func NewPlayer(Name string) (*Player, error) {
-	if len(Name) > maxLength || len(Name) < minLength {
-		return nil, errors.New(fmt.Sprintf("Length of name must be between %d and %d (exclusive exclusive)", minLength, maxLength))
+	if len(Name) > MaxPlayerNameLength || len(Name) < MinPlayerNameLength {
+		return nil, errors.New(fmt.Sprintf("Length of name must be between %d and %d (exclusive exclusive)", MinPlayerNameLength, MaxPlayerNameLength))
 	}
 
 	return &Player{Id: uuid.New(),
