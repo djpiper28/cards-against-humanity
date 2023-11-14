@@ -27,6 +27,7 @@ jobs:
       - name: Install dependancies
         run: |
           go install github.com/swaggo/swag/cmd/swag@latest
+          go install github.com/gzuidhof/tygo@latest
       - name: Build the package
         run: make
       - name: Test the package and, generate coverage reports
