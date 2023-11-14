@@ -6,4 +6,4 @@ packages:
       null.Bool: "null | boolean"
       uuid.UUID: "string /* uuid */"
       uuid.NullUUID: "null | string /* uuid */"
-    output_path: "cahFrontend/src/rpcTypes.ts"
+    output_path: "cahfrontend/src/rpcTypes.ts"
