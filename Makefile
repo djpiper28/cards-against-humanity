@@ -7,10 +7,10 @@ build:
 	go build
 	cd ./cahfrontend && npm i && npm run build
 
-test:
+test: build:
 	go test './...'
 
-bench:
+bench: build:
 	go test '-bench=./...'
 
 fmt:
