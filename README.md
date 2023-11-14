@@ -17,7 +17,7 @@ The backend is in Go and uses Gin and Gorilla.
 make test
 
 # Build and execute
-make . -j
+make -j
 ./cards-against-humanity
 
 # or .\cards-against-humanity.exe if you use WinDoze

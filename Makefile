@@ -1,3 +1,6 @@
+all: swagger frontend backend
+	echo "Done"
+
 swagger:
 	swag init
 
@@ -9,9 +12,6 @@ frontend: swagger frontendapi
 
 backend: swagger
 	go build
-
-all: swagger frontend backend
-	echo "Done"
 
 test: all
 	go test './...'
