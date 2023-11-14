@@ -10,13 +10,13 @@ frontend: swagger
 backend: swagger
 	go build
 
-build: swagger frontend backend
+all: swagger frontend backend
 	echo "Done"
 
-test: build
+test: all
 	go test './...'
 
-bench: build
+bench: all
 	go test '-bench=./...'
 
 fmt:
