@@ -14,8 +14,7 @@ The backend is in Go and uses Gin and Gorilla.
 
 ```sh
 # Run the tests
-# or `gotestsum` if you are cool
-go test ./...
+make test
 
 # Build and execute
 make
