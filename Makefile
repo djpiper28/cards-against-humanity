@@ -1,5 +1,5 @@
 all: swagger frontend backend
-	echo "Done"
+	# Done
 
 swagger:
 	swag init
@@ -7,7 +7,10 @@ swagger:
 frontendapi: swagger
 	npx swagger-typescript-api -p ./docs/swagger.json -o ./cahfrontend/src/ -n api.ts
 
-frontend: swagger frontendapi
+frontendtypes:
+	tygo generate
+
+frontend: swagger frontendapi frontendtypes
 	cd ./cahfrontend && npm i && npm run build
 
 backend: swagger

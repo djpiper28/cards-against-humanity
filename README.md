@@ -13,21 +13,27 @@ Live on [changeme](changeme).
 The backend is in Go and uses Gin and Gorilla.
 
 ```sh
+# Build and execute
+make -j
+
+./cards-against-humanity
+# or .\cards-against-humanity.exe if you use WinDoze
+
+# Format the code 
+make fmt
+
 # Run the tests
 make test
 
-# Build and execute
-make -j
-./cards-against-humanity
-
-# or .\cards-against-humanity.exe if you use WinDoze
+# Run the benchmarks
+make bench
 ```
 
-> Setting Up Swag To Generate Swagger Docs
+> Setting Up Code Generators
 
 ```sh
 go install github.com/swaggo/swag/cmd/swag@latest
-swag i # this should now work
+go install github.com/gzuidhof/tygo@latest
 ```
 
 The server will start on `http://localhost:8080`, Prometheus metrics can be found at `/metrics` (server stats), and
@@ -35,4 +41,17 @@ game stats on `/game-metrics`. This setup is jank lol, don't question it though.
 
 ### Frontend
 
-The frontend is in TS and uses SolidJS and whatever the f&ck a Vite is. (I'm not a frontend dev, I am a free man)
+The frontend is in TS and uses SolidJS and Vite is.
+
+```sh
+cd ./cahfrontend/
+npm i 
+
+# Building
+npm run build 
+# Output in /dist
+
+# Storybook
+npm run storybook
+npm run build-storybook
+```

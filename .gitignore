@@ -25,3 +25,4 @@ cards-against-humanity
 # Auto-generated code
 docs
 cahfrontend/src/api.ts
+cahfrontend/src/rpcTypes.ts
