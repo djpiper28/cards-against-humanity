@@ -90,7 +90,7 @@ func TestGetCardPacks(t *testing.T) {
 
 	packs, err := gameLogic.GetCardPacks(ids)
 	assert.Nil(t, err, "Should not be able to find a random ID in the card packs")
-  assert.Len(t, packs, len(ids), "Should return the right amount of packs")
+	assert.Len(t, packs, len(ids), "Should return the right amount of packs")
 }
 
 func TestBlackCardLookup(t *testing.T) {
