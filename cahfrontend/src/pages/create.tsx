@@ -165,10 +165,7 @@ export default function Create() {
             api.games
               .createCreate({
                 settings: {
-                  cardPacks: selectedPacks().map((packId) => {
-                    const ret: GameLogicCardPack = { id: packId };
-                    return ret;
-                  }),
+                  cardPacks: selectedPacks(),
                   gamePassword: gamePassword(),
                   maxPlayers: maxPlayers(),
                   maxRounds: gameRounds(),
