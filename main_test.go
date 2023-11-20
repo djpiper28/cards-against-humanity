@@ -75,11 +75,20 @@ func TestGetGamesNotFullOneGame(t *testing.T) {
 
 const jsonContentType = "application/json"
 
+func defaultGameSettings() GameCreateSettings {
+	settings := gameLogic.DefaultGameSettings()
+	packs := make([]uuid.UUID, len(settings.CardPacks))
+	for i, pack := range settings.CardPacks {
+		packs[i] = pack.Id
+	}
+	return GameCreateSettings{MaxRounds: settings.MaxRounds, MaxPlayers: settings.MaxPlayers, PlayingToPoints: settings.PlayingToPoints, CardPacks: packs}
+}
+
 func TestCreateGameEndpoint(t *testing.T) {
 	name := "Dave"
-	gs := gameLogic.DefaultGameSettings()
+	gs := defaultGameSettings()
 
-	postBody, err := json.Marshal(gameCreateSettings{Settings: *gs, PlayerName: name})
+	postBody, err := json.Marshal(GameCreateRequest{Settings: gs, PlayerName: name})
 	assert.Nil(t, err, "Should be able to create json body")
 
 	reader := bytes.NewReader(postBody)
@@ -91,7 +100,7 @@ func TestCreateGameEndpoint(t *testing.T) {
 	body, err := io.ReadAll(resp.Body)
 	assert.Nil(t, err, "Should be able to read the body")
 
-	var gameIds gameCreatedResp
+	var gameIds GameCreatedResp
 	err = json.Unmarshal(body, &gameIds)
 	assert.Nil(t, err, "There should not be an error reading the game ids")
 	assert.NotEmpty(t, gameIds.GameId, "Game ID should be set")

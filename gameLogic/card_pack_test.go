@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/djpiper28/cards-against-humanity/gameLogic"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -67,6 +68,29 @@ func TestLoadCards(t *testing.T) {
 		assert.Equal(t, pack.WhiteCards, len(pack.CardDeck.WhiteCards), "Length of white cards should be set")
 		assert.Equal(t, pack.BlackCards, len(pack.CardDeck.BlackCards), "Length of black cards should be set")
 	}
+}
+
+func TestGetCardPacksFail(t *testing.T) {
+	ids := []uuid.UUID{uuid.New()}
+	_, err := gameLogic.GetCardPacks(ids)
+	assert.NotNil(t, err, "Should not be able to find a random ID in the card packs")
+}
+
+func TestGetCardPacks(t *testing.T) {
+	ids := make([]uuid.UUID, 10)
+	i := 0
+	for id, _ := range gameLogic.AllPacks {
+		ids[i] = id
+
+		i++
+		if i >= len(ids) {
+			break
+		}
+	}
+
+	packs, err := gameLogic.GetCardPacks(ids)
+	assert.Nil(t, err, "Should not be able to find a random ID in the card packs")
+  assert.Len(t, packs, len(ids), "Should return the right amount of packs")
 }
 
 func TestBlackCardLookup(t *testing.T) {

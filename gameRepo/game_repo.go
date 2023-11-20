@@ -2,6 +2,8 @@ package gameRepo
 
 import (
 	"container/list"
+	"errors"
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -66,4 +68,24 @@ func (gr *GameRepo) GetGames() []*gameLogic.Game {
 	}
 
 	return games
+}
+
+func (gr *GameRepo) JoinGame(gameId, playerId uuid.UUID) error {
+	gr.lock.RLock()
+	defer gr.lock.RUnlock()
+
+	game, found := gr.GameMap[gameId]
+	if !found {
+		msg := fmt.Sprintf("Cannot find game with id %s", gameId)
+		log.Println(msg)
+		return errors.New(msg)
+	}
+
+	_, found = game.PlayersMap[playerId]
+	if !found {
+		msg := fmt.Sprintf("Cannot find player with id %s in game with id %s", playerId, gameId)
+		log.Println(msg)
+		return errors.New(msg)
+	}
+	return nil
 }

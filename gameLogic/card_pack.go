@@ -3,6 +3,7 @@ package gameLogic
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -21,6 +22,18 @@ type CardPack struct {
 var AllPacks map[uuid.UUID]*CardPack
 var AllWhiteCards []*WhiteCard
 var AllBlackCards []*BlackCard
+
+func GetCardPacks(ids []uuid.UUID) ([]*CardPack, error) {
+	ret := make([]*CardPack, len(ids))
+	for index, id := range ids {
+		pack, found := AllPacks[id]
+		if !found {
+			return nil, errors.New(fmt.Sprintf("Cannot find card pack with ID %s", id))
+		}
+		ret[index] = pack
+	}
+	return ret, nil
+}
 
 func GetWhiteCard(id int) (*WhiteCard, error) {
 	if id < 0 || id >= len(AllWhiteCards) {
