@@ -16,7 +16,7 @@ The backend is in Go and uses Gin and Gorilla.
 # Build and execute
 make -j
 
-./cards-against-humanity
+./cards-against-humanity    
 # or .\cards-against-humanity.exe if you use WinDoze
 
 # Format the code 
@@ -37,7 +37,8 @@ go install github.com/gzuidhof/tygo@latest
 ```
 
 The server will start on `http://localhost:8080`, Prometheus metrics can be found at `/metrics` (server stats), and
-game stats on `/game-metrics`. This setup is jank lol, don't question it though.
+game stats on `/game-metrics`. This setup is jank lol, don't question it though. The swagger docs can be found on 
+`http://localhost:8080/swagger/index.html`.
 
 ### Frontend
 

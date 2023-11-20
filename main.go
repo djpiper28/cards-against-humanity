@@ -49,17 +49,14 @@ func Start() {
 //	@title			Cards Against Humanity API
 //	@version		1.0
 //	@description	A FOSS Cards Against Humanity server written in Go
-
 //	@contact.name	Danny Piper (djpiper28)
 //	@contact.url	https://github.com/djpiper28/cards-against-humanity
 //	@contact.email	djpiper28@gmail.com
-
 //	@license.name	GNU GPL 3
 //	@license.url	https://github.com/djpiper28/cards-against-humanity
-
-// @schemes http https
-// @host		localhost:8080
-// @BasePath	/
+//	@schemes		http https
+//	@host			localhost:8080
+//	@BasePath		/
 func main() {
 	Start()
 }
