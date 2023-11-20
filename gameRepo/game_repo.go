@@ -38,7 +38,6 @@ func (gr *GameRepo) CreateGame(gameSettings *gameLogic.GameSettings, playerName 
 	gr.lock.Lock()
 	defer gr.lock.Unlock()
 
-	log.Println("Creating game for", playerName)
 	game, err := gameLogic.NewGame(gameSettings, playerName)
 	if err != nil {
 		log.Println("Cannot create game", err)
