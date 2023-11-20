@@ -1,25 +1,42 @@
 all: swagger frontend backend
-	# Done
+	echo "Building Done"
 
 swagger:
+	go install github.com/swaggo/swag/cmd/swag@latest
 	swag init
 
-frontendapi: swagger
+frontend-install:
+	cd ./cahfrontend/ && npm i
+
+frontend-api: swagger
 	npx swagger-typescript-api -p ./docs/swagger.json -o ./cahfrontend/src/ -n api.ts
 
-frontendtypes:
+frontend-types:
+	go install github.com/gzuidhof/tygo@latest
 	tygo generate
 
-frontend: swagger frontendapi frontendtypes
-	cd ./cahfrontend && npm i && npm run build
+frontend-storybook: frontend-install
+	cd ./cahfrontend && npm run build-storybook
+
+frontend-main: frontend-install swagger frontend-api frontend-types
+	cd ./cahfrontend && npm run build
+
+frontend: frontend-main frontend-storybook
+	echo "Building Frontend Done"
 
 backend: swagger
 	go build
 
-test: all
+test-backend: backend
 	go test './...'
 
-bench: all
+test-frontend: frontend
+	cd ./cahfrontend && npm run test
+
+test: test-backend test-frontend
+	echo "Testing Done"
+
+bench: backend
 	go test '-bench=./...'
 
 fmt:
