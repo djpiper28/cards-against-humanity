@@ -39,7 +39,12 @@ test: test-backend test-frontend
 bench: backend
 	go test '-bench=./...'
 
-fmt:
-	gofmt -l -w .
+backend-fmt:
 	swag fmt
+	gofmt -l -w .
+
+frontend-fmt:
 	cd ./cahfrontend/ && prettier -w .
+
+fmt: backend-fmt frontend-fmt
+	echo "Formatting Done"
