@@ -111,6 +111,7 @@ export default function Create() {
             value={playerName()}
             onChanged={setPlayerName}
             label="Player Name"
+            autocomplete="name"
             errorState={
               playerName().length < MinPlayerNameLength ||
               playerName().length > MaxPlayerNameLength

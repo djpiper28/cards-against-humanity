@@ -1,22 +1,18 @@
 import { lazy } from "solid-js";
 import type { RouteDefinition } from "@solidjs/router";
 
-import Home from "./pages/home";
-import About from "./pages/about";
-import Create from "./pages/create";
-
 export const routes: RouteDefinition[] = [
   {
     path: "/",
-    component: Home,
+    component: lazy(() => import("./pages/home")),
   },
   {
     path: "/create",
-    component: Create,
+    component: lazy(() => import("./pages/create")),
   },
   {
     path: "/about",
-    component: About,
+    component: lazy(() => import("./pages/about")),
   },
   {
     path: "**",

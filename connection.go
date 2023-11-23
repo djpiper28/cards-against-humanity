@@ -34,7 +34,7 @@ type GameMessage struct {
 }
 
 type WsConnection struct {
-	Conn         *websocket.Conn
+	Conn         NetworkConnection
 	PlayerId     uuid.UUID
 	GameID       uuid.UUID
 	JoinTime     time.Time
@@ -45,7 +45,7 @@ type WsConnection struct {
 }
 
 func NewConnection(conn *websocket.Conn, gameId, playerId uuid.UUID) *WsConnection {
-	c := &WsConnection{Conn: conn,
+	c := &WsConnection{Conn: &WebsocketConnection{Conn: conn},
 		PlayerId:     playerId,
 		GameID:       gameId,
 		JoinTime:     time.Now(),
@@ -67,7 +67,7 @@ func (c *WsConnection) Process() {
 			case <-c.shutdown:
 				return
 			case msg := <-c.WsBroadcast:
-				err := c.Conn.WriteMessage(websocket.TextMessage, []byte(msg))
+				err := c.Conn.Send([]byte(msg))
 				if err != nil {
 					log.Printf("Player %s had a network error %s", c.PlayerId, err)
 					globalConnectionManager.Close(c.GameID, c.PlayerId)
@@ -82,16 +82,14 @@ func (c *WsConnection) Process() {
 		case <-c.shutdown:
 			return
 		default:
-			msgType, msg, err := c.Conn.ReadMessage()
+			msg, err := c.Conn.Receive()
 			if err != nil {
 				log.Println(err)
 				globalConnectionManager.Close(c.GameID, c.PlayerId)
 				return
 			}
 
-			if msgType == websocket.TextMessage {
-				c.WsRecieve <- GameMessage{Message: string(msg), GameId: c.GameID, PlayerId: c.PlayerId}
-			}
+			c.WsRecieve <- GameMessage{Message: string(msg), GameId: c.GameID, PlayerId: c.PlayerId}
 		}
 	}
 }

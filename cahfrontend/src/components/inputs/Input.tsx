@@ -10,6 +10,7 @@ interface Props {
   placeHolder?: string;
   inputType: InputType;
   errorState?: boolean;
+  autocomplete?: string;
 }
 
 export default function Input(props: Readonly<Props>) {
@@ -30,6 +31,7 @@ export default function Input(props: Readonly<Props>) {
         }}
         placeholder={props.placeHolder ?? ""}
         type={props.inputType === InputType.Text ? "text" : "number"}
+        autocomplete={props.autocomplete ?? "off"}
       />
     </label>
   );
