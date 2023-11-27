@@ -84,7 +84,7 @@ type GlobalConnectionManager struct {
 	lock              sync.Mutex
 }
 
-func InitGlobalConnectionManager() {
+func NewGlobalConnectionManager() {
 	globalConnectionManager = GlobalConnectionManager{GameConnectionMap: make(map[uuid.UUID]*GameConnection)}
 }
 
