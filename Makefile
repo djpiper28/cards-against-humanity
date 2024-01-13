@@ -31,7 +31,7 @@ backend: swagger
 	cd ./backend/ && go build
 
 # Tests
-test-frontend: frontend-main 
+test-frontend: frontend-types
 	cd ./cahfrontend && pnpm run test
 
 test-backend: backend
