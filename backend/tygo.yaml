@@ -6,7 +6,7 @@ packages:
       null.Bool: "null | boolean"
       uuid.UUID: "string /* uuid */"
       uuid.NullUUID: "null | string /* uuid */"
-    output_path: "cahfrontend/src/rpcTypes.ts"
+    output_path: "../cahfrontend/src/rpcTypes.ts"
   - path: "github.com/djpiper28/cards-against-humanity/backend/gameLogic"
     type_mappings:
       time.Time: "string /* RFC3339 */"
@@ -14,4 +14,4 @@ packages:
       null.Bool: "null | boolean"
       uuid.UUID: "string /* uuid */"
       uuid.NullUUID: "null | string /* uuid */"
-    output_path: "cahfrontend/src/gameLogicTypes.ts"
+    output_path: "../cahfrontend/src/gameLogicTypes.ts"
