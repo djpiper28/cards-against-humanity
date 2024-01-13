@@ -1,4 +1,4 @@
-module github.com/djpiper28/cards-against-humanity
+module github.com/djpiper28/cards-against-humanity/backend
 
 go 1.21
 
