@@ -1,10 +1,12 @@
 all: swagger frontend backend
 	echo "Building Done"
 
+# Swagger defs
 swagger:
 	go install github.com/swaggo/swag/cmd/swag@latest
 	cd backend && swag init
 
+# Frontend
 frontend-install:
 	cd ./cahfrontend/ && pnpm i
 
@@ -24,9 +26,11 @@ frontend-main: frontend-install swagger frontend-api frontend-types
 frontend: frontend-main frontend-storybook
 	echo "Building Frontend Done"
 
+# Backend
 backend: swagger
 	cd ./backend/ && go build
 
+# Tests
 test-frontend: frontend-main 
 	cd ./cahfrontend && pnpm run test
 
@@ -42,6 +46,7 @@ test: test-backend test-frontend test-e2e
 bench: backend
 	cd ./backend/ && go test '-bench=./...'
 
+# Formatters
 e2e-fmt:
 	cd ./e2e/ && gofmt -l -w .
 
