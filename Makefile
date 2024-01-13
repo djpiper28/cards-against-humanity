@@ -33,11 +33,17 @@ backend: swagger
 test-backend: backend
 	cd ./backend/ && go test './...'
 
-test: test-backend test-frontend
+test-e2e: frontend backend
+	cd ./e2e/ && go test './...'
+
+test: test-backend test-frontend test-e2e
 	echo "Testing Done"
 
 bench: backend
 	cd ./backend/ && go test '-bench=./...'
+
+e2e-fmt:
+	cd ./e2e/ && gofmt -l -w .
 
 backend-fmt:
 	cd ./backend/ && swag fmt && gofmt -l -w .
@@ -45,5 +51,5 @@ backend-fmt:
 frontend-fmt:
 	cd ./cahfrontend/ && prettier -w .
 
-fmt: backend-fmt frontend-fmt
+fmt: backend-fmt frontend-fmt e2e-fmt
 	echo "Formatting Done"
