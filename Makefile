@@ -24,11 +24,11 @@ frontend-main: frontend-install swagger frontend-api frontend-types
 frontend: frontend-main frontend-storybook
 	echo "Building Frontend Done"
 
-test-frontend: frontend
-	cd ./cahfrontend && pnpm run test
-
 backend: swagger
 	cd ./backend/ && go build
+
+test-frontend: frontend-main 
+	cd ./cahfrontend && pnpm run test
 
 test-backend: backend
 	cd ./backend/ && go test './...'
