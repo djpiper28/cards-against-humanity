@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/djpiper28/cards-against-humanity/gameLogic"
+	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )

@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	gpmiddleware "github.com/carousell/gin-prometheus-middleware"
-	docs "github.com/djpiper28/cards-against-humanity/docs"
+	docs "github.com/djpiper28/cards-against-humanity/backend/docs"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"

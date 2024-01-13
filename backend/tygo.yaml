@@ -1,5 +1,5 @@
 packages:
-  - path: "github.com/djpiper28/cards-against-humanity"
+  - path: "github.com/djpiper28/cards-against-humanity/backend"
     type_mappings:
       time.Time: "string /* RFC3339 */"
       null.String: "null | string"
@@ -7,7 +7,7 @@ packages:
       uuid.UUID: "string /* uuid */"
       uuid.NullUUID: "null | string /* uuid */"
     output_path: "cahfrontend/src/rpcTypes.ts"
-  - path: "github.com/djpiper28/cards-against-humanity/gameLogic"
+  - path: "github.com/djpiper28/cards-against-humanity/backend/gameLogic"
     type_mappings:
       time.Time: "string /* RFC3339 */"
       null.String: "null | string"

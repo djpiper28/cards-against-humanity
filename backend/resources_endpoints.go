@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/djpiper28/cards-against-humanity/gameLogic"
+	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )

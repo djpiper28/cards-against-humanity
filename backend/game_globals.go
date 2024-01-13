@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/djpiper28/cards-against-humanity/gameLogic"
-	"github.com/djpiper28/cards-against-humanity/gameRepo"
+	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
+	"github.com/djpiper28/cards-against-humanity/backend/gameRepo"
 	"log"
 )
 

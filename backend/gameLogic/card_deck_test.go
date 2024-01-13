@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/djpiper28/cards-against-humanity/gameLogic"
+	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 )
 
 func TestNewCardDeckNilWhiteCards(t *testing.T) {
