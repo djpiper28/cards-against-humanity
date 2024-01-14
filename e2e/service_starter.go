@@ -13,9 +13,10 @@ func StartService() {
 		return
 	}
 
-	err := process.Run()
+	err := process.Start()
 	if err != nil {
-		log.Fatalln("Cannot start backend")
+		log.Fatalf("Cannot start backend: %s", err)
 	}
+	log.Println("Started backend")
 	started = true
 }
