@@ -1,4 +1,4 @@
-all: swagger frontend backend
+all: frontend backend
 	echo "Building Done"
 
 # Swagger defs

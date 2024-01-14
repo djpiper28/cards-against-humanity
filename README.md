@@ -8,6 +8,11 @@ Live on [changeme](changeme).
 
 ## Dev Stuff
 
+### Deps
+ - pnpm
+ - Go
+ - GNU Make
+
 ### Backend
 
 The backend is in Go and uses Gin and Gorilla.
@@ -16,8 +21,8 @@ The backend is in Go and uses Gin and Gorilla.
 # Build and execute
 make -j
 
-./cards-against-humanity    
-# or .\cards-against-humanity.exe if you use WinDoze
+./backend
+# or .\backend.exe if you use WinDoze
 
 # Format the code 
 make fmt
@@ -42,17 +47,5 @@ game stats on `/game-metrics`. This setup is jank lol, don't question it though.
 
 ### Frontend
 
-The frontend is in TS and uses SolidJS and Vite is.
-
-```sh
-cd ./cahfrontend/
-npm i 
-
-# Building
-npm run build 
-# Output in /dist
-
-# Storybook
-npm run storybook
-npm run build-storybook
-```
+The frontend is in TS and uses SolidJS, Vite, Vitest, and Storybook. You should use the 
+Makefile for building `make -j`, and `pnpm dev` for a dev server.
