@@ -8,14 +8,14 @@ Live on [changeme](changeme).
 
 ## Dev Stuff
 
-### Deps
+### Building
+
+#### Deps
  - pnpm
  - Go
  - GNU Make
 
-### Backend
-
-The backend is in Go and uses Gin and Gorilla.
+To build/test all parts of the system use the below commands.
 
 ```sh
 # Build and execute
@@ -25,21 +25,18 @@ make -j
 # or .\backend.exe if you use WinDoze
 
 # Format the code 
-make fmt
+make fmt -j 
 
 # Run the tests
-make test
+make test -j
 
 # Run the benchmarks
-make bench
+make bench -j
 ```
 
-> Setting Up Code Generators
+### Backend
 
-```sh
-go install github.com/swaggo/swag/cmd/swag@latest
-go install github.com/gzuidhof/tygo@latest
-```
+The backend is in Go and uses Gin and Gorilla.
 
 The server will start on `http://localhost:8080`, Prometheus metrics can be found at `/metrics` (server stats), and
 game stats on `/game-metrics`. This setup is jank lol, don't question it though. The swagger docs can be found on 
@@ -49,3 +46,6 @@ game stats on `/game-metrics`. This setup is jank lol, don't question it though.
 
 The frontend is in TS and uses SolidJS, Vite, Vitest, and Storybook. You should use the 
 Makefile for building `make -j`, and `pnpm dev` for a dev server.
+
+The server will start on `http://localhost:3000`, currently the backend is set to 
+`http://localhost:8080`
