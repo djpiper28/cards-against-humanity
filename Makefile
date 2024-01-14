@@ -10,20 +10,23 @@ swagger:
 frontend-install:
 	cd ./cahfrontend/ && pnpm i
 
-frontend-api: swagger
+frontend-api: swagger 
 	npx swagger-typescript-api -p ./backend/docs/swagger.json -o ./cahfrontend/src/ -n api.ts
 
-frontend-types:
+frontend-tygo:
 	go install github.com/gzuidhof/tygo@latest
 	cd backend && tygo generate
+
+frontend-types: frontend-tygo swagger
+	echo "Generated types"
 
 frontend-storybook: frontend-install
 	cd ./cahfrontend && pnpm run build-storybook
 
-frontend-main: frontend-install swagger frontend-api frontend-types
+frontend-build: frontend-install swagger frontend-api frontend-types
 	cd ./cahfrontend && pnpm run build
 
-frontend: frontend-main frontend-storybook
+frontend: frontend-build frontend-storybook
 	echo "Building Frontend Done"
 
 # Backend
