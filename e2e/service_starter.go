@@ -9,49 +9,82 @@ import (
 
 var started = false
 var backendProcess *exec.Cmd = exec.Command("../backend/backend")
-var frontendProcess *exec.Cmd = exec.Command("../cahfrontend/e2e-start.sh")
+var frontendProcess *exec.Cmd = exec.Command("./e2e-start.sh")
+
+const frontendUrl = "http://localhost:3000/"
+
+func testFrontend() error {
+	_, err := http.Get(frontendUrl)
+	return err
+}
+
+func waitForFrontend() {
+	const maxTries = 10
+	for tries := 0; tries < maxTries; tries++ {
+		err := testFrontend()
+		if err != nil {
+			log.Printf("frontend poll %d/%d failed: %s", tries+1, maxTries, err)
+		} else {
+			break
+		}
+
+		time.Sleep(time.Second)
+	}
+}
+
+const backendUrl = "http://localhost:8080/"
+
+func testBackend() error {
+	_, err := http.Get(backendUrl)
+	return err
+}
+
+func waitForBackend() {
+	const maxTries = 10
+	for tries := 0; tries < maxTries; tries++ {
+		err := testBackend()
+		if err != nil {
+			log.Printf("Backend poll %d/%d failed: %s", tries+1, maxTries, err)
+		} else {
+			break
+		}
+
+		time.Sleep(time.Second)
+	}
+}
+
+func startFrontend() {
+	log.Println("Starting frontend")
+	err := frontendProcess.Start()
+	if err != nil {
+		log.Fatalf("Cannot start frontend: %s", err)
+	}
+	log.Println("Started frontend")
+}
+
+func startBackend() {
+	log.Println("Starting backend")
+	err := backendProcess.Start()
+	if err != nil {
+		log.Fatalf("Cannot start backend: %s", err)
+	}
+	log.Println("Started backend")
+}
 
 func StartService() {
 	if started {
 		return
 	}
 
-  log.Println("Starting backend")
-	err := backendProcess.Start()
-	if err != nil {
-		log.Fatalf("Cannot start backend: %s", err)
-	}
-	log.Println("Started backend")
-
-  log.Println("Starting frontend")
-	err = frontendProcess.Start()
-	if err != nil {
-		log.Fatalf("Cannot start frontend: %s", err)
-	}
-	log.Println("Started frontend")
+	startBackend()
+	startFrontend()
 
 	started = true
-}
 
-
-const frontendUrl = "http://localhost:3000/"
-func testFrontend() error {
-  _, err := http.Get(frontendUrl)
-  return err
+	waitForBackend()
+	waitForFrontend()
 }
 
 func GetBasePage() string {
-  const maxTries = 10
-  for tries := 0; tries < maxTries; tries++ {
-    err := testFrontend()
-    if err != nil {
-      log.Printf("Try %d/%d failed: %s", tries + 1, maxTries, err)
-    } else {
-      break
-    }
-
-    time.Sleep(time.Second)
-  }
-
-  return frontendUrl
+	return frontendUrl
 }

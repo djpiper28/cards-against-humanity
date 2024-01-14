@@ -5,5 +5,6 @@ import (
 )
 
 func GetBrowser() *rod.Browser {
+	StartService()
 	return rod.New().MustConnect()
 }
