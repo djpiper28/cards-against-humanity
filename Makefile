@@ -23,11 +23,8 @@ frontend-types: frontend-tygo frontend-api
 frontend-storybook: frontend-install
 	cd ./cahfrontend && pnpm run build-storybook
 
-frontend-build: frontend-install frontend-types
+frontend: frontend-install frontend-types
 	cd ./cahfrontend && pnpm run build
-
-frontend: frontend-build
-	echo "Building Frontend Done"
 
 # Backend
 backend: swagger
