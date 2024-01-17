@@ -30,6 +30,7 @@ func waitForFrontend() {
 
 		time.Sleep(time.Second)
 	}
+	log.Println("Frontend responded to poll")
 }
 
 const backendUrl = "http://localhost:8080/"
@@ -51,6 +52,7 @@ func waitForBackend() {
 
 		time.Sleep(time.Second)
 	}
+	log.Println("Backend responded to poll")
 }
 
 func startFrontend() {

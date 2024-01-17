@@ -38,10 +38,10 @@ test-frontend: frontend-types
 	cd ./cahfrontend && pnpm run test
 
 test-backend: backend
-	cd ./backend/ && go test './...'
+	cd ./backend/ && go test -v './...'
 
 test-e2e: frontend backend
-	cd ./e2e/ && go test './...'
+	cd ./e2e/ && go test -v './...'
 
 test: test-backend test-frontend test-e2e
 	echo "Testing Done"
