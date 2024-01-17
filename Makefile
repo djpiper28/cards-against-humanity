@@ -17,16 +17,16 @@ frontend-tygo:
 	go install github.com/gzuidhof/tygo@latest
 	cd backend && tygo generate
 
-frontend-types: frontend-tygo swagger
+frontend-types: frontend-tygo frontend-api 
 	echo "Generated types"
 
 frontend-storybook: frontend-install
 	cd ./cahfrontend && pnpm run build-storybook
 
-frontend-build: frontend-install swagger frontend-api frontend-types
+frontend-build: frontend-install frontend-types
 	cd ./cahfrontend && pnpm run build
 
-frontend: frontend-build frontend-storybook
+frontend: frontend-build
 	echo "Building Frontend Done"
 
 # Backend
@@ -43,7 +43,7 @@ test-backend: backend
 test-e2e: frontend backend
 	cd ./e2e/ && go test -v './...'
 
-test: test-backend test-frontend test-e2e
+test: test-backend test-frontend test-e2e frontend-storybook
 	echo "Testing Done"
 
 bench: backend
