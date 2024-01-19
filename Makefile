@@ -1,3 +1,4 @@
+.PHONY: all
 all: frontend backend
 	echo "Building Done"
 
@@ -23,10 +24,12 @@ frontend-types: frontend-tygo frontend-api
 frontend-storybook: frontend-install
 	cd ./cahfrontend && pnpm run build-storybook
 
+.PHONY: frontend
 frontend: frontend-install frontend-types
 	cd ./cahfrontend && pnpm run build
 
 # Backend
+.PHONY: backend
 backend: swagger
 	cd ./backend/ && go build
 
@@ -39,12 +42,14 @@ GO_TEST_ARGS=-v -benchmem -parallel 16 ./... -covermode=atomic -coverprofile=cov
 test-backend: backend
 	cd ./backend/ && go test './...' ${GO_TEST_ARGS}
 
-test-e2e: frontend backend
+test-e2e: frontend test-backend
 	cd ./e2e/ && go test './...' ${GO_TEST_ARGS}
 
+.PHONY: test
 test: test-backend test-frontend test-e2e frontend-storybook
 	echo "Testing Done"
 
+.PHONY: bench
 bench: backend
 	cd ./backend/ && go test '-bench=./...'
 
@@ -58,5 +63,6 @@ backend-fmt:
 frontend-fmt:
 	cd ./cahfrontend/ && prettier -w .
 
+.PHONY: fmt
 fmt: backend-fmt frontend-fmt e2e-fmt
 	echo "Formatting Done"
