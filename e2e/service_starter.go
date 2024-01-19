@@ -4,9 +4,11 @@ import (
 	"log"
 	"net/http"
 	"os/exec"
+	"sync"
 	"time"
 )
 
+var lock sync.Mutex
 var started = false
 var backendProcess *exec.Cmd = exec.Command("../backend/backend")
 var frontendProcess *exec.Cmd = exec.Command("./e2e-start.sh")
@@ -74,6 +76,8 @@ func startBackend() {
 }
 
 func StartService() {
+	lock.Lock()
+	defer lock.Unlock()
 	if started {
 		return
 	}

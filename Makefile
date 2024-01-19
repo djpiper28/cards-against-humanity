@@ -33,12 +33,14 @@ backend: swagger
 # Tests
 test-frontend: frontend-types
 	cd ./cahfrontend && pnpm run test
+	
+GO_TEST_ARGS=-v -benchmem -parallel 16 ./... -covermode=atomic -coverprofile=coverage.out
 
 test-backend: backend
-	cd ./backend/ && go test -v './...'
+	cd ./backend/ && go test './...' ${GO_TEST_ARGS}
 
 test-e2e: frontend backend
-	cd ./e2e/ && go test -v './...'
+	cd ./e2e/ && go test './...' ${GO_TEST_ARGS}
 
 test: test-backend test-frontend test-e2e frontend-storybook
 	echo "Testing Done"

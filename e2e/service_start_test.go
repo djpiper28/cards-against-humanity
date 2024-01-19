@@ -5,5 +5,6 @@ import (
 )
 
 func TestServiceStartup(t *testing.T) {
+	t.Parallel()
 	StartService()
 }

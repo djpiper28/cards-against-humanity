@@ -7,12 +7,14 @@ import (
 )
 
 func TestHomePageRender(t *testing.T) {
+	t.Parallel()
 	page := NewHomePage(GetBrowser())
 	assert.NotNil(t, page, "Page should render and not be nil")
 	page.Page.MustScreenshotFullPage("../wiki/assets/home.png")
 }
 
 func TestClickCreateAGame(t *testing.T) {
+	t.Parallel()
 	page := NewHomePage(GetBrowser())
 	createAGameButton := page.GetCreateGameButton()
 	assert.NotNil(t, createAGameButton, "Should find a create a game button")
