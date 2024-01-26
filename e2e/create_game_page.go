@@ -46,9 +46,9 @@ func (c *CreateGamePage) MaxGameRounds() *rod.Element {
 
 // Inserts the default valid settings into the form
 func (c *CreateGamePage) InsertDefaultValidSettings() {
-	c.PlayerName().Input("Steve")
-	c.GamePasssowrd().Input("poop")
-	c.MaxPlayers().Input("4")
-	c.PointsToPlayTo().Input("4")
-	c.MaxGameRounds().Input("20")
+	c.PlayerName().MustInput("Steve")
+	c.GamePasssowrd().MustInput("poop")
+	c.MaxPlayers().MustInput("4")
+	c.PointsToPlayTo().MustInput("4")
+	c.MaxGameRounds().MustInput("20")
 }
