@@ -31,7 +31,7 @@ export default function Input(props: Readonly<Props>) {
           props.onChanged(text);
         }}
         placeholder={props.placeHolder ?? ""}
-        type={props.inputType === InputType.Text ? "text" : "number"}
+        type={props.inputType === InputType.Text ? "text" : "tel"}
         autocomplete={props.autocomplete ?? "off"}
       />
     </label>
