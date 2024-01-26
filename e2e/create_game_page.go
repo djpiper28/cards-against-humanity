@@ -15,3 +15,40 @@ func NewCreatePagePage(b *rod.Browser) CreateGamePage {
 	log.Printf("Create Game Page page: %s", url)
 	return CreateGamePage{Page: b.MustPage(url).MustWaitStable()}
 }
+
+const (
+	createGameInputPlayerName     = "/Player Name/i"
+	createGameInputGamePassword   = "/Game Password/i"
+	createGameInputMaxPlayers     = "/Max Players/i"
+	createGameInputPointsToPlayTo = "/Points To Play To/i"
+	createGameInputMaxGameRounds  = "/Max Game Rounds/i"
+)
+
+func (c *CreateGamePage) PlayerName() *rod.Element {
+	return GetInputByLabel(c.Page, createGameInputPlayerName)
+}
+
+func (c *CreateGamePage) GamePasssowrd() *rod.Element {
+	return GetInputByLabel(c.Page, createGameInputGamePassword)
+}
+
+func (c *CreateGamePage) MaxPlayers() *rod.Element {
+	return GetInputByLabel(c.Page, createGameInputMaxPlayers)
+}
+
+func (c *CreateGamePage) PointsToPlayTo() *rod.Element {
+	return GetInputByLabel(c.Page, createGameInputPointsToPlayTo)
+}
+
+func (c *CreateGamePage) MaxGameRounds() *rod.Element {
+	return GetInputByLabel(c.Page, createGameInputMaxGameRounds)
+}
+
+// Inserts the default valid settings into the form
+func (c *CreateGamePage) InsertDefaultValidSettings() {
+	c.PlayerName().Input("Steve")
+	c.GamePasssowrd().Input("poop")
+	c.MaxPlayers().Input("4")
+	c.PointsToPlayTo().Input("4")
+	c.MaxGameRounds().Input("20")
+}
