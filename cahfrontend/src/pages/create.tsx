@@ -14,6 +14,8 @@ import {
   MinRounds,
   MaxRounds,
 } from "../gameLogicTypes";
+import { gameIdParam, playerIdCookie } from "../gameState/gameState";
+import { cookieStorage } from "@solid-primitives/storage";
 
 interface Checked {
   checked: boolean;
@@ -83,7 +85,7 @@ export default function Create() {
                     newPacks[index()].checked = !pack.checked;
                     setPacks(newPacks);
                   }}
-                  secondary={/^CAH:.*$/i.test(pack.name ?? '')}
+                  secondary={/^CAH:.*$/i.test(pack.name ?? "")}
                 />
               );
             }}
@@ -176,7 +178,13 @@ export default function Create() {
                 playerName: playerName(),
               })
               .then((newGame) => {
-                console.log(newGame);
+                console.log("Creating game for ", JSON.stringify(newGame.data));
+                cookieStorage.setItem(playerIdCookie, newGame.data.playerId);
+                navigate(
+                  `/join?${gameIdParam}=${encodeURIComponent(
+                    newGame.data.gameId,
+                  )}`,
+                );
               })
               .catch((err) => {
                 setErrorMessage(err.error.error);
