@@ -38,6 +38,7 @@
     "@solidjs/router": "^0.8.4",
     "font-awesome": "^4.7.0",
     "react": "^18.2.0",
-    "solid-js": "^1.8.12"
+    "solid-js": "^1.8.12",
+    "uuid": "^9.0.1"
   }
 }

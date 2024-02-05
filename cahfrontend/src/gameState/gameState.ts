@@ -15,6 +15,13 @@ class GameState {
     this.playerId = playerId;
     this.setup = true;
   }
+
+  public validate(): boolean {
+    if (!this.setup) {
+      return false;
+    }
+    return true;
+  }
 }
 
 export const gameState: GameState = new GameState();
