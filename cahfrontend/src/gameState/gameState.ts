@@ -7,9 +7,9 @@ class GameState {
   constructor() {}
   private gameId: string = "";
   private playerId: string = "";
-  private gameSettings: GameSettings;
-
+  private gameSettings?: GameSettings = undefined;
   private setup: boolean = false;
+
   public setupState(gameId: string, playerId: string) {
     this.gameId = gameId;
     this.playerId = playerId;
@@ -17,9 +17,10 @@ class GameState {
   }
 
   public validate(): boolean {
-    if (!this.setup) {
-      return false;
-    }
+    if (!this.setup) return false;
+    if (!this.gameId) return false;
+    if (!this.playerId) return false;
+    // if (!this.gameSettings) return false;
     return true;
   }
 }
