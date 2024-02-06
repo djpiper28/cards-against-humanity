@@ -18,9 +18,11 @@ describe("WebSocketClient tests", () => {
       port: port,
     });
     wss.on("connection", (ws: WebSocket) => {
-      ws.on("message", (msg: Buffer) =>
-        serverReceivedMessages.push(msg.toString()),
-      );
+      ws.on("message", (msg: Buffer) => {
+        console.error("A MESSAGE 1!!1", msg.toString());
+        serverReceivedMessages.push(msg.toString());
+        console.error(serverReceivedMessages);
+      });
       ws.on("error", console.error);
       ws.send(onConnectMessage);
     });
@@ -35,6 +37,7 @@ describe("WebSocketClient tests", () => {
     const wsClient = toWebSocketClient(ws, {
       onConnect: () => {
         onConnectCalled = true;
+        wsClient.sendMessage(msg);
       },
       onDisconnect: () => {
         onDisconnectCalled = true;
@@ -45,7 +48,6 @@ describe("WebSocketClient tests", () => {
     });
 
     const msg = `${v4()} test message from client`;
-    wsClient.sendMessage(msg);
 
     await delay(100);
     expect(onConnectCalled).toBe(true);

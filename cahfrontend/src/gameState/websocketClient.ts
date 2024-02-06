@@ -16,7 +16,12 @@ export function toWebSocketClient(
   ws: WebSocket,
   callbacks: WebSocketClientCallbacks,
 ): WebSocketClient {
-  const ret: WebSocketClient = { sendMessage: ws.send, ...callbacks };
+  const ret: WebSocketClient = {
+    sendMessage: (msg: string) => {
+      ws.send(msg, console.error);
+    },
+    ...callbacks,
+  };
 
   ws.on("close", () => {
     ret.onDisconnect();
