@@ -1,15 +1,15 @@
 import { useNavigate } from "@solidjs/router";
 import Card from "../components/gameItems/Card";
 import { For, createSignal, onMount } from "solid-js";
-import { Api, GameLogicGameInfo } from "../api";
+import { GameLogicGameInfo } from "../api";
+import { apiClient } from "../apiClient";
 
 export default function Home() {
   const navigate = useNavigate();
   const [currentGames, setCurrentGames] = createSignal<GameLogicGameInfo[]>([]);
 
   onMount(async () => {
-    const api = new Api();
-    const resp = await api.games.notFullList();
+    const resp = await apiClient.games.notFullList();
     setCurrentGames(
       resp.data.slice(0, 7).sort((a, b) => {
         if (a.hasPassword) {

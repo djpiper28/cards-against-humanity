@@ -1,4 +1,4 @@
-import { Api, GameLogicCardPack } from "../api";
+import { GameLogicCardPack } from "../api";
 import { For, createSignal, onMount } from "solid-js";
 import Checkbox from "../components/inputs/Checkbox";
 import Input, { InputType } from "../components/inputs/Input";
@@ -16,6 +16,7 @@ import {
 } from "../gameLogicTypes";
 import { gameIdParam, playerIdCookie } from "../gameState/gameState";
 import { cookieStorage } from "@solid-primitives/storage";
+import { apiClient } from "../apiClient";
 
 interface Checked {
   checked: boolean;
@@ -27,8 +28,7 @@ export default function Create() {
   const navigate = useNavigate();
   const [packs, setPacks] = createSignal<CardPack[]>([]);
   onMount(async () => {
-    const api = new Api();
-    const packs = await api.res.packsList();
+    const packs = await apiClient.res.packsList();
     const cardPacksList: CardPack[] = [];
     const packData = packs.data;
     for (let cardId in packData) {
@@ -165,8 +165,7 @@ export default function Create() {
 
         <button
           onclick={() => {
-            const api = new Api();
-            api.games
+            apiClient.games
               .createCreate({
                 settings: {
                   cardPacks: selectedPacks(),
