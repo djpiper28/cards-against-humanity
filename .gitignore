@@ -30,3 +30,5 @@ cahfrontend/src/rpcTypes.ts
 cahfrontend/src/gameLogicTypes.ts
 
 backend/backend
+
+.DS_Store
