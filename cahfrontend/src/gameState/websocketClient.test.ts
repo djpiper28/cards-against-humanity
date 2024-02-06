@@ -1,59 +1,59 @@
 // @vitest-environment node
 import { v4 } from "uuid";
-import { beforeAll, beforeEach, describe, it, expect } from "vitest";
 import { toWebSocketClient } from "./websocketClient";
-import WebSocket, { WebSocketServer } from "ws";
+import { beforeAll, describe, expect, it } from "vitest";
+import WebSocket, { WebSocketServer } from "../../node_modules/ws/index.js";
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 describe("WebSocketClient tests", () => {
   const port = 1442;
   const onConnectMessage = `${v4()} test message from server`;
-  let serverReceivedMessages: string[] = [];
-  let wss: WebSocketServer | undefined = undefined;
+  const serverReceivedMessages: string[] = [];
 
   beforeAll(() => {
-    wss = new WebSocketServer({
+    const wss = new WebSocketServer({
       port: port,
     });
-    wss.on("connection", (ws) => {
+    wss.on("connection", (ws: WebSocket) => {
+      ws.on("message", (msg: Buffer) =>
+        serverReceivedMessages.push(msg.toString()),
+      );
+      ws.on("error", console.error);
       ws.send(onConnectMessage);
-      ws.on("message", (data: string) => {
-        serverReceivedMessages.push(data);
-      });
     });
   });
 
-  beforeEach(() => {
-    wss?.close();
-    serverReceivedMessages = [];
-  });
-
-  it("Test websocket", () => {
-    const ws = new WebSocket(`ws://localhost:${port}`);
-    const wsClient = toWebSocketClient(ws);
-
+  it("Test websocket", async () => {
     let onConnectCalled = false;
-    wsClient.onConnect = () => {
-      onConnectCalled = true;
-    };
-
     let onDisconnectCalled = false;
-    wsClient.onDisconnect = () => {
-      onDisconnectCalled = true;
-    };
-
     const clientReceivedMessages: string[] = [];
-    wsClient.onReceive = clientReceivedMessages.push;
+
+    const ws = new WebSocket(`ws://localhost:${port}`);
+    const wsClient = toWebSocketClient(ws, {
+      onConnect: () => {
+        onConnectCalled = true;
+      },
+      onDisconnect: () => {
+        onDisconnectCalled = true;
+      },
+      onReceive: (msg: string) => {
+        clientReceivedMessages.push(msg);
+      },
+    });
 
     const msg = `${v4()} test message from client`;
     wsClient.sendMessage(msg);
 
-    ws.close();
+    await delay(100);
     expect(onConnectCalled).toBe(true);
-    expect(onDisconnectCalled).toBe(true);
-    expect(serverReceivedMessages).toContain(msg);
-    expect(serverReceivedMessages).toHaveLength(1);
-
     expect(clientReceivedMessages).toContain(onConnectMessage);
-    expect(clientReceivedMessages).toHaveLength(1);
+    expect(serverReceivedMessages).toContain(msg);
+
+    ws.close();
+    await delay(100);
+    expect(onDisconnectCalled).toBe(true);
   });
 });

@@ -1,25 +1,31 @@
 import WebSocket from "ws";
 
-export interface WebSocketClient {
-  readonly sendMessage: (msg: string) => void;
-  onReceive?: (msg: string) => void;
-  onDisconnect?: () => void;
-  onConnect?: () => void;
+export interface WebSocketClientCallbacks {
+  readonly onReceive: (msg: string) => void;
+  readonly onDisconnect: () => void;
+  readonly onConnect: () => void;
 }
 
-export function toWebSocketClient(ws: WebSocket): WebSocketClient {
-  const ret: WebSocketClient = {
-    sendMessage: ws.send,
-  };
+interface WebSocketSend {
+  readonly sendMessage: (msg: string) => void;
+}
+
+export type WebSocketClient = WebSocketSend & WebSocketClientCallbacks;
+
+export function toWebSocketClient(
+  ws: WebSocket,
+  callbacks: WebSocketClientCallbacks,
+): WebSocketClient {
+  const ret: WebSocketClient = { sendMessage: ws.send, ...callbacks };
 
   ws.on("close", () => {
-    ret?.onDisconnect();
+    ret.onDisconnect();
   });
-  ws.on("connection", () => {
-    ret?.onConnect();
+  ws.on("open", () => {
+    ret.onConnect();
   });
-  ws.on("message", (data: string) => {
-    ret?.onReceive(data);
+  ws.on("message", (buf: Buffer) => {
+    ret.onReceive(buf.toString());
   });
   return ret;
 }
