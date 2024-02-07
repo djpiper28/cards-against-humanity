@@ -14,7 +14,7 @@ export type WebSocketClient = WebSocketSend & WebSocketClientCallbacks;
 
 export function toWebSocketClient(
   ws: WebSocket,
-  callbacks: WebSocketClientCallbacks,
+  callbacks: WebSocketClientCallbacks
 ): WebSocketClient {
   const ret: WebSocketClient = {
     sendMessage: (msg: string) => {
@@ -31,6 +31,11 @@ export function toWebSocketClient(
   });
   ws.on("message", (buf: Buffer) => {
     ret.onReceive(buf.toString());
+  });
+  ws.on("error", (err: Error) => {
+    console.error(err);
+    ret.onDisconnect();
+    ws.close();
   });
   return ret;
 }
