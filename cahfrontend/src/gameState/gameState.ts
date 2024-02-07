@@ -1,4 +1,8 @@
+import { wsBaseUrl } from "../apiClient";
 import { GameSettings } from "../gameLogicTypes";
+import { RpcMessageBody } from "../rpcTypes";
+import { WebSocketClient, toWebSocketClient } from "./websocketClient";
+import WebSocket from "ws";
 
 export const playerIdCookie = "playerId";
 export const gameIdParam = "gameID";
@@ -7,12 +11,23 @@ class GameState {
   constructor() {}
   private gameId: string = "";
   private playerId: string = "";
-  private gameSettings?: GameSettings = undefined;
   private setup: boolean = false;
+  private gameSettings?: GameSettings = undefined;
+  private wsClient: WebSocketClient;
 
   public setupState(gameId: string, playerId: string) {
     this.gameId = gameId;
     this.playerId = playerId;
+
+    const ws: WebSocket = new WebSocket(wsBaseUrl);
+    this.wsClient = toWebSocketClient(ws, {
+      onDisconnect: () => {},
+      onConnect: () => {},
+      onReceive: (msg: string) => {
+        this.handleRpcMessage(msg);
+      },
+    });
+
     this.setup = true;
   }
 
@@ -20,8 +35,17 @@ class GameState {
     if (!this.setup) return false;
     if (!this.gameId) return false;
     if (!this.playerId) return false;
-    // if (!this.gameSettings) return false;
     return true;
+  }
+
+  private handleRpcMessage(msg: string): void {
+    const rpcMessage = JSON.parse(msg) as RpcMessageBody;
+    switch (rpcMessage.type) {
+      default:
+        throw new Error(
+          `Cannot handle RPC message as type is not valid ${rpcMessage.type}`,
+        );
+    }
   }
 }
 
