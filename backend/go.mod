@@ -2,11 +2,10 @@ module github.com/djpiper28/cards-against-humanity/backend
 
 go 1.21
 
-require github.com/google/uuid v1.6.0 // direct
-
 require (
 	github.com/carousell/gin-prometheus-middleware v1.5.9
 	github.com/gin-gonic/gin v1.9.1
+	github.com/google/uuid v1.6.0 // direct
 	github.com/gorilla/websocket v1.5.1
 	github.com/stretchr/testify v1.8.4
 	github.com/swaggo/files v1.0.1
