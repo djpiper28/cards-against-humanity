@@ -76,9 +76,7 @@ describe("WebSocketClient tests (http upgrade)", () => {
   beforeAll(() => {
     wss.on("connection", (ws: WebSocket) => {
       ws.on("message", (msg: Buffer) => {
-        console.error("A MESSAGE 1!!1", msg.toString());
         serverReceivedMessages.push(msg.toString());
-        console.error(serverReceivedMessages);
       });
       ws.on("error", console.error);
       ws.send(onConnectMessage);

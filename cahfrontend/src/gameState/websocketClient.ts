@@ -18,24 +18,24 @@ export function toWebSocketClient(
 ): WebSocketClient {
   const ret: WebSocketClient = {
     sendMessage: (msg: string) => {
-      ws.send(msg, console.error);
+      ws.send(msg);
     },
     ...callbacks,
   };
 
-  ws.on("close", () => {
+  ws.onclose = () => {
     ret.onDisconnect();
-  });
-  ws.on("open", () => {
+  };
+  ws.onopen = () => {
     ret.onConnect();
-  });
-  ws.on("message", (buf: Buffer) => {
-    ret.onReceive(buf.toString());
-  });
-  ws.on("error", (err: Error) => {
-    console.error(err);
+  };
+  ws.onmessage = function incoming(data) {
+    ret.onReceive(data.data.toString());
+  };
+  ws.onerror = (event) => {
+    console.error(event);
     ret.onDisconnect();
     ws.close();
-  });
+  };
   return ret;
 }

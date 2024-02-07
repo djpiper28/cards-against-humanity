@@ -1,7 +1,7 @@
-import { wsBaseUrl } from "../apiClient";
 import { GameSettings } from "../gameLogicTypes";
 import { RpcMessageBody } from "../rpcTypes";
 import { WebSocketClient, toWebSocketClient } from "./websocketClient";
+import { wsBaseUrl } from "../apiClient";
 import WebSocket from "isomorphic-ws";
 
 export const playerIdCookie = "playerId";
@@ -19,6 +19,9 @@ class GameState {
     this.gameId = gameId;
     this.playerId = playerId;
 
+    /**
+     * Mock new WebSocket when testing
+     */
     const ws: WebSocket = new WebSocket(wsBaseUrl);
     this.wsClient = toWebSocketClient(ws, {
       onDisconnect: () => {},
