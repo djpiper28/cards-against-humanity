@@ -24,7 +24,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 21
-      - run: pnpm i -g pnpm
+      - run: npm i -g pnpm
       - name: Build the package
         run: make -j
       - name: Test the package and, generate coverage reports (backend)
