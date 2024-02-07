@@ -2,7 +2,7 @@ import { wsBaseUrl } from "../apiClient";
 import { GameSettings } from "../gameLogicTypes";
 import { RpcMessageBody } from "../rpcTypes";
 import { WebSocketClient, toWebSocketClient } from "./websocketClient";
-import WebSocket from "ws";
+import WebSocket from "isomorphic-ws";
 
 export const playerIdCookie = "playerId";
 export const gameIdParam = "gameID";

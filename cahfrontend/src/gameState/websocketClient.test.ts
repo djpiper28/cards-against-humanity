@@ -1,10 +1,10 @@
 // @vitest-environment node
-import { v4 } from "uuid";
-import { toWebSocketClient } from "./websocketClient";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import WebSocket, { WebSocketServer } from "../../node_modules/ws/index.js";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { toWebSocketClient } from "./websocketClient";
 import { createServer } from "http";
 import { parse } from "url";
+import { v4 } from "uuid";
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));

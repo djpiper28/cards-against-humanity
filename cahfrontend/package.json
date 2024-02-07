@@ -23,7 +23,6 @@
     "@types/ws": "^8.5.10",
     "@vitest/coverage-v8": "^1.2.2",
     "autoprefixer": "^10.4.17",
-    "bufferutil": "^4.0.8",
     "jsdom": "^23.2.0",
     "postcss": "^8.4.33",
     "react-dom": "^18.2.0",
@@ -35,15 +34,16 @@
     "uuid": "^9.0.1",
     "vite": "^4.5.2",
     "vite-plugin-solid": "^2.9.1",
-    "vitest": "^1.2.2"
+    "vitest": "^1.2.2",
+    "ws": "^8.16.0"
   },
   "dependencies": {
     "@solid-primitives/storage": "^2.1.2",
     "@solid-primitives/websocket": "^1.2.1",
     "@solidjs/router": "^0.8.4",
     "font-awesome": "^4.7.0",
+    "isomorphic-ws": "^5.0.0",
     "react": "^18.2.0",
-    "solid-js": "^1.8.12",
-    "ws": "^8.16.0"
+    "solid-js": "^1.8.12"
   }
 }

@@ -1,4 +1,4 @@
-import WebSocket from "ws";
+import WebSocket from "isomorphic-ws";
 
 export interface WebSocketClientCallbacks {
   readonly onReceive: (msg: string) => void;
