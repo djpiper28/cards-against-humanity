@@ -20,31 +20,32 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.20'
-      - uses: actions/setup-node@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
           node-version: 21
-      - run: go version
-      - name: Install dependancies
-        run: |
-          go install github.com/swaggo/swag/cmd/swag@latest
-          go install github.com/gzuidhof/tygo@latest
+      - run: pnpm i -g pnpm
       - name: Build the package
-        run: make
-      - name: Test the package and, generate coverage reports
-        run: go test -v -benchmem -parallel 16 ./... -covermode=atomic -coverprofile=coverage.out
+        run: make -j
+      - name: Test the package and, generate coverage reports (backend)
+        run: cd backend; go test -v -benchmem -parallel 16 ./... -covermode=atomic -coverprofile=coverage.out
+      - name: Test the package and, generate coverage reports (frontend)
+        run: |
+          npm i -g @vitest/coverage-v8
+          cd cahfrontend; npx vitest run --coverage
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
         with:
           fail_ci_if_error: yes
-          files: ./coverage.out
+          files: ./coverage.out,./cahFrontend/coverage-final.json
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: yes
       - name: Build the frontend
         run: |
           cd ./cahFrontend
-          npm i
-          npm run build
+          pnpm i
+          pnpm run build
       - name: Build Storybook
         run: |-
           cd ./cahFrontend
-          npm run build-storybook
+          pnpm run build-storybook

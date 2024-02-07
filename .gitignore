@@ -7,15 +7,17 @@
 *.dll
 *.so
 *.dylib
+backend/backend
+
+# Mac lol
+.DS_Store
 
 # Test binary, built with `go test -c`
 *.test
 
-# Output of the go coverage tool, specifically when used with LiteIDE
+# Coverage
 *.out
-
-# Dependency directories (remove the comment below to include it)
-# vendor/
+cahfrontend/coverage
 
 # Go workspace file
 go.work
@@ -26,9 +28,4 @@ cards-against-humanity
 docs
 cahfrontend/src/api.ts
 cahfrontend/src/rpcTypes.ts
-
 cahfrontend/src/gameLogicTypes.ts
-
-backend/backend
-
-.DS_Store
