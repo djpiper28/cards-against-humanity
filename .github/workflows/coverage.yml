@@ -25,13 +25,15 @@ jobs:
         with:
           node-version: 21
       - run: npm i -g pnpm
+      - name: Git submodules (no clue why checkout has not got them)
+        run: |
+          git submodule init
+          git submodule update
       - name: Build the package
         run: make -j
       - name: Test the package and, generate coverage reports (backend)
         run: |
           cd backend
-          pwd
-          ls -lah packs
           go test -v -benchmem -parallel 16 ./... -covermode=atomic -coverprofile=coverage.out
       - name: Test the package and, generate coverage reports (frontend)
         run: |
