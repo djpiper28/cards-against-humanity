@@ -31,6 +31,7 @@ jobs:
         run: |
           cd backend
           pwd
+          ls -lah packs
           go test -v -benchmem -parallel 16 ./... -covermode=atomic -coverprofile=coverage.out
       - name: Test the package and, generate coverage reports (frontend)
         run: |
