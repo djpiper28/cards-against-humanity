@@ -40,10 +40,12 @@ test-frontend: frontend-types
 GO_TEST_ARGS=-v -benchmem -parallel 16 ./... -covermode=atomic -coverprofile=coverage.out
 
 test-backend: backend
-	cd ./backend/ && go test './...' ${GO_TEST_ARGS}
+	cd ./backend/
+	go test './...' ${GO_TEST_ARGS}
 
 test-e2e: frontend test-backend
-	cd ./e2e/ && go test './...' ${GO_TEST_ARGS}
+	cd ./e2e/
+	go test './...' ${GO_TEST_ARGS}
 
 .PHONY: test
 test: test-backend test-frontend test-e2e frontend-storybook
