@@ -1,6 +1,6 @@
 module github.com/djpiper28/cards-against-humanity/backend
 
-go 1.21
+go 1.21.6
 
 require github.com/google/uuid v1.6.0 // direct
 
