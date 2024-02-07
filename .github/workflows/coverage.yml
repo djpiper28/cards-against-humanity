@@ -47,12 +47,5 @@ jobs:
           files: ./backend/coverage.out,./cahfrontend/coverage-final.json
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: yes
-      - name: Build the frontend
-        run: |
-          cd ./cahFrontend
-          pnpm i
-          pnpm run build
-      - name: Build Storybook
-        run: |-
-          cd ./cahFrontend
-          pnpm run build-storybook
+      - name: Run e2e tests (includes full build)
+        run: make test -j
