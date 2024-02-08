@@ -7,7 +7,6 @@ import (
 )
 
 func GetBrowser() *rod.Browser {
-	StartService()
 	return rod.New().MustConnect().Timeout(time.Second * 5)
 }
 

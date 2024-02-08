@@ -4,14 +4,11 @@ import (
 	"log"
 	"net/http"
 	"os/exec"
-	"sync"
+	"testing"
 	"time"
-)
 
-var lock sync.Mutex
-var started = false
-var backendProcess *exec.Cmd = exec.Command("../backend/backend")
-var frontendProcess *exec.Cmd = exec.Command("./e2e-start.sh")
+	"github.com/stretchr/testify/suite"
+)
 
 const frontendUrl = "http://localhost:3000/"
 
@@ -57,38 +54,54 @@ func waitForBackend() {
 	log.Println("Backend responded to poll")
 }
 
-func startFrontend() {
+type WithServicesSuite struct {
+	suite.Suite
+	backendProcess  *exec.Cmd
+	frontendProcess *exec.Cmd
+}
+
+func (s *WithServicesSuite) startFrontend() {
 	log.Println("Starting frontend")
-	err := frontendProcess.Start()
+	s.frontendProcess = exec.Command("./e2e-start.sh")
+	err := s.frontendProcess.Start()
 	if err != nil {
 		log.Fatalf("Cannot start frontend: %s", err)
 	}
 	log.Println("Started frontend")
 }
 
-func startBackend() {
+func (s *WithServicesSuite) startBackend() {
 	log.Println("Starting backend")
-	err := backendProcess.Start()
+	s.backendProcess = exec.Command("../backend/backend")
+	err := s.backendProcess.Start()
 	if err != nil {
 		log.Fatalf("Cannot start backend: %s", err)
 	}
 	log.Println("Started backend")
 }
 
-func StartService() {
-	lock.Lock()
-	defer lock.Unlock()
-	if started {
-		return
-	}
+func (s *WithServicesSuite) SetupSuite() {
+	log.Printf("Starting services")
+	s.startBackend()
+	s.startFrontend()
 
-	startBackend()
-	startFrontend()
-
-	started = true
-
+	log.Printf("Waiting for services to become ready")
 	waitForBackend()
 	waitForFrontend()
+}
+
+func (s *WithServicesSuite) TearDownSuite() {
+	log.Print("Shutting down test services")
+	if err := s.backendProcess.Process.Kill(); err != nil {
+		log.Printf("Cannot kill backend: %s", err)
+	}
+	if err := s.frontendProcess.Process.Kill(); err != nil {
+		log.Printf("Cannot kill frontend: %s", err)
+	}
+}
+
+func TestWithServicesSuite(t *testing.T) {
+	suite.Run(t, new(WithServicesSuite))
 }
 
 func GetBasePage() string {
