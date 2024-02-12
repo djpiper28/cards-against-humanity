@@ -15,8 +15,6 @@ import (
 func Start() {
 	log.SetFlags(log.Lshortfile | log.Ltime | log.Ldate)
 	log.Println("Starting up Cards Against Humanity server")
-	InitGlobals()
-
 	r := gin.Default()
 
 	// Setup swagger

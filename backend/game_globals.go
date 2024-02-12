@@ -6,16 +6,14 @@ import (
 	"log"
 )
 
-var GameRepo *gameRepo.GameRepo
+var GameRepo *gameRepo.GameRepo = initGlobals()
 
-func InitGlobals() {
+func initGlobals() *gameRepo.GameRepo {
 	err := gameLogic.LoadPacks()
 	if err != nil {
 		log.Fatal("Cannot create the card packs", err)
 	}
 
 	log.Println("Initialising Game Repo")
-	GameRepo = gameRepo.New()
-
-	NewGlobalConnectionManager()
+	return gameRepo.New()
 }

@@ -2,8 +2,9 @@ package main
 
 import (
 	"errors"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewConnection(t *testing.T) {
@@ -13,8 +14,8 @@ func TestNewConnection(t *testing.T) {
 }
 
 func TestNewGlobalConnectioManager(t *testing.T) {
-	NewGlobalConnectionManager()
 	assert.NotNil(t, globalConnectionManager, "Global connection manager should not be nil")
+	assert.NotNil(t, globalConnectionManager.GameConnectionMap)
 }
 
 type MockConnection struct {

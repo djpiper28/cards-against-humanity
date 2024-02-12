@@ -2,9 +2,10 @@ package main
 
 import (
 	"errors"
-	"github.com/google/uuid"
 	"log"
 	"sync"
+
+	"github.com/google/uuid"
 )
 
 type GameConnection struct {
@@ -15,7 +16,7 @@ type GameConnection struct {
 }
 
 func NewGameConnection() *GameConnection {
-	gc := &GameConnection{PlayerConnectionMap: NewGameConnection().PlayerConnectionMap,
+	gc := &GameConnection{PlayerConnectionMap: make(map[uuid.UUID]*WsConnection),
 		broadcast: make(chan string),
 		shutdown:  make(chan bool)}
 	go gc.process()
@@ -76,16 +77,12 @@ func (gc *GameConnection) RegisterConnection(playerId uuid.UUID, conn *WsConnect
 }
 
 // Manages all of the connections
-var globalConnectionManager GlobalConnectionManager
+var globalConnectionManager GlobalConnectionManager = GlobalConnectionManager{GameConnectionMap: make(map[uuid.UUID]*GameConnection)}
 
 type GlobalConnectionManager struct {
 	// Maps a game ID to the game connection pool
 	GameConnectionMap map[uuid.UUID]*GameConnection
 	lock              sync.Mutex
-}
-
-func NewGlobalConnectionManager() {
-	globalConnectionManager = GlobalConnectionManager{GameConnectionMap: make(map[uuid.UUID]*GameConnection)}
 }
 
 func (g *GlobalConnectionManager) Close(gameId, playerId uuid.UUID) error {
