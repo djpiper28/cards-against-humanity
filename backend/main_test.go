@@ -11,13 +11,19 @@ import (
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
 const baseUrl = "http://localhost:8080"
 
-func TestServerStart(t *testing.T) {
-	go Start()
+type ServerTestSuite struct {
+	suite.Suite
+}
 
+func (s *ServerTestSuite) SetupSuite() {
+	t := s.T()
+
+	go Start()
 	t.Log("Sleeping whils the server starts")
 	time.Sleep(time.Second)
 	resp, err := http.Get(baseUrl + "/healthcheck")
@@ -27,19 +33,20 @@ func TestServerStart(t *testing.T) {
 	body, err := io.ReadAll(resp.Body)
 	assert.Nil(t, err, "Should be able to read the body")
 	assert.Equal(t, `{"healthy":true}`, string(body), "Should return healthy")
+
+	// Initial state checks
+	s.BeforeGetGamesNotFullEmpty()
+	s.BeforeInitialGameCreateTest()
 }
 
-func TestGetMetrics(t *testing.T) {
-	resp, err := http.Get(baseUrl + "/metrics")
-	assert.Nil(t, err, "There should not be an error getting the metrics")
-	assert.Equal(t, http.StatusOK, resp.StatusCode, "Should be OK")
-
-	body, err := io.ReadAll(resp.Body)
-	assert.Nil(t, err, "Should be able to read the body")
-	assert.NotEmpty(t, body, "Body should not be empty")
+func TestServerStart(t *testing.T) {
+	t.Parallel()
+	suite.Run(t, new(ServerTestSuite))
 }
 
-func TestGetGamesNotFullEmpty(t *testing.T) {
+func (s *ServerTestSuite) BeforeGetGamesNotFullEmpty() {
+	t := s.T()
+
 	resp, err := http.Get(baseUrl + "/games/notFull")
 	assert.Nil(t, err, "There should not be an error getting the games")
 	assert.Equal(t, http.StatusOK, resp.StatusCode, "Should be OK")
@@ -49,7 +56,8 @@ func TestGetGamesNotFullEmpty(t *testing.T) {
 	assert.Equal(t, string(body), "[]", "Should be an empty array")
 }
 
-func TestGetGamesNotFullOneGame(t *testing.T) {
+func (s *ServerTestSuite) BeforeInitialGameCreateTest() {
+	t := s.T()
 	name := "Dave"
 
 	gid, pid, err := GameRepo.CreateGame(gameLogic.DefaultGameSettings(), name)
@@ -73,6 +81,19 @@ func TestGetGamesNotFullOneGame(t *testing.T) {
 	assert.Equal(t, games[0].PlayerCount, 1, "Should only be one player")
 }
 
+func (s *ServerTestSuite) TestGetMetrics() {
+	t := s.T()
+	t.Parallel()
+
+	resp, err := http.Get(baseUrl + "/metrics")
+	assert.Nil(t, err, "There should not be an error getting the metrics")
+	assert.Equal(t, http.StatusOK, resp.StatusCode, "Should be OK")
+
+	body, err := io.ReadAll(resp.Body)
+	assert.Nil(t, err, "Should be able to read the body")
+	assert.NotEmpty(t, body, "Body should not be empty")
+}
+
 const jsonContentType = "application/json"
 
 func defaultGameSettings() GameCreateSettings {
@@ -84,7 +105,10 @@ func defaultGameSettings() GameCreateSettings {
 	return GameCreateSettings{MaxRounds: settings.MaxRounds, MaxPlayers: settings.MaxPlayers, PlayingToPoints: settings.PlayingToPoints, CardPacks: packs}
 }
 
-func TestCreateGameEndpoint(t *testing.T) {
+func (s *ServerTestSuite) TestCreateGameEndpoint() {
+	t := s.T()
+	t.Parallel()
+
 	name := "Dave"
 	gs := defaultGameSettings()
 
@@ -107,7 +131,10 @@ func TestCreateGameEndpoint(t *testing.T) {
 	assert.NotEmpty(t, gameIds.PlayerId, "Player ID should be set")
 }
 
-func TestGetCardPacks(t *testing.T) {
+func (s *ServerTestSuite) TestGetCardPacks() {
+	t := s.T()
+	t.Parallel()
+
 	resp, err := http.Get(baseUrl + "/res/packs")
 	assert.Nil(t, err, "Should not get an error getting packs")
 	assert.Equal(t, http.StatusOK, resp.StatusCode, "Should return a 200")
