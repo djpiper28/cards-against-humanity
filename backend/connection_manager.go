@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/websocket"
 )
 
 type GameConnection struct {
@@ -77,12 +78,18 @@ func (gc *GameConnection) RegisterConnection(playerId uuid.UUID, conn *WsConnect
 }
 
 // Manages all of the connections
-var globalConnectionManager GlobalConnectionManager = GlobalConnectionManager{GameConnectionMap: make(map[uuid.UUID]*GameConnection)}
+var globalConnectionManager = &GlobalConnectionManager{GameConnectionMap: make(map[uuid.UUID]*GameConnection)}
 
 type GlobalConnectionManager struct {
 	// Maps a game ID to the game connection pool
 	GameConnectionMap map[uuid.UUID]*GameConnection
 	lock              sync.Mutex
+}
+
+type ConnectionManager interface {
+	RegisterConnection(gameId, playerId uuid.UUID, connection *WsConnection)
+	NewConnection(conn *websocket.Conn, gameId, playerId uuid.UUID) *WsConnection
+	Close(gameId, playerId uuid.UUID) error
 }
 
 func (g *GlobalConnectionManager) Close(gameId, playerId uuid.UUID) error {

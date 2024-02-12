@@ -16,14 +16,14 @@ var wsupgrader = websocket.Upgrader{
 	WriteBufferSize: wsBufferSize,
 }
 
-func WsUpgrade(w http.ResponseWriter, r *http.Request, playerId, gameId uuid.UUID) (*WsConnection, error) {
+func WsUpgrade(w http.ResponseWriter, r *http.Request, playerId, gameId uuid.UUID, cm ConnectionManager) (*WsConnection, error) {
 	c, err := wsupgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("Failed to set websocket upgrade: %s", err)
 		return nil, err
 	}
 
-	conn := NewConnection(c, playerId, gameId)
+	conn := cm.NewConnection(c, playerId, gameId)
 	return conn, nil
 }
 
@@ -44,7 +44,7 @@ type WsConnection struct {
 	shutdown     chan bool
 }
 
-func NewConnection(conn *websocket.Conn, gameId, playerId uuid.UUID) *WsConnection {
+func (gcm *GlobalConnectionManager) NewConnection(conn *websocket.Conn, gameId, playerId uuid.UUID) *WsConnection {
 	c := &WsConnection{Conn: &WebsocketConnection{Conn: conn},
 		PlayerId:     playerId,
 		GameID:       gameId,
@@ -56,7 +56,7 @@ func NewConnection(conn *websocket.Conn, gameId, playerId uuid.UUID) *WsConnecti
 	}
 	go c.Process()
 
-	globalConnectionManager.RegisterConnection(gameId, playerId, c)
+	gcm.RegisterConnection(gameId, playerId, c)
 	return c
 }
 

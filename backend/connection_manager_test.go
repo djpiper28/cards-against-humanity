@@ -13,6 +13,11 @@ func TestNewConnection(t *testing.T) {
 	conn.CloseAll()
 }
 
+func TestGlobalConnectionManagerMatchesConnectionManagerInterface(t *testing.T) {
+	var gcm ConnectionManager = new(GlobalConnectionManager)
+	assert.NotNil(t, gcm)
+}
+
 func TestNewGlobalConnectioManager(t *testing.T) {
 	assert.NotNil(t, globalConnectionManager, "Global connection manager should not be nil")
 	assert.NotNil(t, globalConnectionManager.GameConnectionMap)
