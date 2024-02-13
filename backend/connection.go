@@ -36,26 +36,20 @@ type GameMessage struct {
 type WsConnection struct {
 	Conn         NetworkConnection
 	PlayerId     uuid.UUID
-	GameID       uuid.UUID
 	JoinTime     time.Time
 	LastPingTime time.Time
-	WsRecieve    chan GameMessage
-	WsBroadcast  chan string
-	shutdown     chan bool
+}
+
+func (gcm *WsConnection) Close() {
+  gcm.Conn.Close()
 }
 
 func (gcm *GlobalConnectionManager) NewConnection(conn *websocket.Conn, gameId, playerId uuid.UUID) *WsConnection {
 	c := &WsConnection{Conn: &WebsocketConnection{Conn: conn},
 		PlayerId:     playerId,
-		GameID:       gameId,
 		JoinTime:     time.Now(),
 		LastPingTime: time.Now(),
-		WsRecieve:    make(chan GameMessage),
-		WsBroadcast:  make(chan string),
-		shutdown:     make(chan bool),
 	}
 	gcm.RegisterConnection(gameId, playerId, c)
 	return c
 }
-
-//TODO: make something to handle the websocket (send and recv)
