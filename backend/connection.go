@@ -54,59 +54,8 @@ func (gcm *GlobalConnectionManager) NewConnection(conn *websocket.Conn, gameId, 
 		WsBroadcast:  make(chan string),
 		shutdown:     make(chan bool),
 	}
-	go c.Process()
-
 	gcm.RegisterConnection(gameId, playerId, c)
 	return c
 }
 
-func (c *WsConnection) Process() {
-	go func() {
-		for {
-			select {
-			case <-c.shutdown:
-				return
-			case msg := <-c.WsBroadcast:
-				err := c.Conn.Send([]byte(msg))
-				if err != nil {
-					log.Printf("Player %s had a network error %s", c.PlayerId, err)
-					globalConnectionManager.Close(c.GameID, c.PlayerId)
-					return
-				}
-			}
-		}
-	}()
-
-	for {
-		select {
-		case <-c.shutdown:
-			return
-		default:
-			msg, err := c.Conn.Receive()
-			if err != nil {
-				log.Println(err)
-				globalConnectionManager.Close(c.GameID, c.PlayerId)
-				return
-			}
-
-			c.WsRecieve <- GameMessage{Message: string(msg), GameId: c.GameID, PlayerId: c.PlayerId}
-		}
-	}
-}
-
-func (c *WsConnection) Close() {
-	go func() {
-		defer func() {
-			err := recover()
-			if err != nil {
-				log.Printf("Closing the websocket caused an issue %s", err)
-			}
-		}()
-
-		c.Conn.Close()
-		c.shutdown <- true
-
-		close(c.WsBroadcast)
-		close(c.WsRecieve)
-	}()
-}
+//TODO: make something to handle the websocket (send and recv)

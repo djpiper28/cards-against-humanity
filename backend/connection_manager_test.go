@@ -7,12 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewConnection(t *testing.T) {
-	conn := NewGameConnection()
-	assert.NotNil(t, conn, "Game connection should not be nil")
-	conn.CloseAll()
-}
-
 func TestGlobalConnectionManagerMatchesConnectionManagerInterface(t *testing.T) {
 	var gcm ConnectionManager = new(GlobalConnectionManager)
 	assert.NotNil(t, gcm)
