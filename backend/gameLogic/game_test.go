@@ -192,6 +192,24 @@ func TestGameInfo(t *testing.T) {
 	assert.True(t, info.HasPassword, "The game should be marked as having a password")
 }
 
+func TestGameStateInfo(t *testing.T) {
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.Nil(t, err, "There should not be an error with making the game", err)
+
+	info := game.StateInfo()
+
+	assert.Equal(t, game.Id, info.Id)
+	assert.Equal(t, *game.Settings, info.Settings)
+	assert.Equal(t, game.Players, info.Players)
+	assert.Equal(t, game.CurrentRound, info.CurrentRound)
+	assert.Equal(t, game.CreationTime, info.CreationTime)
+	assert.Equal(t, game.GameState, info.GameState)
+	assert.Equal(t, game.CurrentBlackCard, info.CurrentBlackCard)
+	assert.Equal(t, game.CurrentCardCzarId, info.CurrentCardCzarId)
+	assert.Equal(t, game.GameOwnerId, info.GameOwnerId)
+}
+
 func TestAddInvalidPlayer(t *testing.T) {
 	settings := gameLogic.DefaultGameSettings()
 	game, err := gameLogic.NewGame(settings, "Dave")

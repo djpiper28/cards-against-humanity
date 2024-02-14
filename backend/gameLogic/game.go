@@ -172,6 +172,7 @@ type GameInfo struct {
 	HasPassword bool      `json:"hasPassword"`
 }
 
+// Info about a game to see before you join it
 func (g *Game) Info() GameInfo {
 	g.lock.Lock()
 	defer g.lock.Unlock()
@@ -181,6 +182,40 @@ func (g *Game) Info() GameInfo {
 		MaxPlayers:  g.Settings.MaxPlayers,
 		PlayingTo:   g.Settings.PlayingToPoints,
 		HasPassword: g.Settings.Password != ""}
+}
+
+// Information about a game you can see when you join. Settings - password + players
+type GameStateInfo struct {
+	Id       uuid.UUID    `json:"id"`
+	Settings GameSettings `json:"settings"`
+
+	CurrentRound     uint       `json:"currentRound"`
+	CreationTime     time.Time  `json:"creationTime"`
+	GameState        GameState  `json:"gameState"`
+	CurrentBlackCard *BlackCard `json:"currentBlackCard"`
+
+	Players []uuid.UUID `json:"players"`
+
+	CurrentCardCzarId uuid.UUID `json:"currentCardCzarId"`
+	GameOwnerId       uuid.UUID `json:"gameOwnerId"`
+}
+
+// The state of a game for player who has just joined a game
+// or has become de-synced
+func (g *Game) StateInfo() GameStateInfo {
+	g.lock.Lock()
+	defer g.lock.Unlock()
+
+	return GameStateInfo{Id: g.Id,
+		Settings:          *g.Settings,
+		CurrentRound:      g.CurrentRound,
+		CreationTime:      g.CreationTime,
+		GameState:         g.GameState,
+		CurrentBlackCard:  g.CurrentBlackCard,
+		Players:           g.Players,
+		CurrentCardCzarId: g.CurrentCardCzarId,
+		GameOwnerId:       g.GameOwnerId,
+	}
 }
 
 func (g *Game) AddPlayer(playerName string) (uuid.UUID, error) {

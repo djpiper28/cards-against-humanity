@@ -64,7 +64,7 @@ func TestCreateGame(t *testing.T) {
 		t.FailNow()
 	}
 
-	game, _ := repo.GameMap[id]
+	game, _ := repo.GetGame(id)
 	if game.PlayersMap[game.GameOwnerId].Name != name {
 		t.Log("The player was not made with the correct name")
 		t.FailNow()

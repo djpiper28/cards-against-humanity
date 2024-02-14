@@ -30,7 +30,9 @@ type GameRepo struct {
 }
 
 func New() *GameRepo {
-	return &GameRepo{GamesByAge: list.New(), GameMap: make(map[uuid.UUID]*gameLogic.Game), GameAgeMap: make(map[uuid.UUID]time.Time)}
+	return &GameRepo{GamesByAge: list.New(),
+		GameMap:    make(map[uuid.UUID]*gameLogic.Game),
+		GameAgeMap: make(map[uuid.UUID]time.Time)}
 }
 
 // Creates a game and return the game ID, player ID and any errors
@@ -44,13 +46,13 @@ func (gr *GameRepo) CreateGame(gameSettings *gameLogic.GameSettings, playerName 
 		return uuid.UUID{}, uuid.UUID{}, err
 	}
 
-	id := game.Id
+	gid := game.Id
 	gr.GamesByAge.PushBack(GameListPtr(game))
-	gr.GameMap[id] = game
-	gr.GameAgeMap[id] = game.CreationTime
+	gr.GameMap[gid] = game
+	gr.GameAgeMap[gid] = game.CreationTime
 
 	log.Println("Created game for", playerName)
-	return id, game.GameOwnerId, nil
+	return gid, game.GameOwnerId, nil
 }
 
 func (gr *GameRepo) GetGames() []*gameLogic.Game {
@@ -87,4 +89,15 @@ func (gr *GameRepo) JoinGame(gameId, playerId uuid.UUID) error {
 		return errors.New(msg)
 	}
 	return nil
+}
+
+func (gr *GameRepo) GetGame(gameId uuid.UUID) (*gameLogic.Game, error) {
+	gr.lock.RLock()
+	defer gr.lock.RUnlock()
+
+	game, found := gr.GameMap[gameId]
+	if !found {
+		return nil, errors.New("Cannot find game")
+	}
+	return game, nil
 }
