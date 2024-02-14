@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
-	"github.com/google/uuid"
 )
 
 type RpcMessageType int
@@ -22,7 +21,7 @@ type RpcMessage interface {
 	Type() RpcMessageType
 }
 
-func EncodeRpcMessagee(msg RpcMessage) ([]byte, error) {
+func EncodeRpcMessage(msg RpcMessage) ([]byte, error) {
 	body := RpcMessageBody{Type: msg.Type()}
 	ret, err := json.Marshal(&body)
 	if err != nil {
@@ -32,21 +31,9 @@ func EncodeRpcMessagee(msg RpcMessage) ([]byte, error) {
 }
 
 type RpcOnJoinMsg struct {
-	WhiteCardCount int                    `json:"whiteCardCount"`
-	BlackCardCount int                    `json:"blackCardCount"`
-	PlayerNames    []string               `json:"playerNames"`
-	CardPacks      []uuid.UUID            `json:"cardPacks"`
-	GameSettings   gameLogic.GameSettings `json:"GameSettings"`
-
-	BlackCard        *gameLogic.BlackCard `json:"blackCard"`
-	WhiteCardsPlayed int                  `json:"WhiteCardsPlayed"`
-
-	CurrentCardCzar string              `json:"currentCardCzar"`
-	GameOwner       string              `json:"gameOwner"`
-	GameState       gameLogic.GameState `json:"gameState"`
-	CurrentRound    uint                `json:"currentRound"`
+	Data gameLogic.GameStateInfo `json:"data"`
 }
 
-func (msg *RpcOnJoinMsg) Type() RpcMessageType {
+func (msg RpcOnJoinMsg) Type() RpcMessageType {
 	return MsgOnJoin
 }

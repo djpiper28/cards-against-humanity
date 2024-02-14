@@ -200,7 +200,7 @@ func TestGameStateInfo(t *testing.T) {
 	info := game.StateInfo()
 
 	assert.Equal(t, game.Id, info.Id)
-	assert.Equal(t, game.Settings, info.Settings)
+	assert.Equal(t, *game.Settings, info.Settings)
 	assert.Equal(t, game.Players, info.Players)
 	assert.Equal(t, game.CurrentRound, info.CurrentRound)
 	assert.Equal(t, game.CreationTime, info.CreationTime)

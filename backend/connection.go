@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
@@ -18,14 +17,14 @@ var wsupgrader = websocket.Upgrader{
 	WriteBufferSize: wsBufferSize,
 }
 
-func WsUpgrade(w http.ResponseWriter, r *http.Request, playerId, gameId uuid.UUID, cm ConnectionManager) (*WsConnection, error) {
+func WsUpgrade(w http.ResponseWriter, r *http.Request, gameId, playerId uuid.UUID, cm ConnectionManager) (*WsConnection, error) {
 	c, err := wsupgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("Failed to set websocket upgrade: %s", err)
 		return nil, err
 	}
 
-	conn := cm.NewConnection(c, playerId, gameId)
+	conn := cm.NewConnection(c, gameId, playerId)
 	return conn, nil
 }
 
@@ -68,8 +67,8 @@ func (c *WsConnection) listenAndHandle() error {
 		return err
 	}
 
-	// Send initial state
-	initialState, err := json.Marshal(game.StateInfo())
+	state := RpcOnJoinMsg{Data: game.StateInfo()}
+	initialState, err := EncodeRpcMessage(state)
 	if err != nil {
 		return err
 	}

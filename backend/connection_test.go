@@ -16,8 +16,8 @@ import (
 const wsIntegrationTestPort = 6655
 
 var wsIntrationTestUrl = fmt.Sprintf("ws://0.0.0.0:%d", wsIntegrationTestPort)
-var pid = uuid.New()
 var gid = uuid.New()
+var pid = uuid.New()
 
 type MockGlobalConnectionManager struct {
 	newConnectionCalled          bool

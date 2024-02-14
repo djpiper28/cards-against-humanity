@@ -5,7 +5,7 @@ import { wsBaseUrl } from "../apiClient";
 import WebSocket from "isomorphic-ws";
 
 export const playerIdCookie = "playerId";
-export const gameIdParam = "gameID";
+export const gameIdParam = "gameId";
 
 class GameState {
   constructor() {}
