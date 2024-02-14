@@ -55,5 +55,18 @@ func (g *GlobalConnectionManager) RegisterConnection(gameId, playerId uuid.UUID,
 		log.Printf("Registered game %s", gameId)
 	}
 	game.playerConnectionMap[playerId] = connection
-	//TODO: add listeners to the games
+	go connection.ListenAndHandle(g)
+}
+
+func (g *GlobalConnectionManager) UnregisterConnection(gameId, playerId uuid.UUID) {
+	g.lock.Lock()
+	defer g.lock.Unlock()
+
+	log.Printf("Unregistering player %s to game %s", playerId, gameId)
+	game, found := g.GameConnectionMap[gameId]
+	if found {
+		delete(game.playerConnectionMap, playerId)
+	} else {
+		log.Printf("Cannot unregister game %s as it cannot be found", gameId)
+	}
 }

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"time"
@@ -35,21 +37,65 @@ type GameMessage struct {
 
 type WsConnection struct {
 	Conn         NetworkConnection
+	GameId       uuid.UUID
 	PlayerId     uuid.UUID
 	JoinTime     time.Time
 	LastPingTime time.Time
 }
 
 func (gcm *WsConnection) Close() {
-  gcm.Conn.Close()
+	gcm.Conn.Close()
 }
 
 func (gcm *GlobalConnectionManager) NewConnection(conn *websocket.Conn, gameId, playerId uuid.UUID) *WsConnection {
 	c := &WsConnection{Conn: &WebsocketConnection{Conn: conn},
 		PlayerId:     playerId,
+		GameId:       gameId,
 		JoinTime:     time.Now(),
 		LastPingTime: time.Now(),
 	}
 	gcm.RegisterConnection(gameId, playerId, c)
 	return c
+}
+
+// To be called after registering the connection, this will listen to the
+// websocket traffic on a loop and handle it
+func (c *WsConnection) listenAndHandle() error {
+	gid := c.GameId
+	// pid := c.PlayerId
+	game, err := GameRepo.GetGame(gid)
+	if err != nil {
+		return err
+	}
+
+	// Send initial state
+	initialState, err := json.Marshal(game.StateInfo())
+	if err != nil {
+		return err
+	}
+
+	err = c.Conn.Send(initialState)
+	if err != nil {
+		return err
+	}
+
+	// Start listening and handling
+	for {
+		msg, err := c.Conn.Receive()
+		if err != nil {
+			c.Close()
+			return errors.New("Cannot read from websocket")
+		}
+
+		log.Printf("Got a message: %s", string(msg))
+	}
+}
+
+func (c *WsConnection) ListenAndHandle(g *GlobalConnectionManager) {
+	err := c.listenAndHandle()
+	if err != nil {
+		log.Printf("Error whilst handling websocket connection %s", err)
+		c.Close()
+		g.UnregisterConnection(c.GameId, c.PlayerId)
+	}
 }

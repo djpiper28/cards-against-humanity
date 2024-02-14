@@ -1,7 +1,7 @@
 package main
 
 import (
-  "github.com/gorilla/websocket"
+	"github.com/gorilla/websocket"
 )
 
 // An interface to abstract a connection over a network to allow for networking to
