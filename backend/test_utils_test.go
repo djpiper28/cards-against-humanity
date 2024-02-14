@@ -12,6 +12,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const BaseUrl = "localhost:8080"
+const HttpBaseUrl = "http://" + BaseUrl
+const WsBaseUrl = "ws://" + BaseUrl
+
 func createTestGame(t *testing.T) GameCreatedResp {
 	name := "Dave"
 	gs := DefaultGameSettings()
@@ -43,4 +47,8 @@ func DefaultGameSettings() GameCreateSettings {
 		packs[i] = pack.Id
 	}
 	return GameCreateSettings{MaxRounds: settings.MaxRounds, MaxPlayers: settings.MaxPlayers, PlayingToPoints: settings.PlayingToPoints, CardPacks: packs}
+}
+
+type onJoinRpcMsg struct {
+	Data RpcOnJoinMsg `json:"data"`
 }

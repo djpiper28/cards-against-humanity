@@ -16,10 +16,6 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-const BaseUrl = "localhost:8080"
-const HttpBaseUrl = "http://" + BaseUrl
-const WsBaseUrl = "ws://" + BaseUrl
-
 type ServerTestSuite struct {
 	suite.Suite
 }
@@ -147,9 +143,13 @@ func (s *ServerTestSuite) TestJoinGameEndpoint() {
 	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
 	assert.Equal(t, msgType, websocket.TextMessage)
 
-	var onJoinMsg RpcOnJoinMsg
+	var onJoinMsg onJoinRpcMsg
 	err = json.Unmarshal(msg, &onJoinMsg)
+
 	assert.Nil(t, err, "Should be a join message")
+	assert.Equal(t, game.GameId, onJoinMsg.Data.State.Id)
+	assert.Len(t, onJoinMsg.Data.State.Players, 1)
+	assert.Contains(t, onJoinMsg.Data.State.Players, game.PlayerId)
 }
 
 func (s *ServerTestSuite) TestGetCardPacks() {

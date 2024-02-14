@@ -67,7 +67,7 @@ func (c *WsConnection) listenAndHandle() error {
 		return err
 	}
 
-	state := RpcOnJoinMsg{Data: game.StateInfo()}
+	state := RpcOnJoinMsg(RpcOnJoinMsg{State: game.StateInfo()})
 	initialState, err := EncodeRpcMessage(state)
 	if err != nil {
 		return err

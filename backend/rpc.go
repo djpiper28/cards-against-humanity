@@ -15,6 +15,7 @@ const (
 
 type RpcMessageBody struct {
 	Type RpcMessageType `json:"type"`
+	Data any            `json:"data"`
 }
 
 type RpcMessage interface {
@@ -22,7 +23,7 @@ type RpcMessage interface {
 }
 
 func EncodeRpcMessage(msg RpcMessage) ([]byte, error) {
-	body := RpcMessageBody{Type: msg.Type()}
+	body := RpcMessageBody{Type: msg.Type(), Data: msg}
 	ret, err := json.Marshal(&body)
 	if err != nil {
 		return nil, err
@@ -31,7 +32,7 @@ func EncodeRpcMessage(msg RpcMessage) ([]byte, error) {
 }
 
 type RpcOnJoinMsg struct {
-	Data gameLogic.GameStateInfo `json:"data"`
+	State gameLogic.GameStateInfo `json:"state"`
 }
 
 func (msg RpcOnJoinMsg) Type() RpcMessageType {
