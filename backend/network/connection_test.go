@@ -1,4 +1,4 @@
-package main
+package network_test
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/djpiper28/cards-against-humanity/backend/network"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
@@ -23,10 +24,10 @@ type MockGlobalConnectionManager struct {
 	newConnectionCalled          bool
 	calledGameId, calledPlayerId uuid.UUID
 	calledConn                   *websocket.Conn
-	GlobalConnectionManager
+	network.IntegratedConnectionManager
 }
 
-func (gcm *MockGlobalConnectionManager) NewConnection(conn *websocket.Conn, gameId, playerId uuid.UUID) *WsConnection {
+func (gcm *MockGlobalConnectionManager) NewConnection(conn *websocket.Conn, gameId, playerId uuid.UUID) *network.WsConnection {
 	defer conn.Close()
 	gcm.calledGameId = gameId
 	gcm.calledPlayerId = playerId
@@ -68,7 +69,7 @@ func (s *WsUpgradeSuite) SetupSuite() {
 
 	log.Print("Starting ws server")
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		WsUpgrade(w, r, gid, pid, s.gcm)
+		network.WsUpgrade(w, r, gid, pid, s.gcm)
 	})
 	go http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", wsIntegrationTestPort), nil)
 

@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
+	"github.com/djpiper28/cards-against-humanity/backend/network"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -20,7 +21,7 @@ import (
 // @Success		200	{object}	[]gameLogic.GameInfo
 // @Router			/games/notFull [get]
 func getGames(c *gin.Context) {
-	games := GameRepo.GetGames()
+	games := network.GameRepo.GetGames()
 	info := make([]gameLogic.GameInfo, 0, len(games))
 
 	for _, game := range games {
@@ -91,7 +92,7 @@ func createGame(c *gin.Context) {
 		CardPacks:       packs,
 	}
 
-	gameId, playerId, err := GameRepo.CreateGame(&settings, createReq.PlayerName)
+	gameId, playerId, err := network.GameRepo.CreateGame(&settings, createReq.PlayerName)
 	if err != nil {
 		c.Error(err)
 		c.JSON(http.StatusInternalServerError, NewApiError(err))
@@ -147,7 +148,7 @@ func joinGame(c *gin.Context) {
 	}
 
 	// Join the game
-	err = GameRepo.JoinGame(gameId, playerId)
+	err = network.GameRepo.JoinGame(gameId, playerId)
 	if err != nil {
 		c.Error(err)
 		c.JSON(http.StatusNotFound, NewApiError(err))
@@ -155,7 +156,7 @@ func joinGame(c *gin.Context) {
 	}
 
 	// Attempt to upgrade the websocket
-	WsUpgrade(c.Writer, c.Request, gameId, playerId, globalConnectionManager)
+	network.WsUpgrade(c.Writer, c.Request, gameId, playerId, network.GlobalConnectionManager)
 }
 
 func SetupGamesEndpoints(r *gin.Engine) {

@@ -1,4 +1,4 @@
-package main
+package network
 
 import (
 	"errors"
@@ -15,9 +15,9 @@ type GameConnection struct {
 }
 
 // Manages all of the connections
-var globalConnectionManager = &GlobalConnectionManager{GameConnectionMap: make(map[uuid.UUID]*GameConnection)}
+var GlobalConnectionManager = &IntegratedConnectionManager{GameConnectionMap: make(map[uuid.UUID]*GameConnection)}
 
-type GlobalConnectionManager struct {
+type IntegratedConnectionManager struct {
 	// Maps a game ID to the game connection pool
 	GameConnectionMap map[uuid.UUID]*GameConnection
 	lock              sync.Mutex
@@ -29,7 +29,7 @@ type ConnectionManager interface {
 	Close(gameId, playerId uuid.UUID) error
 }
 
-func (g *GlobalConnectionManager) Close(gameId, playerId uuid.UUID) error {
+func (g *IntegratedConnectionManager) Close(gameId, playerId uuid.UUID) error {
 	g.lock.Lock()
 	defer g.lock.Unlock()
 
@@ -43,7 +43,7 @@ func (g *GlobalConnectionManager) Close(gameId, playerId uuid.UUID) error {
 	return nil
 }
 
-func (g *GlobalConnectionManager) RegisterConnection(gameId, playerId uuid.UUID, connection *WsConnection) {
+func (g *IntegratedConnectionManager) RegisterConnection(gameId, playerId uuid.UUID, connection *WsConnection) {
 	g.lock.Lock()
 	defer g.lock.Unlock()
 
@@ -58,7 +58,7 @@ func (g *GlobalConnectionManager) RegisterConnection(gameId, playerId uuid.UUID,
 	go connection.ListenAndHandle(g)
 }
 
-func (g *GlobalConnectionManager) UnregisterConnection(gameId, playerId uuid.UUID) {
+func (g *IntegratedConnectionManager) UnregisterConnection(gameId, playerId uuid.UUID) {
 	g.lock.Lock()
 	defer g.lock.Unlock()
 

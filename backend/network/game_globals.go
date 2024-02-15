@@ -1,4 +1,4 @@
-package main
+package network
 
 import (
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"

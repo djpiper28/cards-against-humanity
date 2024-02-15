@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
+	"github.com/djpiper28/cards-against-humanity/backend/network"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
@@ -60,7 +61,7 @@ func (s *ServerTestSuite) BeforeInitialGameCreateTest() {
 	t := s.T()
 	name := "Dave"
 
-	gid, pid, err := GameRepo.CreateGame(gameLogic.DefaultGameSettings(), name)
+	gid, pid, err := network.GameRepo.CreateGame(gameLogic.DefaultGameSettings(), name)
 	assert.Nil(t, err, "Should be able to make a game")
 	assert.NotEmpty(t, gid)
 	assert.NotEmpty(t, pid)

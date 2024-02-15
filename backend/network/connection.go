@@ -1,4 +1,4 @@
-package main
+package network
 
 import (
 	"errors"
@@ -46,7 +46,7 @@ func (gcm *WsConnection) Close() {
 	gcm.Conn.Close()
 }
 
-func (gcm *GlobalConnectionManager) NewConnection(conn *websocket.Conn, gameId, playerId uuid.UUID) *WsConnection {
+func (gcm *IntegratedConnectionManager) NewConnection(conn *websocket.Conn, gameId, playerId uuid.UUID) *WsConnection {
 	c := &WsConnection{Conn: &WebsocketConnection{Conn: conn},
 		PlayerId:     playerId,
 		GameId:       gameId,
@@ -90,7 +90,7 @@ func (c *WsConnection) listenAndHandle() error {
 	}
 }
 
-func (c *WsConnection) ListenAndHandle(g *GlobalConnectionManager) {
+func (c *WsConnection) ListenAndHandle(g *IntegratedConnectionManager) {
 	err := c.listenAndHandle()
 	if err != nil {
 		log.Printf("Error whilst handling websocket connection %s", err)

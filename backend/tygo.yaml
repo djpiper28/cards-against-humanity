@@ -1,5 +1,5 @@
 packages:
-  - path: "github.com/djpiper28/cards-against-humanity/backend"
+  - path: "github.com/djpiper28/cards-against-humanity/backend/network"
     type_mappings:
       time.Time: "string /* RFC3339 */"
       null.String: "null | string"

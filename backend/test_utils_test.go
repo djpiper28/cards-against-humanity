@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
+	"github.com/djpiper28/cards-against-humanity/backend/network"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -50,5 +51,5 @@ func DefaultGameSettings() GameCreateSettings {
 }
 
 type onJoinRpcMsg struct {
-	Data RpcOnJoinMsg `json:"data"`
+	Data network.RpcOnJoinMsg `json:"data"`
 }
