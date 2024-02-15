@@ -70,7 +70,7 @@ export default function Create() {
                 <Checkbox
                   checked={pack.checked}
                   label={`${pack.name} (${
-                    pack.whiteCards + pack.blackCards
+                    pack ? pack.whiteCards + pack.blackCards : 0
                   } Cards)`}
                   onSetChecked={(checked) => {
                     if (checked && !selectedPacks().includes(pack.id)) {
@@ -96,11 +96,11 @@ export default function Create() {
           {`You have added ${selectedPacks()
             .map((x) => packs().find((y) => y.id === x))
             .filter((x) => !!x)
-            .map((x) => x.whiteCards)
+            .map((x) => x?.whiteCards ?? 0)
             .reduce((a, b) => a + b, 0)} white cards and ${selectedPacks()
             .map((x) => packs().find((y) => y.id === x))
             .filter((x) => !!x)
-            .map((x) => x.blackCards)
+            .map((x) => x?.blackCards ?? 0)
             .reduce((a, b) => a + b, 0)} black cards.`}
         </p>
       </div>
@@ -178,10 +178,13 @@ export default function Create() {
               })
               .then((newGame) => {
                 console.log("Creating game for ", JSON.stringify(newGame.data));
-                cookieStorage.setItem(playerIdCookie, newGame.data.playerId);
+                cookieStorage.setItem(
+                  playerIdCookie,
+                  newGame.data.playerId ?? "error",
+                );
                 navigate(
                   `/join?${gameIdParam}=${encodeURIComponent(
-                    newGame.data.gameId,
+                    newGame.data.gameId ?? "error",
                   )}`,
                 );
               })
