@@ -81,7 +81,7 @@ export default function Create() {
                     newPacks[index()].checked = !pack.checked;
                     setPacks(newPacks);
                   }}
-                  secondary={/^CAH:.*$/i.test(pack.name ?? "")}
+                  secondary={/^CAH:?.*$/i.test(pack.name ?? "")}
                 />
               );
             }}
