@@ -4,19 +4,14 @@ import Checkbox from "../components/inputs/Checkbox";
 import Input, { InputType } from "../components/inputs/Input";
 import { useNavigate } from "@solidjs/router";
 import {
-  MaxPasswordLength,
   MaxPlayerNameLength,
   MinPlayerNameLength,
-  MinPlayers,
-  MaxPlayers,
-  MinPlayingToPoints,
-  MaxPlayingToPoints,
-  MinRounds,
-  MaxRounds,
+  GameSettings,
 } from "../gameLogicTypes";
 import { gameIdParam, playerIdCookie } from "../gameState/gameState";
 import { cookieStorage } from "@solid-primitives/storage";
 import { apiClient } from "../apiClient";
+import GameSettingsInput from "../components/gameControls/GameSettingsInput";
 
 interface Checked {
   checked: boolean;
@@ -37,13 +32,17 @@ export default function Create() {
     setPacks(cardPacksList.sort((a, b) => a.name.localeCompare(b.name)));
   });
 
+  const settings: GameSettings = {
+    gamePassword: "",
+    maxPlayers: 6,
+    maxRounds: 25,
+    playingToPoints: 10,
+    cardPacks: [],
+  };
   const [selectedPacks, setSelectedPacks] = createSignal<string[]>([]);
-  const [gamePassword, setGamePassword] = createSignal("");
-  const [maxPlayers, setMaxPlayers] = createSignal(6);
-  const [gameRounds, setGameRounds] = createSignal(25);
-  const [playingToPoints, setPlayingToPoints] = createSignal(10);
   const [playerName, setPlayerName] = createSignal("");
   const [errorMessage, setErrorMessage] = createSignal("");
+  const [gameSettings, setGameSettings] = createSignal(settings);
 
   const editPanelCss =
     "flex flex-col gap-5 rounded-2xl border-2 p-3 md:p-5 bg-gray-100";
@@ -107,72 +106,36 @@ export default function Create() {
 
       <div class={editPanelCss}>
         <h2 class={panelTitleCss}>Other Game Settings</h2>
-        <div class="flex flex-row flex-wrap gap-2 md:gap-1">
-          <Input
-            inputType={InputType.Text}
-            placeHolder="John Smith"
-            value={playerName()}
-            onChanged={setPlayerName}
-            label="Player Name"
-            autocomplete="name"
-            errorState={
-              playerName().length < MinPlayerNameLength ||
-              playerName().length > MaxPlayerNameLength
-            }
-          />
+        <Input
+          inputType={InputType.Text}
+          placeHolder="John Smith"
+          value={playerName()}
+          onChanged={setPlayerName}
+          label="Player Name"
+          autocomplete="name"
+          errorState={
+            playerName().length < MinPlayerNameLength ||
+            playerName().length > MaxPlayerNameLength
+          }
+        />
 
-          <Input
-            inputType={InputType.Text}
-            placeHolder="password"
-            value={gamePassword()}
-            onChanged={setGamePassword}
-            label="Game Password"
-            errorState={gamePassword().length > MaxPasswordLength}
-          />
-
-          <Input
-            inputType={InputType.PositiveNumber}
-            placeHolder="max players"
-            value={maxPlayers().toString()}
-            onChanged={(text) => setMaxPlayers(parseInt(text))}
-            label="Max Players"
-            errorState={maxPlayers() < MinPlayers || maxPlayers() > MaxPlayers}
-          />
-
-          <Input
-            inputType={InputType.PositiveNumber}
-            placeHolder="points to play to"
-            value={playingToPoints().toString()}
-            onChanged={(text) => setPlayingToPoints(parseInt(text))}
-            label="Points To Play To"
-            errorState={
-              playingToPoints() < MinPlayingToPoints ||
-              playingToPoints() > MaxPlayingToPoints
-            }
-          />
-
-          <Input
-            inputType={InputType.PositiveNumber}
-            placeHolder="max game rounds"
-            value={gameRounds().toString()}
-            onChanged={(text) => setGameRounds(parseInt(text))}
-            label="Max Game Rounds"
-            errorState={gameRounds() < MinRounds || gameRounds() > MaxRounds}
-          />
-        </div>
-
-        <p class="text-error-colour text-lg">{errorMessage()}</p>
+        <GameSettingsInput
+          settings={gameSettings()}
+          errorMessage={errorMessage()}
+          setSettings={setGameSettings}
+        />
 
         <button
           onclick={() => {
             apiClient.games
               .createCreate({
                 settings: {
-                  cardPacks: selectedPacks(),
-                  gamePassword: gamePassword(),
-                  maxPlayers: maxPlayers(),
-                  maxRounds: gameRounds(),
-                  playingToPoints: playingToPoints(),
+                  cardPacks:
+                    gameSettings().cardPacks.map((x) => x?.id ?? "") ?? [],
+                  gamePassword: gameSettings().gamePassword,
+                  maxPlayers: gameSettings().maxPlayers,
+                  maxRounds: gameSettings().maxRounds,
+                  playingToPoints: gameSettings().playingToPoints,
                 },
                 playerName: playerName(),
               })
