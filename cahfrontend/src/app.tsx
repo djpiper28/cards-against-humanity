@@ -7,7 +7,8 @@ const App: Component = () => {
 
   return (
     <div class="min-h-screen bg-gray-50">
-      <nav class="bg-gray-200 text-gray-900 px-4">
+      <nav class="flex flex-row gap-2 bg-gray-200 text-gray-900 px-4 items-center flex-wrap">
+        <span class="font-bold text-2xl">Cards Aginst Humanity</span>
         <ul class="flex items-center">
           <li class="py-2 px-4">
             <Link href="/" class="no-underline hover:underline">
