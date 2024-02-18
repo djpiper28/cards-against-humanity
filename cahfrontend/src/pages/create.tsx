@@ -3,15 +3,13 @@ import { For, createSignal, onMount } from "solid-js";
 import Checkbox from "../components/inputs/Checkbox";
 import Input, { InputType } from "../components/inputs/Input";
 import { useNavigate } from "@solidjs/router";
-import {
-  MaxPlayerNameLength,
-  MinPlayerNameLength,
-  GameSettings,
-} from "../gameLogicTypes";
+import { MaxPlayerNameLength, MinPlayerNameLength } from "../gameLogicTypes";
 import { gameIdParam, playerIdCookie } from "../gameState/gameState";
 import { cookieStorage } from "@solid-primitives/storage";
 import { apiClient } from "../apiClient";
-import GameSettingsInput from "../components/gameControls/GameSettingsInput";
+import GameSettingsInput, {
+  Settings,
+} from "../components/gameControls/GameSettingsInput";
 
 interface Checked {
   checked: boolean;
@@ -32,12 +30,11 @@ export default function Create() {
     setPacks(cardPacksList.sort((a, b) => a.name.localeCompare(b.name)));
   });
 
-  const settings: GameSettings = {
+  const settings: Settings = {
     gamePassword: "",
     maxPlayers: 6,
     maxRounds: 25,
     playingToPoints: 10,
-    cardPacks: [],
   };
   const [selectedPacks, setSelectedPacks] = createSignal<string[]>([]);
   const [playerName, setPlayerName] = createSignal("");
@@ -69,11 +66,11 @@ export default function Create() {
                 <Checkbox
                   checked={pack.checked}
                   label={`${pack.name} (${
-                    pack ? pack.whiteCards + pack.blackCards : 0
+                    pack ? (pack.whiteCards ?? 0) + (pack.blackCards ?? 0) : 0
                   } Cards)`}
                   onSetChecked={(checked) => {
-                    if (checked && !selectedPacks().includes(pack.id)) {
-                      setSelectedPacks([...selectedPacks(), pack.id]);
+                    if (checked && !selectedPacks().includes(pack.id ?? "")) {
+                      setSelectedPacks([...selectedPacks(), pack.id ?? ""]);
                     } else {
                       setSelectedPacks(
                         selectedPacks().filter((x) => x !== pack.id),
@@ -130,8 +127,7 @@ export default function Create() {
             apiClient.games
               .createCreate({
                 settings: {
-                  cardPacks:
-                    gameSettings().cardPacks.map((x) => x?.id ?? "") ?? [],
+                  cardPacks: selectedPacks(),
                   gamePassword: gameSettings().gamePassword,
                   maxPlayers: gameSettings().maxPlayers,
                   maxRounds: gameSettings().maxRounds,

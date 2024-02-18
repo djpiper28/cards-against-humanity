@@ -10,9 +10,11 @@ import {
   GameSettings,
 } from "../../gameLogicTypes";
 
+export type Settings = Omit<GameSettings, 'cardPacks'>
+
 interface Props {
-  settings: GameSettings;
-  setSettings: (settings: GameSettings) => void;
+  settings: Settings;
+  setSettings: (settings: Settings) => void;
   errorMessage: string;
 }
 
