@@ -30,6 +30,6 @@ describe("Game state tests", () => {
     const pid = v4();
     gameState.setupState(gid, pid);
     expect(gameState.validate()).toBeTruthy();
-    expect(WebSocket).toHaveBeenCalledWith(wsBaseUrl);
+    expect(WebSocket).toHaveBeenCalledWith(`${wsBaseUrl}?game_id=${gid}&player_id=${pid}`);
   });
 });
