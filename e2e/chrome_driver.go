@@ -1,35 +1,22 @@
 package main
 
 import (
-	"log"
-	"os"
-	"time"
-
 	"github.com/go-rod/rod"
-	"github.com/go-rod/rod/lib/devices"
-	"github.com/go-rod/rod/lib/launcher"
+	"log"
 )
 
 func GetBrowser() *rod.Browser {
-	headless := os.Getenv("HEADLESS") != "false"
-	log.Printf("Starting new browser, headless: %v", headless)
-	l := launcher.New().
-		Leakless(true).
-		Headless(headless)
-
-	url := l.MustLaunch()
-	b := rod.New().
-		MustConnect().
-		DefaultDevice(devices.LaptopWithHiDPIScreen).
-		ControlURL(url)
-
-	if !headless {
-		b.Timeout(time.Second * 5).
-			Trace(true)
-	}
-	return b
+	return rod.New().
+		MustConnect()
 }
 
 func GetInputByLabel(p *rod.Page, label string) *rod.Element {
-	return p.MustElementR("label", label).MustElement("input")
+	defer func() {
+		const fname = "./error.png"
+		if recover() != nil {
+			log.Printf("Error getting input by label '%s', %s was saved", label, fname)
+			p.MustScreenshotFullPage(fname)
+		}
+	}()
+	return p.Timeout(Timeout).MustElementR("label", label).MustElement("input")
 }
