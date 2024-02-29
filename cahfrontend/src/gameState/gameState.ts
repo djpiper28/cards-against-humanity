@@ -24,8 +24,12 @@ class GameState {
      */
     const ws: WebSocket = new WebSocket(wsBaseUrl);
     this.wsClient = toWebSocketClient(ws, {
-      onDisconnect: () => {},
-      onConnect: () => {},
+      onDisconnect: () => {
+        console.error("Disconnected from the game server");
+      },
+      onConnect: () => {
+        console.log("Connected to the game server");
+      },
       onReceive: (msg: string) => {
         this.handleRpcMessage(msg);
       },
