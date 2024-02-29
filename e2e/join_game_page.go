@@ -7,9 +7,7 @@ import (
 )
 
 type JoinGamePage struct {
-	Page     *rod.Page
-	GameId   string
-	PlayerId string
+	Page *rod.Page
 }
 
 const PlayerIdCookie = "playerId"
@@ -24,4 +22,9 @@ func NewJoinGamePage(b *rod.Browser, gameId string) CreateGamePage {
 		url,
 		gameId)
 	return CreateGamePage{Page: b.MustPage(url).MustWaitStable()}
+}
+
+func (page *JoinGamePage) InLobby() bool {
+	_, err := page.Page.ElementR("h1", "LOADED")
+	return err == nil
 }

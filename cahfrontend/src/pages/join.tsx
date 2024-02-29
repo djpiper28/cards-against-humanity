@@ -3,9 +3,11 @@ import { gameIdParam, gameState, playerIdCookie } from "../gameState/gameState";
 import { onMount, createSignal } from "solid-js";
 import { cookieStorage } from "@solid-primitives/storage";
 import LoadingSlug from "../components/loading/LoadingSlug";
+import GameLobby from "../components/gameControls/GameLobby";
 
 export default function Join() {
   const [searchParams] = useSearchParams();
+  const [connected, setConnected] = createSignal(false);
   const navigate = useNavigate();
 
   onMount(() => {
@@ -21,12 +23,24 @@ export default function Join() {
       return;
     }
 
-    gameState.setupState(gameId, playerId);
+    try {
+      gameState.setupState(gameId, playerId);
+      setConnected(true);
+    } catch (e) {
+      console.error(`Cannot setup the connection ${e}`);
+      navigate("/");
+    }
   });
 
   return (
-    <div class="flex flex-grow justify-center items-center text-2xl">
-      Joining the game <LoadingSlug />
-    </div>
+    <>
+      {connected() ? (
+        <GameLobby />
+      ) : (
+        <div class="flex flex-grow justify-center items-center text-2xl">
+          Connecting to the game server <LoadingSlug />
+        </div>
+      )}
+    </>
   );
 }

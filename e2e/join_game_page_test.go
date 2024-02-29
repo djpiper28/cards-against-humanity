@@ -6,14 +6,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const timeout = time.Millisecond * 200
-
 func (s *WithServicesSuite) TestJoinGameRedirectsOnEmptyGameId() {
 	t := s.T()
 	t.Parallel()
 
 	joinGame := NewJoinGamePage(GetBrowser(), "")
-	time.Sleep(timeout)
+	time.Sleep(Timeout)
 	assert.Equal(t, GetBasePage(), joinGame.Page.MustInfo().URL)
 }
 
@@ -23,6 +21,6 @@ func (s *WithServicesSuite) TestJoinGameRedirectsOnEmptyPlayerId() {
 
 	gameId := "testing123"
 	joinGame := NewJoinGamePage(GetBrowser(), gameId)
-	time.Sleep(timeout)
+	time.Sleep(Timeout)
 	assert.Equal(t, GetBasePage()+"player-join?gameId="+gameId, joinGame.Page.MustInfo().URL)
 }

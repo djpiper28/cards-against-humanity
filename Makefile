@@ -21,6 +21,7 @@ frontend-tygo:
 frontend-types: frontend-tygo frontend-api 
 	echo "Generated types"
 
+.PHONY: frontend-storybook
 frontend-storybook: frontend-install
 	cd ./cahfrontend && pnpm run build-storybook
 
@@ -34,14 +35,17 @@ backend: swagger
 	cd ./backend/ && go build
 
 # Tests
+.PHONY: test-frontend
 test-frontend: frontend-types
 	cd ./cahfrontend && pnpm run test
 	
-GO_TEST_ARGS=-v -benchmem -parallel 16 ./... -covermode=atomic -coverprofile=coverage.out
+GO_TEST_ARGS=-v -benchmem -parallel 16 ./... -covermode=atomic -coverprofile=coverage.out -timeout 20s
 
+.PHONY: test-backend
 test-backend: backend
 	cd ./backend/ &&	go test './...' ${GO_TEST_ARGS}
 
+.PHONY: test-e2e
 test-e2e: frontend test-backend
 	cd ./e2e/ && go test './...' ${GO_TEST_ARGS}
 
@@ -54,12 +58,15 @@ bench: backend
 	cd ./backend/ && go test '-bench=./...'
 
 # Formatters
+.PHONY: e2e-fmt
 e2e-fmt:
 	cd ./e2e/ && gofmt -l -w .
 
+.PHONY: backend-fmt
 backend-fmt:
 	cd ./backend/ && swag fmt && gofmt -l -w .
 
+.PHONY: frontend-fmt
 frontend-fmt:
 	cd ./cahfrontend/ && prettier -w .
 

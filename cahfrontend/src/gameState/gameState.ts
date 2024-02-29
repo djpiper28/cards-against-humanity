@@ -1,4 +1,4 @@
-import { GameSettings, GameStateInfo } from "../gameLogicTypes";
+import { GameStateInfo } from "../gameLogicTypes";
 import { MsgOnJoin, RpcMessageBody, RpcOnJoinMsg } from "../rpcTypes";
 import { WebSocketClient, toWebSocketClient } from "./websocketClient";
 import { wsBaseUrl } from "../apiClient";
@@ -8,22 +8,31 @@ export const playerIdCookie = "playerId";
 export const gameIdParam = "gameId";
 
 class GameState {
-  constructor() {}
   private gameId: string = "";
   private playerId: string = "";
   private setup: boolean = false;
-  private gameSettings?: GameSettings = undefined;
   private wsClient: WebSocketClient;
-  private state: GameStateInfo;
+  private state?: GameStateInfo;
+
+  // Events
+  public onStateChange?: (state?: GameStateInfo) => void;
+
+  // Logic lmao
+  constructor() {}
 
   public setupState(gameId: string, playerId: string) {
     this.gameId = gameId;
     this.playerId = playerId;
 
+    const url = `${wsBaseUrl}?game_id=${encodeURIComponent(
+      gameId,
+    )}&player_id=${encodeURIComponent(playerId)}`;
+    console.log(`Connecting to ${url}`);
+
     /**
      * Mock new WebSocket when testing
      */
-    const ws: WebSocket = new WebSocket(wsBaseUrl);
+    const ws: WebSocket = new WebSocket(url);
     this.wsClient = toWebSocketClient(ws, {
       onDisconnect: () => {
         console.error("Disconnected from the game server");
@@ -36,6 +45,7 @@ class GameState {
       },
     });
 
+    console.log("State Setup");
     this.setup = true;
   }
 
@@ -46,11 +56,21 @@ class GameState {
     return true;
   }
 
+  private setState(state: GameStateInfo) {
+    this.state = state;
+    this.emitState();
+  }
+
+  public emitState() {
+    this.onStateChange?.(structuredClone(this.state));
+  }
+
   private handleOnJoin(msg: RpcOnJoinMsg) {
     this.state = msg.state as GameStateInfo;
   }
 
   private handleRpcMessage(msg: string): void {
+    console.log(`Received a message ${msg}`);
     const rpcMessage = JSON.parse(msg) as RpcMessageBody;
     switch (rpcMessage.type) {
       case MsgOnJoin:

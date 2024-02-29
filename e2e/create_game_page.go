@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"github.com/go-rod/rod"
 )
@@ -13,7 +14,11 @@ type CreateGamePage struct {
 func NewCreateGamePage(b *rod.Browser) CreateGamePage {
 	url := GetBasePage() + "create"
 	log.Printf("Create Game Page: %s", url)
-	return CreateGamePage{Page: b.MustPage(url).MustWaitStable()}
+	createGamePage := CreateGamePage{Page: b.MustPage(url)}
+
+	time.Sleep(Timeout)
+	createGamePage.Page.MustWaitStable()
+	return createGamePage
 }
 
 const (
@@ -51,4 +56,6 @@ func (c *CreateGamePage) InsertDefaultValidSettings() {
 	c.MaxPlayers().MustInput("4")
 	c.PointsToPlayTo().MustInput("4")
 	c.MaxGameRounds().MustInput("20")
+
+	GetInputByLabel(c.Page, "CAH Base Set (1557 Cards)").MustClick()
 }

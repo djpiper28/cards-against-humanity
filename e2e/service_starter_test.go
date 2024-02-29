@@ -12,6 +12,7 @@ import (
 )
 
 const frontendUrl = "http://localhost:3000/"
+const Timeout = time.Millisecond * 200
 
 func testFrontend() error {
 	_, err := http.Get(frontendUrl)
