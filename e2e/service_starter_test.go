@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"net/url"
 	"os/exec"
 	"testing"
 	"time"
@@ -107,4 +108,12 @@ func TestWithServicesSuite(t *testing.T) {
 
 func GetBasePage() string {
 	return frontendUrl
+}
+
+func GetDomain() string {
+	url, err := url.Parse(frontendUrl)
+	if err != nil {
+		log.Fatalf("Cannot get domain for base url: %s", err)
+	}
+	return url.Host
 }
