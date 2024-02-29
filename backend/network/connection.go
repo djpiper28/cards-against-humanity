@@ -12,9 +12,14 @@ import (
 
 const wsBufferSize = 1024
 
+func wsOriginChecker(_ *http.Request) bool {
+	return true
+}
+
 var wsupgrader = websocket.Upgrader{
 	ReadBufferSize:  wsBufferSize,
 	WriteBufferSize: wsBufferSize,
+	CheckOrigin:     wsOriginChecker,
 }
 
 func WsUpgrade(w http.ResponseWriter, r *http.Request, gameId, playerId uuid.UUID, cm ConnectionManager) (*WsConnection, error) {
