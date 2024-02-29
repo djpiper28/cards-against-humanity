@@ -6,7 +6,7 @@ const App: Component = () => {
   const Route = useRoutes(routes);
 
   return (
-    <div class="min-h-screen bg-gray-50">
+    <div class="flex flex-col min-h-screen bg-gray-50">
       <nav class="flex flex-row gap-2 bg-gray-200 text-gray-900 px-4 items-center flex-wrap">
         <span class="font-bold text-2xl">Cards Aginst Humanity</span>
         <ul class="flex items-center">
@@ -23,7 +23,7 @@ const App: Component = () => {
         </ul>
       </nav>
 
-      <main class="p-2 md:p-5 flex flex-col w-full gap-5">
+      <main class="p-2 md:p-5 flex flex-col w-full gap-5 flex-grow">
         <Route />
       </main>
     </div>
