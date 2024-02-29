@@ -10,9 +10,9 @@ type CreateGamePage struct {
 	Page *rod.Page
 }
 
-func NewCreatePagePage(b *rod.Browser) CreateGamePage {
+func NewCreateGamePage(b *rod.Browser) CreateGamePage {
 	url := GetBasePage() + "create"
-	log.Printf("Create Game Page page: %s", url)
+	log.Printf("Create Game Page: %s", url)
 	return CreateGamePage{Page: b.MustPage(url).MustWaitStable()}
 }
 
