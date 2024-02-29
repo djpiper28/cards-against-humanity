@@ -57,5 +57,5 @@ func (c *CreateGamePage) InsertDefaultValidSettings() {
 	c.PointsToPlayTo().MustInput("4")
 	c.MaxGameRounds().MustInput("20")
 
-	GetInputByLabel(c.Page, "CAH Base Set (1557 Cards)").MustClick()
+	GetInputByLabel(c.Page, "/CAH Base Set.*/i").MustClick()
 }
