@@ -1,5 +1,5 @@
-import { GameSettings } from "../gameLogicTypes";
-import { RpcMessageBody } from "../rpcTypes";
+import { GameSettings, GameStateInfo } from "../gameLogicTypes";
+import { MsgOnJoin, RpcMessageBody, RpcOnJoinMsg } from "../rpcTypes";
 import { WebSocketClient, toWebSocketClient } from "./websocketClient";
 import { wsBaseUrl } from "../apiClient";
 import WebSocket from "isomorphic-ws";
@@ -14,6 +14,7 @@ class GameState {
   private setup: boolean = false;
   private gameSettings?: GameSettings = undefined;
   private wsClient: WebSocketClient;
+  private state: GameStateInfo;
 
   public setupState(gameId: string, playerId: string) {
     this.gameId = gameId;
@@ -45,9 +46,15 @@ class GameState {
     return true;
   }
 
+  private handleOnJoin(msg: RpcOnJoinMsg) {
+    this.state = msg.state as GameStateInfo;
+  }
+
   private handleRpcMessage(msg: string): void {
     const rpcMessage = JSON.parse(msg) as RpcMessageBody;
     switch (rpcMessage.type) {
+      case MsgOnJoin:
+        return this.handleOnJoin(rpcMessage.data as RpcOnJoinMsg);
       default:
         throw new Error(
           `Cannot handle RPC message as type is not valid ${rpcMessage.type}`,
