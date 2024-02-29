@@ -8,14 +8,13 @@ const App: Component = () => {
   return (
     <div class="flex flex-col min-h-screen bg-gray-50">
       <nav class="flex flex-row gap-2 bg-gray-200 text-gray-900 px-4 items-center flex-wrap">
-        <span class="font-bold text-2xl">Cards Aginst Humanity</span>
-        <ul class="flex items-center">
-          <li class="py-2 px-4">
+        <ul class="flex flex-row flex-grow justify-between items-center py-2 gap-2">
+          <li>
             <Link href="/" class="no-underline hover:underline">
-              Home
+              <span class="font-bold text-3xl">Cards Aginst Humanity</span>
             </Link>
           </li>
-          <li class="py-2 px-4">
+          <li>
             <Link href="/about" class="no-underline hover:underline">
               About
             </Link>
