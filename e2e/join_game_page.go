@@ -25,6 +25,6 @@ func NewJoinGamePage(b *rod.Browser, gameId string) CreateGamePage {
 }
 
 func (page *JoinGamePage) InLobby() bool {
-	_, err := page.Page.ElementR("h1", "LOADED")
+	_, err := page.Page.ElementR("h1", "/loaded/i")
 	return err == nil
 }
