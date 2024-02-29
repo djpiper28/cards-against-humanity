@@ -18,9 +18,7 @@ func GetJoinGameUrl() string {
 
 func NewJoinGamePage(b *rod.Browser, gameId string) CreateGamePage {
 	url := GetJoinGameUrl() + "?gameId=" + gameId
-	log.Printf("Join Game page: %s, gameId: %s",
-		url,
-		gameId)
+  log.Printf("Join Game page: %s", url)
 	return CreateGamePage{Page: b.MustPage(url).MustWaitStable()}
 }
 
