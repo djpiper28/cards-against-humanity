@@ -41,20 +41,30 @@ export default function Create() {
   const [errorMessage, setErrorMessage] = createSignal("");
   const [gameSettings, setGameSettings] = createSignal(settings);
 
+  const whiteCards = (): number => {
+    return selectedPacks()
+      .map((x) => packs().find((y) => y.id === x))
+      .filter((x) => !!x)
+      .map((x) => x?.whiteCards ?? 0)
+      .reduce((a, b) => a + b, 0);
+  };
+  const blackCards = (): number => {
+    return selectedPacks()
+      .map((x) => packs().find((y) => y.id === x))
+      .filter((x) => !!x)
+      .map((x) => x?.whiteCards ?? 0)
+      .reduce((a, b) => a + b, 0);
+  };
+
   const editPanelCss =
     "flex flex-col gap-5 rounded-2xl border-2 p-3 md:p-5 bg-gray-100";
-  const panelTitleCss = "text-xl";
+  const panelTitleCss = () =>
+    `text-xl ${blackCards() + whiteCards() === 0 ? "text-error-colour font-bold" : "text-black"}`;
   return (
     <>
-      <h1 class="text-2xl font-bold">
-        Create A Game of Cards Against Humanity
-      </h1>
+      <h1 class="text-2xl font-bold">Create A Game</h1>
       <div class={editPanelCss}>
-        <h2
-          class={`${panelTitleCss} ${
-            selectedPacks().length === 0 ? "text-error-colour" : ""
-          }`}
-        >
+        <h2 class={`${panelTitleCss()}`}>
           {`Choose Some Card Packs ${
             selectedPacks().length === 0 ? "(No Packs Selected)" : ""
           }`}
@@ -88,21 +98,13 @@ export default function Create() {
           </For>
         </div>
 
-        <p class={panelTitleCss}>
-          {`You have added ${selectedPacks()
-            .map((x) => packs().find((y) => y.id === x))
-            .filter((x) => !!x)
-            .map((x) => x?.whiteCards ?? 0)
-            .reduce((a, b) => a + b, 0)} white cards and ${selectedPacks()
-            .map((x) => packs().find((y) => y.id === x))
-            .filter((x) => !!x)
-            .map((x) => x?.blackCards ?? 0)
-            .reduce((a, b) => a + b, 0)} black cards.`}
+        <p class={panelTitleCss()}>
+          {`You have added ${whiteCards()} white cards and ${blackCards()} black cards.`}
         </p>
       </div>
 
       <div class={editPanelCss}>
-        <h2 class={panelTitleCss}>Other Game Settings</h2>
+        <h2 class={panelTitleCss()}>Other Game Settings</h2>
         <Input
           inputType={InputType.Text}
           placeHolder="John Smith"
