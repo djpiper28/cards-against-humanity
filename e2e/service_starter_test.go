@@ -65,6 +65,8 @@ type WithServicesSuite struct {
 func (s *WithServicesSuite) startFrontend() {
 	log.Println("Starting frontend")
 	s.frontendProcess = exec.Command("./e2e-start.sh")
+  s.frontendProcess.Stdout = log.Writer()
+  s.frontendProcess.Stderr = log.Writer()
 	err := s.frontendProcess.Start()
 	if err != nil {
 		log.Fatalf("Cannot start frontend: %s", err)
@@ -75,6 +77,8 @@ func (s *WithServicesSuite) startFrontend() {
 func (s *WithServicesSuite) startBackend() {
 	log.Println("Starting backend")
 	s.backendProcess = exec.Command("../backend/backend")
+  s.backendProcess.Stdout = log.Writer()
+  s.backendProcess.Stderr = log.Writer()
 	err := s.backendProcess.Start()
 	if err != nil {
 		log.Fatalf("Cannot start backend: %s", err)

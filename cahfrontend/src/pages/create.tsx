@@ -20,14 +20,20 @@ type CardPack = GameLogicCardPack & Checked;
 export default function Create() {
   const navigate = useNavigate();
   const [packs, setPacks] = createSignal<CardPack[]>([]);
+  const [errorMessage, setErrorMessage] = createSignal("");
   onMount(async () => {
-    const packs = await apiClient.res.packsList();
-    const cardPacksList: CardPack[] = [];
-    const packData = packs.data;
-    for (let cardId in packData) {
-      cardPacksList.push({ ...packData[cardId], checked: false });
+    try {
+      const packs = await apiClient.res.packsList();
+      const cardPacksList: CardPack[] = [];
+      const packData = packs.data;
+      for (let cardId in packData) {
+        cardPacksList.push({ ...packData[cardId], checked: false });
+      }
+      setPacks(cardPacksList.sort((a, b) => a.name.localeCompare(b.name)));
+    } catch (err) {
+      console.error(err);
+      setErrorMessage(`Error getting card packs: ${err}`);
     }
-    setPacks(cardPacksList.sort((a, b) => a.name.localeCompare(b.name)));
   });
 
   const settings: Settings = {
@@ -38,7 +44,6 @@ export default function Create() {
   };
   const [selectedPacks, setSelectedPacks] = createSignal<string[]>([]);
   const [playerName, setPlayerName] = createSignal("");
-  const [errorMessage, setErrorMessage] = createSignal("");
   const [gameSettings, setGameSettings] = createSignal(settings);
 
   const whiteCards = (): number => {
