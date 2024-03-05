@@ -64,9 +64,9 @@ func (c *CreateGamePage) InsertDefaultValidSettings() {
 	c.PlayerName().Input("Steve")
 	c.GamePasssowrd().Input("poop")
 
-	GetInputByLabel(c.Page, "/.*CAH:? Base Set.*/").MustClick()
+	GetInputByLabel(c.Page, "/.*CAH:? Base Set.*/").Timeout(Timeout).MustClick()
 }
 
 func (c *CreateGamePage) CreateGame() {
-	c.Page.MustElementR("button", "Create Game").MustClick()
+	c.Page.Timeout(Timeout).MustElementR("button", "/Create Game/i").MustClick()
 }

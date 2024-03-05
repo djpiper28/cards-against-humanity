@@ -20,13 +20,11 @@ func (s *WithServicesSuite) TestCreateGamePageDefaultInput() {
 	page.InsertDefaultValidSettings()
 	page.Page.MustScreenshotFullPage("../wiki/assets/create_game_default_input.png")
 
+  log.Print("Creating game")
 	page.CreateGame()
 
 	time.Sleep(Timeout)
-	log.Print(page.Page.MustInfo().URL)
-
-	page.Page.MustScreenshotFullPage("error.png")
-	assert.True(s.T(), strings.Contains(page.Page.MustInfo().URL, "/join?gameId="))
+	assert.True(s.T(), strings.Contains(page.Page.Timeout(Timeout).MustInfo().URL, "/join?gameId="))
 
 	lobbyPage := JoinGamePage{Page: page.Page}
 	assert.True(s.T(), lobbyPage.InLobby())
