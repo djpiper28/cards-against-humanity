@@ -1,12 +1,17 @@
 package main
 
 import (
-	"github.com/go-rod/rod"
 	"log"
+	"time"
+
+	"github.com/go-rod/rod"
 )
+
+const actionDelay = time.Millisecond * 100
 
 func GetBrowser() *rod.Browser {
 	return rod.New().
+		SlowMotion(actionDelay).
 		MustConnect()
 }
 

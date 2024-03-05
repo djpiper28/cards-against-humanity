@@ -29,7 +29,10 @@ export default function Create() {
       for (let cardId in packData) {
         cardPacksList.push({ ...packData[cardId], checked: false });
       }
-      setPacks(cardPacksList.sort((a, b) => a.name.localeCompare(b.name)));
+      setPacks(cardPacksList.sort((a, b) => {
+        if ((!a.name) || (!b.name)) return 0;
+        return a.name.localeCompare(b.name);
+      }));
     } catch (err) {
       console.error(err);
       setErrorMessage(`Error getting card packs: ${err}`);
