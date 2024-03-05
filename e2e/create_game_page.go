@@ -49,13 +49,24 @@ func (c *CreateGamePage) MaxGameRounds() *rod.Element {
 	return GetInputByLabel(c.Page, createGameInputMaxGameRounds)
 }
 
+func (c *CreateGamePage) ClearInputs() {
+	c.PlayerName().Input("")
+	c.GamePasssowrd().Input("")
+	c.MaxPlayers().Input("")
+	c.PointsToPlayTo().Input("")
+	c.PointsToPlayTo().Input("")
+}
+
 // Inserts the default valid settings into the form
 func (c *CreateGamePage) InsertDefaultValidSettings() {
-	c.PlayerName().MustInput("Steve")
-	c.GamePasssowrd().MustInput("poop")
-	c.MaxPlayers().MustInput("4")
-	c.PointsToPlayTo().MustInput("4")
-	c.MaxGameRounds().MustInput("20")
+	c.ClearInputs()
 
-	GetInputByLabel(c.Page, "/CAH Base Set.*/i").MustClick()
+	c.PlayerName().Input("Steve")
+	c.GamePasssowrd().Input("poop")
+
+	GetInputByLabel(c.Page, "/.*CAH:? Base Set.*/").MustClick()
+}
+
+func (c *CreateGamePage) CreateGame() {
+	c.Page.MustElementR("button", "Create Game").MustClick()
 }
