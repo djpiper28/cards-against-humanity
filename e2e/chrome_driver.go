@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/go-rod/rod"
 	"log"
+
+	"github.com/go-rod/rod"
 )
 
 func GetBrowser() *rod.Browser {

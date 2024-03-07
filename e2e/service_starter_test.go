@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"os/exec"
 	"testing"
 	"time"
@@ -65,6 +66,8 @@ type WithServicesSuite struct {
 func (s *WithServicesSuite) startFrontend() {
 	log.Println("Starting frontend")
 	s.frontendProcess = exec.Command("./e2e-start.sh")
+	s.frontendProcess.Stdout = os.Stdout
+	s.frontendProcess.Stderr = os.Stderr
 	err := s.frontendProcess.Start()
 	if err != nil {
 		log.Fatalf("Cannot start frontend: %s", err)
@@ -75,11 +78,21 @@ func (s *WithServicesSuite) startFrontend() {
 func (s *WithServicesSuite) startBackend() {
 	log.Println("Starting backend")
 	s.backendProcess = exec.Command("../backend/backend")
+	s.backendProcess.Stdout = os.Stdout
+	s.backendProcess.Stderr = os.Stderr
+	s.backendProcess.Env = append(s.backendProcess.Env, "PORT=8080")
 	err := s.backendProcess.Start()
 	if err != nil {
 		log.Fatalf("Cannot start backend: %s", err)
 	}
 	log.Println("Started backend")
+
+	go func() {
+		err := s.backendProcess.Wait()
+		if err != nil {
+			log.Printf("Backend exited with err: %s", err)
+		}
+	}()
 }
 
 func (s *WithServicesSuite) SetupSuite() {
@@ -93,17 +106,17 @@ func (s *WithServicesSuite) SetupSuite() {
 }
 
 func (s *WithServicesSuite) TearDownSuite() {
-	log.Print("Shutting down test services")
+	log.Print("Shutting down test services...")
 	if err := s.backendProcess.Process.Kill(); err != nil {
 		log.Printf("Cannot kill backend: %s", err)
 	}
+
 	if err := s.frontendProcess.Process.Kill(); err != nil {
 		log.Printf("Cannot kill frontend: %s", err)
 	}
 }
 
 func TestWithServicesSuite(t *testing.T) {
-	t.Parallel()
 	suite.Run(t, new(WithServicesSuite))
 }
 

@@ -8,7 +8,6 @@ import (
 
 func (s *WithServicesSuite) TestJoinGameRedirectsOnEmptyGameId() {
 	t := s.T()
-	t.Parallel()
 
 	joinGame := NewJoinGamePage(GetBrowser(), "")
 	time.Sleep(Timeout)
@@ -17,7 +16,6 @@ func (s *WithServicesSuite) TestJoinGameRedirectsOnEmptyGameId() {
 
 func (s *WithServicesSuite) TestJoinGameRedirectsOnEmptyPlayerId() {
 	t := s.T()
-	t.Parallel()
 
 	gameId := "testing123"
 	joinGame := NewJoinGamePage(GetBrowser(), gameId)

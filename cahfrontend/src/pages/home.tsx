@@ -22,9 +22,6 @@ export default function Home() {
 
   return (
     <>
-      <div class="flex w-full justify-center">
-        <h1 class="text-4xl lg:text-5xl font-bold">Cards Against Humanity</h1>
-      </div>
       <button class="w-min" onClick={() => navigate("/create")}>
         <Card
           isWhite={false}
@@ -32,6 +29,9 @@ export default function Home() {
           packName="Click me to make a game"
         />
       </button>
+      <h1 class="text-3xl">
+        {currentGames().length === 0 ? "No games in progress" : "Join a Game"}
+      </h1>
       <div class="flex flex-row flex-wrap gap-5">
         <For each={currentGames()}>
           {(game, _) => (
