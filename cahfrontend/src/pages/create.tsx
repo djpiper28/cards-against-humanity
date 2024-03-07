@@ -10,6 +10,7 @@ import { apiClient } from "../apiClient";
 import GameSettingsInput, {
   Settings,
 } from "../components/gameControls/GameSettingsInput";
+import { validate as validateGameSettings } from "../components/gameControls/GameSettingsInputValidation";
 
 interface Checked {
   checked: boolean;
@@ -136,6 +137,11 @@ export default function Create() {
 
         <button
           onclick={() => {
+            if (!validateGameSettings(settings)) {
+              console.error("The game settings are invalid")
+              return;
+            }
+
             apiClient.games
               .createCreate({
                 settings: {
