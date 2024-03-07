@@ -87,3 +87,28 @@ export default function GameSettingsInput(props: Readonly<Props>) {
     </div>
   );
 }
+
+export function validateGamePassword(password: string): boolean {
+  return password.length <= MaxPasswordLength;
+}
+
+export function validateMaxPlayers(maxPlayers: number): boolean {
+  return maxPlayers >= MinPlayers && maxPlayers <= MaxPlayers;
+}
+
+export function validatePointsToPlayTo(points: number): boolean {
+  return points >= MinPlayingToPoints && points <= MaxPlayingToPoints;
+}
+
+export function validateMaxGameRounds(maxRounds: number): boolean {
+  return maxRounds >= MinRounds && maxRounds <= MaxRounds;
+}
+
+export function validate(settings: Settings): boolean {
+  return (
+    validateGamePassword(settings.gamePassword) &&
+    validateMaxPlayers(settings.maxPlayers) &&
+    validatePointsToPlayTo(settings.playingToPoints) &&
+    validateMaxGameRounds(settings.maxRounds)
+  );
+}
