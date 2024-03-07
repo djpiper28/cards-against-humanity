@@ -31,7 +31,7 @@ export default function GameSettingsInput(props: Readonly<Props>) {
             props.setSettings(props.settings);
           }}
           label="Game Password"
-          errorState={props.settings.gamePassword.length > MaxPasswordLength}
+          errorState={!validateGamePassword(props.settings.gamePassword)}
         />
 
         <Input
@@ -44,10 +44,7 @@ export default function GameSettingsInput(props: Readonly<Props>) {
             props.setSettings(props.settings);
           }}
           label="Max Players"
-          errorState={
-            props.settings.maxPlayers < MinPlayers ||
-            props.settings.maxPlayers > MaxPlayers
-          }
+          errorState={!validateMaxPlayers(props.settings.maxPlayers)}
         />
 
         <Input
@@ -60,10 +57,7 @@ export default function GameSettingsInput(props: Readonly<Props>) {
             props.setSettings(props.settings);
           }}
           label="Points To Play To"
-          errorState={
-            props.settings.playingToPoints < MinPlayingToPoints ||
-            props.settings.playingToPoints > MaxPlayingToPoints
-          }
+          errorState={!validatePointsToPlayTo(props.settings.playingToPoints)}
         />
 
         <Input
@@ -76,10 +70,7 @@ export default function GameSettingsInput(props: Readonly<Props>) {
             props.setSettings(props.settings);
           }}
           label="Max Game Rounds"
-          errorState={
-            props.settings.maxRounds < MinRounds ||
-            props.settings.maxRounds > MaxRounds
-          }
+          errorState={!validateMaxGameRounds(props.settings.maxRounds)}
         />
       </div>
 
@@ -102,13 +93,4 @@ export function validatePointsToPlayTo(points: number): boolean {
 
 export function validateMaxGameRounds(maxRounds: number): boolean {
   return maxRounds >= MinRounds && maxRounds <= MaxRounds;
-}
-
-export function validate(settings: Settings): boolean {
-  return (
-    validateGamePassword(settings.gamePassword) &&
-    validateMaxPlayers(settings.maxPlayers) &&
-    validatePointsToPlayTo(settings.playingToPoints) &&
-    validateMaxGameRounds(settings.maxRounds)
-  );
 }
