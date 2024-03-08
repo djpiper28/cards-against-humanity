@@ -138,7 +138,7 @@ export default function Create() {
         <button
           onclick={() => {
             if (!validateGameSettings(settings)) {
-              console.error("The game settings are invalid")
+              console.error("The game settings are invalid");
               return;
             }
 
