@@ -20,7 +20,7 @@ pipeline {
 
         stage('Build Frontend') {
             steps {
-              sh 'chmod -R 755 .'
+              sh 'mkdir -p backend/docs'
               sh 'sh jenkinsBuild.sh'
           }
         }
