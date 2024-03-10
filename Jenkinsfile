@@ -20,7 +20,7 @@ pipeline {
 
         stage('Build Frontend') {
             steps {
-              sh 'export PATH=/var/lib/jenkins/go/bin:$PATH && make frontend -j'
+              sh 'sh jenkinsBuild.sh'
           }
         }
 
