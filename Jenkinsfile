@@ -20,7 +20,6 @@ pipeline {
 
         stage('Build Frontend') {
             steps {
-              sh 'mkdir -p backend/docs'
               sh 'sh jenkinsBuild.sh'
           }
         }
