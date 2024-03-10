@@ -2,6 +2,13 @@ pipeline {
     agent any
 
     stages {
+        stage('Update submodules') {
+            steps {
+              sh 'git submodule init'
+              sh 'git submodule update'
+            }
+        }
+
         stage('Build and package backend') {
           steps {
             sh 'docker build -t cahbackend .'
