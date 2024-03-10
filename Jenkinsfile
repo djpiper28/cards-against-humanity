@@ -20,8 +20,7 @@ pipeline {
 
         stage('Build Frontend') {
             steps {
-              sh 'cd cahfrontend && pnpm i'
-              sh 'cd cahfrontend && pnpm run build'
+              sh 'make frontend -j'
           }
         }
 
