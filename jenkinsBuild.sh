@@ -1,5 +1,6 @@
 #!/bin/sh
 export GOPATH=/var/lib/jenkins/go
+export PATH=$PATH:/usr/local/bin
 export PATH=$PATH:$GOPATH/bin
 
 export VITE_API_BASE_URL=https://cards.djpiper28.co.uk/
