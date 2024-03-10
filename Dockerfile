@@ -16,6 +16,9 @@ RUN useradd -m app
 WORKDIR /home/app
 USER app
 
+ENV PORT 8080
+ENV GIN_MODE release
+
 EXPOSE 8080
 COPY --from=build /build/backend/backend .
 COPY --from=build /build/backend/packs packs
