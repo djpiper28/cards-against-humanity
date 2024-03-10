@@ -1,4 +1,4 @@
-FROM debian:12.5-slim
+FROM golang:latest
 
 RUN apt-get update
 RUN apt-get install ca-certificates make -y
