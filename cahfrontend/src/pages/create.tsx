@@ -63,7 +63,7 @@ export default function Create() {
     return selectedPacks()
       .map((x) => packs().find((y) => y.id === x))
       .filter((x) => !!x)
-      .map((x) => x?.whiteCards ?? 0)
+      .map((x) => x?.blackCards ?? 0)
       .reduce((a, b) => a + b, 0);
   };
 
