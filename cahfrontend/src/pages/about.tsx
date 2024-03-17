@@ -1,6 +1,6 @@
 export default function About() {
   return (
-    <section class="flex flex-col gap-3 p-8">
+    <section class="flex flex-col gap-3">
       <h1 class="text-2xl font-bold">About - Cards Against Humanity</h1>
 
       <h2 class="text-xl">A party game for horrible people</h2>
@@ -16,7 +16,7 @@ export default function About() {
       <span>
         The project is open source and you can contribute by going go the{" "}
         <a
-          href="https://github.com/MonarchDevelopment/mtg-search-engine"
+          href="https://github.com/djpiper28/cards-against-humanity"
           class="w-8 text-blue-600"
         >
           Github
