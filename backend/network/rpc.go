@@ -10,6 +10,7 @@ type RpcMessageType int
 
 // The type of the message
 const (
+  // Tx the initial game state when the user joins
 	MsgOnJoin = 0
 )
 

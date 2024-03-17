@@ -1,6 +1,7 @@
 package network
 
 import (
+	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
@@ -92,6 +93,12 @@ func (c *WsConnection) listenAndHandle() error {
 		}
 
 		log.Printf("Got a message: %s", string(msg))
+
+    var rpcMessage RpcMessageBody
+    err = json.Unmarshal(msg, &rpcMessage)
+
+    switch rpcMessage.Type {
+    }
 	}
 }
 
