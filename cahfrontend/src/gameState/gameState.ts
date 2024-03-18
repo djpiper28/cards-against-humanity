@@ -67,7 +67,7 @@ class GameState {
   }
 
   private handleOnJoin(msg: RpcOnJoinMsg) {
-    this.state = msg.state as GameStateInfo;
+    this.setState(msg.state as GameStateInfo);
   }
 
   private handleRpcMessage(msg: string): void {

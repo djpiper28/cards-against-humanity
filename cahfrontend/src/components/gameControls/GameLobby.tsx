@@ -5,11 +5,11 @@ import { GameStateInfo } from "../../gameLogicTypes";
 
 export default function GameLobby() {
   const [state, setState] = createSignal<GameStateInfo | undefined>(undefined);
-  gameState.onStateChange = (state?: GameStateInfo) => {
-    setState(state);
-  };
-
   onMount(() => {
+    gameState.onStateChange = (state?: GameStateInfo) => {
+      console.log("State change detected")
+      setState(state);
+    };
     // Just incase the update has already happened
     gameState.emitState();
   });
