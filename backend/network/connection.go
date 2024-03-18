@@ -93,13 +93,13 @@ func (c *WsConnection) listenAndHandle() error {
 		}
 
 		log.Printf("Got a message: %s", string(msg))
-    var message RpcMessage
-    err = json.Unmarshal(msg, &message)
-    if err != nil {
-      log.Printf("Error unmarshalling message: %s; closing connection for gid %s pid %s", err, c.GameId, c.PlayerId)
-      c.Close()
-      continue
-    }
+		var message RpcMessage
+		err = json.Unmarshal(msg, &message)
+		if err != nil {
+			log.Printf("Error unmarshalling message: %s; closing connection for gid %s pid %s", err, c.GameId, c.PlayerId)
+			c.Close()
+			continue
+		}
 	}
 }
 

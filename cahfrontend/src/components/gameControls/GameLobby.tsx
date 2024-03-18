@@ -7,7 +7,7 @@ export default function GameLobby() {
   const [state, setState] = createSignal<GameStateInfo | undefined>(undefined);
   onMount(() => {
     gameState.onStateChange = (state?: GameStateInfo) => {
-      console.log("State change detected")
+      console.log("State change detected");
       setState(state);
     };
     // Just incase the update has already happened

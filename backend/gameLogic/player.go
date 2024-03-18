@@ -3,17 +3,18 @@ package gameLogic
 import (
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"log"
+
+	"github.com/google/uuid"
 )
 
 type Player struct {
-	Id          uuid.UUID
-	Name        string
-	Hand        map[int]*WhiteCard
-	CurrentPlay []*WhiteCard
-	Connected   bool
-	Points      int
+	Id          uuid.UUID          `json:"id"`
+	Name        string             `json:"name"`
+	Hand        map[int]*WhiteCard `json:"-"`
+	CurrentPlay []*WhiteCard       `json:"-"`
+	Connected   bool               `json:"connected"`
+	Points      int                `json:"points"`
 }
 
 const (

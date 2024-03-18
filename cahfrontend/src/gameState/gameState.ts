@@ -25,7 +25,7 @@ class GameState {
     this.playerId = playerId;
 
     const url = `${wsBaseUrl}?game_id=${encodeURIComponent(
-      gameId
+      gameId,
     )}&player_id=${encodeURIComponent(playerId)}`;
     console.log(`Connecting to ${url}`);
 
@@ -75,11 +75,11 @@ class GameState {
     const rpcMessage = JSON.parse(msg) as RpcMessageBody;
     switch (rpcMessage.type) {
       case MsgOnJoin:
-        console.log("Handling on join message")
+        console.log("Handling on join message");
         return this.handleOnJoin(rpcMessage.data as RpcOnJoinMsg);
       default:
         throw new Error(
-          `Cannot handle RPC message as type is not valid ${rpcMessage.type}`
+          `Cannot handle RPC message as type is not valid ${rpcMessage.type}`,
         );
     }
   }
