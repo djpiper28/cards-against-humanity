@@ -10,6 +10,7 @@ export const gameIdParam = "gameId";
 class GameState {
   private gameId: string = "";
   private playerId: string = "";
+  private ownerId: string = "";
   private setup: boolean = false;
   private wsClient: WebSocketClient;
   private state?: GameStateInfo;
@@ -59,11 +60,16 @@ class GameState {
 
   private setState(state: GameStateInfo) {
     this.state = state;
+    this.ownerId = state.gameOwnerId;
     this.emitState();
   }
 
   public emitState() {
     this.onStateChange?.(structuredClone(this.state));
+  }
+
+  public isOwner(): boolean {
+    return this.playerId === this.ownerId;
   }
 
   private handleOnJoin(msg: RpcOnJoinMsg) {
