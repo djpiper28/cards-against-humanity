@@ -1,4 +1,4 @@
-import { createSignal } from "solid-js";
+import { createSignal, onMount } from "solid-js";
 import LoadingSlug from "../loading/LoadingSlug";
 import { gameState } from "../../gameState/gameState";
 import { GameStateInfo } from "../../gameLogicTypes";
@@ -9,8 +9,10 @@ export default function GameLobby() {
     setState(state);
   };
 
-  // Just incase the update has already  happened
-  gameState.emitState();
+  onMount(() => {
+    // Just incase the update has already happened
+    gameState.emitState();
+  });
 
   return (
     <>
