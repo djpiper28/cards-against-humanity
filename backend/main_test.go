@@ -150,7 +150,9 @@ func (s *ServerTestSuite) TestJoinGameEndpoint() {
 	assert.Nil(t, err, "Should be a join message")
 	assert.Equal(t, game.GameId, onJoinMsg.Data.State.Id)
 	assert.Len(t, onJoinMsg.Data.State.Players, 1)
-	assert.Contains(t, onJoinMsg.Data.State.Players, game.PlayerId)
+	assert.Contains(t, onJoinMsg.Data.State.Players, gameLogic.Player{
+		Id:   game.PlayerId,
+		Name: "Dave"})
 }
 
 func (s *ServerTestSuite) TestGetCardPacks() {
