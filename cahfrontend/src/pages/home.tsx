@@ -36,7 +36,7 @@ export default function Home() {
         <For each={currentGames()}>
           {(game, _) => (
             <button
-              onClick={() => navigate(`/join/${encodeURIComponent(game.id)}`)}
+              onClick={() => navigate(`/join?gameId=${encodeURIComponent(game.id ?? 'error')}`)}
             >
               <Card
                 isWhite={true}
