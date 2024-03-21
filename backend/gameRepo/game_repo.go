@@ -101,3 +101,20 @@ func (gr *GameRepo) GetGame(gameId uuid.UUID) (*gameLogic.Game, error) {
 	}
 	return game, nil
 }
+
+func (gr *GameRepo) CreatePlayer(gameId uuid.UUID, playerName string) (uuid.UUID, error) {
+  gr.lock.Lock()
+  defer gr.lock.Unlock()
+
+  game, found := gr.GameMap[gameId]
+  if !found {
+    return uuid.UUID{}, errors.New("Cannot find game")
+  }
+
+  playerId, err := game.AddPlayer(playerName)
+  if err != nil {
+    return uuid.UUID{}, err
+  }
+
+  return playerId, nil
+}

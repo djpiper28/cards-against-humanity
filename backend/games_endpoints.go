@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
@@ -108,6 +109,48 @@ const (
 	JoinGamePlayerIdParam = "player_id"
 )
 
+type CreatePlayerRequest struct {
+  PlayerName string `json:"playerName"`
+  GameId    uuid.UUID `json:"gameId"`
+}
+
+
+// @Summary	Creates a player to allow you to join a game (first step of game joining, followed by /join ing)	
+// @Description Validates the player information, then tries to add them to a game and returns their ID.	
+// @Tags			games
+// @Accept			json
+// @Produce		json
+// @Param			request	body		CreatePlayerRequest	true	"Player information"
+// @Success		200
+// @Failure		500	{object}	ApiError
+// @Failure		400	{object}	ApiError
+// @Router			/games/join[post]
+func createPlayerForJoining(c *gin.Context) {
+  req, err := io.ReadAll(c.Request.Body)
+  if err != nil {
+    log.Printf("Cannot read body: %s", err)
+    c.JSON(http.StatusInternalServerError, NewApiError(errors.New("Failed to read request body")))
+    return
+  }
+
+  var createReq CreatePlayerRequest
+  err = json.Unmarshal(req, &createReq)
+  if err != nil {
+    log.Printf("Cannot unmarshal request: %s", err)
+    c.JSON(http.StatusBadRequest, NewApiError(errors.New("Invalid request")))
+    return
+  }
+
+  playerId, err := network.GameRepo.CreatePlayer(createReq.GameId, createReq.PlayerName)
+  if err != nil {
+    log.Printf("Cannot create player: %s", err)
+    c.JSON(http.StatusInternalServerError, NewApiError(err))
+    return
+  }
+
+  c.JSON(http.StatusCreated, playerId)
+}
+
 // @Summary		Joins a game and upgrades the connection to a websocket if all is well
 // @Description	Validates the input, checks the game exists then tries to upgrade the socket and register the connection. See the RPC docs for what to expect on the websocket.
 // @Tags			games
@@ -165,5 +208,6 @@ func SetupGamesEndpoints(r *gin.Engine) {
 		gamesRoute.GET("/notFull", getGames)
 		gamesRoute.POST("/create", createGame)
 		gamesRoute.GET("/join", joinGame)
+    gamesRoute.POST("/join", createPlayerForJoining)
 	}
 }
