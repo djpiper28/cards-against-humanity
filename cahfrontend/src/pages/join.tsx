@@ -4,7 +4,7 @@ import { onMount, createSignal } from "solid-js";
 import { cookieStorage } from "@solid-primitives/storage";
 import LoadingSlug from "../components/loading/LoadingSlug";
 import GameLobby from "../components/gameControls/GameLobby";
-import { playerJoinUrl } from "../routes";
+import { indexUrl, playerJoinUrl } from "../routes";
 
 export default function Join() {
   const [searchParams] = useSearchParams();
@@ -29,7 +29,7 @@ export default function Join() {
       setConnected(true);
     } catch (e) {
       console.error(`Cannot setup the connection ${e}`);
-      navigate("/");
+      navigate(indexUrl);
     }
   });
 
