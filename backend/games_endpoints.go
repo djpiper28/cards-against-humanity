@@ -124,7 +124,7 @@ type CreatePlayerRequest struct {
 // @Success		200
 // @Failure		500	{object}	ApiError
 // @Failure		400	{object}	ApiError
-// @Router			/games/join[post]
+// @Router			/games/join [post]
 func createPlayerForJoining(c *gin.Context) {
   req, err := io.ReadAll(c.Request.Body)
   if err != nil {
