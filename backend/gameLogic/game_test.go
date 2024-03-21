@@ -199,9 +199,19 @@ func TestGameStateInfo(t *testing.T) {
 
 	info := game.StateInfo()
 
+	expectedPlayers := make([]gameLogic.Player, len(game.Players))
+	for i, pid := range game.Players {
+		expectedPlayers[i] = gameLogic.Player{
+			Id:        pid,
+			Name:      game.PlayersMap[pid].Name,
+			Connected: false,
+			Points:    0,
+		}
+	}
+
 	assert.Equal(t, game.Id, info.Id)
 	assert.Equal(t, *game.Settings, info.Settings)
-	assert.Equal(t, game.Players, info.Players)
+	assert.Equal(t, expectedPlayers, info.Players)
 	assert.Equal(t, game.CurrentRound, info.CurrentRound)
 	assert.Equal(t, game.CreationTime, info.CreationTime)
 	assert.Equal(t, game.GameState, info.GameState)

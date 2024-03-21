@@ -20,7 +20,7 @@ func (s *WithServicesSuite) TestCreateGamePageDefaultInput() {
 	page.InsertDefaultValidSettings()
 	page.Page.MustScreenshotFullPage("../wiki/assets/create_game_default_input.png")
 
-  log.Print("Creating game")
+	log.Print("Creating game")
 	page.CreateGame()
 
 	time.Sleep(Timeout)

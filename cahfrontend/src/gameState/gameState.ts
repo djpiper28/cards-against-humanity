@@ -10,6 +10,7 @@ export const gameIdParam = "gameId";
 class GameState {
   private gameId: string = "";
   private playerId: string = "";
+  private ownerId: string = "";
   private setup: boolean = false;
   private wsClient: WebSocketClient;
   private state?: GameStateInfo;
@@ -41,6 +42,7 @@ class GameState {
         console.log("Connected to the game server");
       },
       onReceive: (msg: string) => {
+        console.log(`Received a message ${msg}`);
         this.handleRpcMessage(msg);
       },
     });
@@ -58,6 +60,7 @@ class GameState {
 
   private setState(state: GameStateInfo) {
     this.state = state;
+    this.ownerId = state.gameOwnerId;
     this.emitState();
   }
 
@@ -65,8 +68,12 @@ class GameState {
     this.onStateChange?.(structuredClone(this.state));
   }
 
+  public isOwner(): boolean {
+    return this.playerId === this.ownerId;
+  }
+
   private handleOnJoin(msg: RpcOnJoinMsg) {
-    this.state = msg.state as GameStateInfo;
+    this.setState(msg.state as GameStateInfo);
   }
 
   private handleRpcMessage(msg: string): void {
@@ -74,6 +81,7 @@ class GameState {
     const rpcMessage = JSON.parse(msg) as RpcMessageBody;
     switch (rpcMessage.type) {
       case MsgOnJoin:
+        console.log("Handling on join message");
         return this.handleOnJoin(rpcMessage.data as RpcOnJoinMsg);
       default:
         throw new Error(

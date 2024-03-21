@@ -194,7 +194,7 @@ type GameStateInfo struct {
 	GameState        GameState  `json:"gameState"`
 	CurrentBlackCard *BlackCard `json:"currentBlackCard"`
 
-	Players []uuid.UUID `json:"players"`
+	Players []Player `json:"players"`
 
 	CurrentCardCzarId uuid.UUID `json:"currentCardCzarId"`
 	GameOwnerId       uuid.UUID `json:"gameOwnerId"`
@@ -206,13 +206,21 @@ func (g *Game) StateInfo() GameStateInfo {
 	g.lock.Lock()
 	defer g.lock.Unlock()
 
+	players := make([]Player, len(g.Players))
+	for i, playerId := range g.Players {
+		players[i] = Player{
+			Id:   playerId,
+			Name: g.PlayersMap[playerId].Name,
+		}
+	}
+
 	return GameStateInfo{Id: g.Id,
 		Settings:          *g.Settings,
 		CurrentRound:      g.CurrentRound,
 		CreationTime:      g.CreationTime,
 		GameState:         g.GameState,
 		CurrentBlackCard:  g.CurrentBlackCard,
-		Players:           g.Players,
+		Players:           players,
 		CurrentCardCzarId: g.CurrentCardCzarId,
 		GameOwnerId:       g.GameOwnerId,
 	}

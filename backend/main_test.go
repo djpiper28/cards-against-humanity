@@ -3,9 +3,11 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -150,7 +152,9 @@ func (s *ServerTestSuite) TestJoinGameEndpoint() {
 	assert.Nil(t, err, "Should be a join message")
 	assert.Equal(t, game.GameId, onJoinMsg.Data.State.Id)
 	assert.Len(t, onJoinMsg.Data.State.Players, 1)
-	assert.Contains(t, onJoinMsg.Data.State.Players, game.PlayerId)
+	assert.Contains(t, onJoinMsg.Data.State.Players, gameLogic.Player{
+		Id:   game.PlayerId,
+		Name: "Dave"})
 }
 
 func (s *ServerTestSuite) TestGetCardPacks() {
@@ -167,4 +171,125 @@ func (s *ServerTestSuite) TestGetCardPacks() {
 	var packs map[uuid.UUID]gameLogic.CardPack
 	err = json.Unmarshal(body, &packs)
 	assert.Nil(t, err, "There should not be any errors getting the card packs")
+}
+
+type testGameInfo struct {
+	gameId, playerId uuid.UUID
+	maxPlayers       uint
+	password         string
+}
+
+func (s *ServerTestSuite) createDefaultGame() testGameInfo {
+	t := s.T()
+
+	name := "Dave"
+	gs := DefaultGameSettings()
+
+	postBody, err := json.Marshal(GameCreateRequest{Settings: gs, PlayerName: name})
+	assert.Nil(t, err, "Should be able to create json body")
+
+	reader := bytes.NewReader(postBody)
+
+	resp, err := http.Post(HttpBaseUrl+"/games/create", jsonContentType, reader)
+	assert.Nil(t, err, "Should be able to POST")
+	assert.Equal(t, http.StatusCreated, resp.StatusCode, "Game should have been made and is ready for connecting to")
+
+	body, err := io.ReadAll(resp.Body)
+	assert.Nil(t, err, "Should be able to read the body")
+
+	var gameIds GameCreatedResp
+	err = json.Unmarshal(body, &gameIds)
+	assert.Nil(t, err, "There should not be an error reading the game ids")
+	assert.NotEmpty(t, gameIds.GameId, "Game ID should be set")
+	assert.NotEmpty(t, gameIds.PlayerId, "Player ID should be set")
+
+	return testGameInfo{gameId: gameIds.GameId, playerId: gameIds.PlayerId, maxPlayers: gs.MaxPlayers, password: gs.Password}
+}
+
+func (s *ServerTestSuite) createPlayer(gameId uuid.UUID, name string) uuid.UUID {
+	t := s.T()
+
+	jsonBody := CreatePlayerRequest{
+		PlayerName: name,
+		GameId:     gameId,
+	}
+	body, err := json.Marshal(jsonBody)
+	assert.Nil(t, err)
+
+	resp, err := http.Post(HttpBaseUrl+"/games/join", jsonContentType, bytes.NewReader(body))
+	assert.Nil(t, err)
+
+	assert.Equal(t, http.StatusCreated, resp.StatusCode)
+
+	playerId, err := io.ReadAll(resp.Body)
+	assert.Nil(t, err)
+
+	assert.NotEmpty(t, playerId)
+
+	playerIdAsUUID, err := uuid.Parse(string(playerId))
+	assert.Nil(t, err)
+	return playerIdAsUUID
+}
+
+func (s *ServerTestSuite) TestCreatePlayerValid() {
+	t := s.T()
+	t.Parallel()
+
+	details := s.createDefaultGame()
+	assert.NotEmpty(t, s.createPlayer(details.gameId, "Bob"))
+}
+
+func (s *ServerTestSuite) TestCreatePlayerInvalidBodyFails() {
+	t := s.T()
+	t.Parallel()
+
+	resp, err := http.Post(HttpBaseUrl+"/games/join", jsonContentType, strings.NewReader("aaaaaaaa"))
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+}
+
+func (s *ServerTestSuite) TestCreatePlayerDuplicateNameFails() {
+	t := s.T()
+	t.Parallel()
+
+	const name = "Bob"
+	details := s.createDefaultGame()
+	assert.NotEmpty(t, s.createPlayer(details.gameId, name))
+
+	jsonBody := CreatePlayerRequest{
+		PlayerName: name,
+		GameId:     details.gameId,
+	}
+	body, err := json.Marshal(jsonBody)
+	assert.Nil(t, err)
+
+	resp, err := http.Post(HttpBaseUrl+"/games/join", jsonContentType, bytes.NewReader(body))
+	assert.Nil(t, err)
+
+	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+}
+
+func (s *ServerTestSuite) TestCreatePlayerGameFullFails() {
+	t := s.T()
+	t.Parallel()
+
+	details := s.createDefaultGame()
+
+	// A player has already joined on line 275
+	var i uint
+	for i = 0; i < details.maxPlayers-1; i++ {
+		assert.NotEmpty(t, s.createPlayer(details.gameId, fmt.Sprintf("Player #%d", i)))
+	}
+
+	jsonBody := CreatePlayerRequest{
+		PlayerName: "BadBay269",
+		GameId:     details.gameId,
+	}
+	body, err := json.Marshal(jsonBody)
+	assert.Nil(t, err)
+
+	resp, err := http.Post(HttpBaseUrl+"/games/join", jsonContentType, bytes.NewReader(body))
+	assert.Nil(t, err)
+
+	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
 }

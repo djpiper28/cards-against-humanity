@@ -1,21 +1,54 @@
-import { createSignal } from "solid-js";
+import { createSignal, onMount } from "solid-js";
 import LoadingSlug from "../loading/LoadingSlug";
 import { gameState } from "../../gameState/gameState";
 import { GameStateInfo } from "../../gameLogicTypes";
+import GameSettingsInput from "./GameSettingsInput";
+import GameSettingsView from "./GameSettingsView";
+
+interface Props {
+  state: GameStateInfo;
+  gameOwner: boolean;
+}
+
+function GameLobbyLoaded(props: Readonly<Props>) {
+  return (
+    <div class="flex flex-col items-between flex-wrap">
+      <h1>{`${
+        props.state.players.find((x) => x.id === props.state.gameOwnerId)?.name
+      }'s Game`}</h1>
+      {props.gameOwner ? (
+        <GameSettingsInput
+          settings={props.state.settings}
+          setSettings={console.log}
+          errorMessage="TODO: Implement me!"
+        />
+      ) : (
+        <GameSettingsView settings={props.state.settings} />
+      )}
+    </div>
+  );
+}
 
 export default function GameLobby() {
   const [state, setState] = createSignal<GameStateInfo | undefined>(undefined);
-  gameState.onStateChange = (state?: GameStateInfo) => {
-    setState(state);
-  };
+  const [gameOwner, setGameOwner] = createSignal(false);
+  onMount(() => {
+    gameState.onStateChange = (state?: GameStateInfo) => {
+      console.log("State change detected");
+      setState(state);
 
-  // Just incase the update has already  happened
-  gameState.emitState();
+      if (gameState.isOwner()) {
+        setGameOwner(true);
+      }
+    };
+    // Just incase the update has already happened
+    gameState.emitState();
+  });
 
   return (
     <>
-      {state() ? (
-        <h1>LOADED</h1>
+      {!!state() ? (
+        <GameLobbyLoaded state={state()} gameOwner={gameOwner()} />
       ) : (
         <div class="flex flex-grow justify-center items-center text-2xl">
           Waiting for lobby information <LoadingSlug />
