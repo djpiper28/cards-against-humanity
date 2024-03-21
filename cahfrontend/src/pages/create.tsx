@@ -160,6 +160,10 @@ export default function Create() {
                   playerIdCookie,
                   newGame.data.playerId ?? "error",
                 );
+                cookieStorage.setItem(
+                  gameIdParam,
+                  newGame.data.gameId ?? "error",
+                );
                 navigate(
                   `${joinGameUrl}?${gameIdParam}=${encodeURIComponent(
                     newGame.data.gameId ?? "error",
