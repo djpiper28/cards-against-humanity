@@ -3,6 +3,8 @@ import Card from "../components/gameItems/Card";
 import { For, createSignal, onMount } from "solid-js";
 import { GameLogicGameInfo } from "../api";
 import { apiClient } from "../apiClient";
+import { createGameUrl, joinGameUrl } from "../routes";
+import { gameIdParam } from "../gameState/gameState";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -22,7 +24,7 @@ export default function Home() {
 
   return (
     <>
-      <button class="w-min" onClick={() => navigate("/create")}>
+      <button class="w-min" onClick={() => navigate(createGameUrl)}>
         <Card
           isWhite={false}
           cardText="Create a Game"
@@ -38,7 +40,7 @@ export default function Home() {
             <button
               onClick={() =>
                 navigate(
-                  `/join?gameId=${encodeURIComponent(game.id ?? "error")}`,
+                  `${joinGameUrl}?${gameIdParam}=${encodeURIComponent(game.id ?? "error")}`,
                 )
               }
             >

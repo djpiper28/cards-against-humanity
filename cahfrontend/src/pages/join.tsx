@@ -4,6 +4,7 @@ import { onMount, createSignal } from "solid-js";
 import { cookieStorage } from "@solid-primitives/storage";
 import LoadingSlug from "../components/loading/LoadingSlug";
 import GameLobby from "../components/gameControls/GameLobby";
+import { playerJoinUrl } from "../routes";
 
 export default function Join() {
   const [searchParams] = useSearchParams();
@@ -19,7 +20,7 @@ export default function Join() {
 
     const playerId = cookieStorage.getItem(playerIdCookie);
     if (!playerId) {
-      navigate(`/player-join?${gameIdParam}=${gameId}`);
+      navigate(`${playerJoinUrl}/${gameIdParam}=${gameId}`);
       return;
     }
 
