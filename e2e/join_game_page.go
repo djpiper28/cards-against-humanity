@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+  "fmt"
 
 	"github.com/go-rod/rod"
 )
@@ -23,6 +24,6 @@ func NewJoinGamePage(b *rod.Browser, gameId string) CreateGamePage {
 }
 
 func (page *JoinGamePage) InLobby() bool {
-	page.Page.Timeout(Timeout).MustElementR("h1", "/loaded/i")
+	page.Page.Timeout(Timeout).MustElementR("h1", fmt.Sprintf("/.*'s game/i"))
 	return true
 }

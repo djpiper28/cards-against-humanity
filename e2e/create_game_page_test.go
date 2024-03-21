@@ -24,7 +24,7 @@ func (s *WithServicesSuite) TestCreateGamePageDefaultInput() {
 	page.CreateGame()
 
 	time.Sleep(Timeout)
-	assert.True(s.T(), strings.Contains(page.Page.Timeout(Timeout).MustInfo().URL, "/join?gameId="))
+	assert.True(s.T(), strings.Contains(page.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
 
 	lobbyPage := JoinGamePage{Page: page.Page}
 	assert.True(s.T(), lobbyPage.InLobby())

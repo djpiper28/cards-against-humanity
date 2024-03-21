@@ -18,5 +18,5 @@ func (s *WithServicesSuite) TestClickCreateAGame() {
 	createAGameButton.MustClick()
 
 	page.Page.MustWaitStable()
-	assert.Equal(s.T(), GetBasePage()+"create", page.Page.MustInfo().URL, "Should go to the create page on click")
+	assert.Equal(s.T(), GetBasePage()+"game/create", page.Page.MustInfo().URL, "Should go to the create page on click")
 }
