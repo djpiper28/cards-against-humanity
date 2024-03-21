@@ -4,6 +4,7 @@ import Create from "./pages/create";
 import Home from "./pages/home";
 import Join from "./pages/join";
 import PlayerJoin from "./pages/playerJoin";
+import GameJoinErrorPage from "./pages/gameJoinError";
 
 export const indexUrl = "/";
 export const aboutUrl = "/about";
@@ -12,6 +13,7 @@ const gameUrlSegment = "/game";
 export const joinGameUrl = `${gameUrlSegment}/join`;
 export const createGameUrl = `${gameUrlSegment}/create`;
 export const playerJoinUrl = `${gameUrlSegment}/playerJoin`;
+export const gmaeJoinErrorUrl = `${gameUrlSegment}/joinError`;
 
 export const routes: RouteDefinition[] = [
   {
@@ -33,6 +35,10 @@ export const routes: RouteDefinition[] = [
   {
     path: playerJoinUrl,
     component: PlayerJoin,
+  },
+  {
+    path: gmaeJoinErrorUrl,
+    component: GameJoinErrorPage,
   },
   {
     path: "**",
