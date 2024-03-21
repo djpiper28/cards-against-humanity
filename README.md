@@ -44,6 +44,10 @@ The server will start on `http://localhost:8080`, Prometheus metrics can be foun
 game stats on `/game-metrics`. This setup is jank lol, don't question it though. The swagger docs can be found on
 `http://localhost:8080/swagger/index.html`.
 
+#### Debugging
+
+To debug you can use `gdb` (of lldb if you are on mac), the debug-xxx targets in the Makefile will build end exec the debugger, mac and windows people need to use their debugger I guess.
+
 ### Frontend
 
 The frontend is in TS and uses SolidJS, Vite, Vitest, and Storybook. You should use the

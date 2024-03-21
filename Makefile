@@ -73,3 +73,16 @@ frontend-fmt:
 .PHONY: fmt
 fmt: backend-fmt frontend-fmt e2e-fmt
 	echo "Formatting Done"
+
+# Debug scripts
+.PHONY: debug-e2e-tests
+debug-e2e-tests:
+	cd ./e2e/ && go test -c && gdb ./e2e.test
+
+.PHONY: debug-backend-tests
+debug-backend-tests:
+	cd ./backend/ && go test -c && gdb ./backend.test
+
+.PHONY: debug-backend
+debug-backend:
+	cd ./backend/ && go build && gdb ./backend
