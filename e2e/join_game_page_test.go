@@ -20,5 +20,5 @@ func (s *WithServicesSuite) TestJoinGameRedirectsOnEmptyPlayerId() {
 	gameId := "testing123"
 	joinGame := NewJoinGamePage(GetBrowser(), gameId)
 	time.Sleep(Timeout)
-	assert.Equal(t, GetBasePage()+"player-join?gameId="+gameId, joinGame.Page.MustInfo().URL)
+	assert.Equal(t, GetBasePage()+"game/playerJoin?gameId="+gameId, joinGame.Page.MustInfo().URL)
 }

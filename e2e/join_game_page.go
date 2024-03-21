@@ -13,7 +13,7 @@ type JoinGamePage struct {
 const PlayerIdCookie = "playerId"
 
 func GetJoinGameUrl() string {
-	return GetBasePage() + "join"
+	return GetBasePage() + "game/join"
 }
 
 func NewJoinGamePage(b *rod.Browser, gameId string) CreateGamePage {

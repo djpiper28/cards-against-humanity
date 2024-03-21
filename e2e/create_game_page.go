@@ -12,7 +12,7 @@ type CreateGamePage struct {
 }
 
 func NewCreateGamePage(b *rod.Browser) CreateGamePage {
-	url := GetBasePage() + "create"
+	url := GetBasePage() + "game/create"
 	log.Printf("Create Game Page: %s", url)
 	createGamePage := CreateGamePage{Page: b.MustPage(url)}
 
