@@ -3,7 +3,7 @@ import { lazy } from "solid-js";
 import Create from "./pages/create";
 import Home from "./pages/home";
 import Join from "./pages/join";
-import playerJoin from "./pages/playerJoin";
+import PlayerJoin from "./pages/playerJoin";
 
 export const indexUrl = "/";
 export const aboutUrl = "/about";
@@ -32,7 +32,7 @@ export const routes: RouteDefinition[] = [
   },
   {
     path: playerJoinUrl,
-    component: playerJoin,
+    component: PlayerJoin,
   },
   {
     path: "**",
