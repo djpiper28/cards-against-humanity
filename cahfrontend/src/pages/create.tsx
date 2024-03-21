@@ -11,6 +11,7 @@ import GameSettingsInput, {
   Settings,
 } from "../components/gameControls/GameSettingsInput";
 import { validate as validateGameSettings } from "../components/gameControls/GameSettingsInputValidation";
+import { joinGameUrl } from "../routes";
 
 interface Checked {
   checked: boolean;
@@ -160,7 +161,7 @@ export default function Create() {
                   newGame.data.playerId ?? "error",
                 );
                 navigate(
-                  `/join?${gameIdParam}=${encodeURIComponent(
+                  `${joinGameUrl}?${gameIdParam}=${encodeURIComponent(
                     newGame.data.gameId ?? "error",
                   )}`,
                 );
