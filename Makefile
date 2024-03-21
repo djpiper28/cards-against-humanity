@@ -5,7 +5,7 @@ all: frontend backend
 # Swagger defs
 swagger:
 	go install github.com/swaggo/swag/cmd/swag@latest
-	cd backend && swag init
+	cd backend && swag init --requiredByDefault 
 
 # Frontend
 frontend-install:
