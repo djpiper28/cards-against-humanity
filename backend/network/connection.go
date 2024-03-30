@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -41,19 +42,28 @@ type GameMessage struct {
 }
 
 type WsConnection struct {
-	Conn         NetworkConnection
+	conn         NetworkConnection
 	GameId       uuid.UUID
 	PlayerId     uuid.UUID
 	JoinTime     time.Time
 	LastPingTime time.Time
+  lock        sync.Mutex
 }
 
-func (gcm *WsConnection) Close() {
-	gcm.Conn.Close()
+func (wsconn *WsConnection) Send(msg []byte) error {
+  wsconn.lock.Lock()
+  defer wsconn.lock.Unlock()
+  return wsconn.conn.Send(msg)
+}
+
+func (wsconn *WsConnection) Close() {
+  wsconn.lock.Lock()
+  defer wsconn.lock.Unlock()
+	wsconn.conn.Close()
 }
 
 func (gcm *IntegratedConnectionManager) NewConnection(conn *websocket.Conn, gameId, playerId uuid.UUID) *WsConnection {
-	c := &WsConnection{Conn: &WebsocketConnection{Conn: conn},
+	c := &WsConnection{conn: &WebsocketConnection{Conn: conn},
 		PlayerId:     playerId,
 		GameId:       gameId,
 		JoinTime:     time.Now(),
@@ -79,14 +89,14 @@ func (c *WsConnection) listenAndHandle() error {
 		return err
 	}
 
-	err = c.Conn.Send(initialState)
+	err = c.Send(initialState)
 	if err != nil {
 		return err
 	}
 
 	// Start listening and handling
 	for {
-		msg, err := c.Conn.Receive()
+		msg, err := c.conn.Receive()
 		if err != nil {
 			c.Close()
 			return errors.New("Cannot read from websocket")

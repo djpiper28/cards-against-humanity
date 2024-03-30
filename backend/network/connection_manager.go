@@ -57,7 +57,8 @@ func (g *IntegratedConnectionManager) RegisterConnection(gameId, playerId uuid.U
 
   playerConnection, foundPlayer := game.playerConnectionMap[playerId]
   if foundPlayer {
-    playerConnection.Conn.Close()
+    // Do not trigger a disconnect event in the internal system, just hot-swap the connection
+    playerConnection.conn.Close()
   }
 
 	game.playerConnectionMap[playerId] = connection
@@ -114,7 +115,7 @@ func (g *IntegratedConnectionManager) Broadcast(gameId uuid.UUID, message []byte
 	for playerId, conn := range game.playerConnectionMap {
 		go func() {
 			defer wg.Done()
-			err := conn.Conn.Send(message)
+			err := conn.Send(message)
 			if err != nil {
 				log.Printf("Cannot send a message to %s", playerId)
 				overallError = true
