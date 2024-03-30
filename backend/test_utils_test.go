@@ -17,6 +17,7 @@ const BaseUrl = "localhost:8080"
 const HttpBaseUrl = "http://" + BaseUrl
 const WsBaseUrl = "ws://" + BaseUrl
 
+// This game has no password
 func createTestGame(t *testing.T) GameCreatedResp {
 	name := "Dave"
 	gs := DefaultGameSettings()

@@ -3,9 +3,9 @@ import Input, { InputType } from "../components/inputs/Input";
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import { cookieStorage } from "@solid-primitives/storage";
 import { validatePlayerName } from "../components/gameControls/GameSettingsInput";
-import { apiClient } from "../apiClient";
+import { apiClient, cookieOptions } from "../apiClient";
 import { indexUrl, joinGameUrl } from "../routes";
-import { gameIdParam, playerIdCookie } from "../gameState/gameState";
+import { gameIdParamCookie, playerIdCookie } from "../gameState/gameState";
 
 export default function PlayerJoin() {
   const [searchParams] = useSearchParams();
@@ -13,7 +13,7 @@ export default function PlayerJoin() {
   const [error, setError] = createSignal("");
   const naviagte = useNavigate();
 
-  const gameId = searchParams[gameIdParam];
+  const gameId = searchParams[gameIdParamCookie];
   if (!gameId) {
     console.error("No gameId found, redirecting to index");
     naviagte(indexUrl);
@@ -46,10 +46,10 @@ export default function PlayerJoin() {
               playerName: playerName(),
             })
             .then((res) => {
-              cookieStorage.setItem(playerIdCookie, res.data);
-              cookieStorage.setItem(gameIdParam, gameId);
+              cookieStorage.setItem(playerIdCookie, res.data, cookieOptions);
+              cookieStorage.setItem(gameIdParamCookie, gameId, cookieOptions);
               naviagte(
-                `${joinGameUrl}?${gameIdParam}=${encodeURIComponent(gameId)}`,
+                `${joinGameUrl}?${gameIdParamCookie}=${encodeURIComponent(gameId)}`,
               );
             })
             .catch((res) => {

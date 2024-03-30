@@ -98,5 +98,8 @@ export function validateMaxGameRounds(maxRounds: number): boolean {
 }
 
 export function validatePlayerName(playerName: string): boolean {
-  return playerName.length >= MinPlayerNameLength && playerName.length <= MaxPlayerNameLength;
+  return (
+    playerName.length >= MinPlayerNameLength &&
+    playerName.length <= MaxPlayerNameLength
+  );
 }

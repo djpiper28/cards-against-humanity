@@ -5,12 +5,17 @@ import { wsBaseUrl } from "../apiClient";
 import WebSocket from "isomorphic-ws";
 
 export const playerIdCookie = "playerId";
-export const gameIdParam = "gameId";
+/**
+ * Used as a cookie name and a search param name. Required for authentication to a game.
+ */
+export const gameIdParamCookie = "gameId";
+export const gamePasswordCookie = "password";
 
 class GameState {
   private gameId: string = "";
   private playerId: string = "";
   private ownerId: string = "";
+  private password: string = "";
   private setup: boolean = false;
   private wsClient: WebSocketClient;
   private state?: GameStateInfo;
@@ -21,13 +26,12 @@ class GameState {
   // Logic lmao
   constructor() {}
 
-  public setupState(gameId: string, playerId: string) {
+  public setupState(gameId: string, playerId: string, password: string) {
     this.gameId = gameId;
     this.playerId = playerId;
+    this.password = password;
 
-    const url = `${wsBaseUrl}?game_id=${encodeURIComponent(
-      gameId,
-    )}&player_id=${encodeURIComponent(playerId)}`;
+    const url = wsBaseUrl;
     console.log(`Connecting to ${url}`);
 
     /**

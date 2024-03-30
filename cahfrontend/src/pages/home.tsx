@@ -4,7 +4,7 @@ import { For, createSignal, onMount } from "solid-js";
 import { GameLogicGameInfo } from "../api";
 import { apiClient } from "../apiClient";
 import { createGameUrl, joinGameUrl } from "../routes";
-import { gameIdParam } from "../gameState/gameState";
+import { gameIdParamCookie } from "../gameState/gameState";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -40,7 +40,7 @@ export default function Home() {
             <button
               onClick={() =>
                 navigate(
-                  `${joinGameUrl}?${gameIdParam}=${encodeURIComponent(game.id ?? "error")}`,
+                  `${joinGameUrl}?${gameIdParamCookie}=${encodeURIComponent(game.id ?? "error")}`,
                 )
               }
             >

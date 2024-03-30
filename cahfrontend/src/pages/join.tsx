@@ -1,5 +1,10 @@
 import { useNavigate, useSearchParams } from "@solidjs/router";
-import { gameIdParam, gameState, playerIdCookie } from "../gameState/gameState";
+import {
+  gameIdParamCookie,
+  gamePasswordCookie,
+  gameState,
+  playerIdCookie,
+} from "../gameState/gameState";
 import { onMount, createSignal } from "solid-js";
 import { cookieStorage } from "@solid-primitives/storage";
 import LoadingSlug from "../components/loading/LoadingSlug";
@@ -16,7 +21,7 @@ export default function Join() {
   const navigate = useNavigate();
 
   onMount(() => {
-    const gameId = searchParams[gameIdParam];
+    const gameId = searchParams[gameIdParamCookie];
     if (!gameId) {
       console.error("There is no gameId, redirecting to index");
       navigate(indexUrl);
@@ -24,10 +29,17 @@ export default function Join() {
     }
 
     const playerId = cookieStorage.getItem(playerIdCookie);
-    const cookieGameId = cookieStorage.getItem(gameIdParam);
+    const cookieGameId = cookieStorage.getItem(gameIdParamCookie);
+    const password = cookieStorage.getItem(gamePasswordCookie) ?? "";
     if (!playerId) {
       console.log("No playerId found, redirecting to player join page");
-      navigate(`${playerJoinUrl}?${gameIdParam}=${gameId}`);
+      navigate(`${playerJoinUrl}?${gameIdParamCookie}=${gameId}`);
+      return;
+    }
+
+    if (!cookieGameId) {
+      console.log("There is no gameId cookie");
+      navigate(`${playerJoinUrl}?${gameIdParamCookie}=${gameId}`);
       return;
     }
 
@@ -35,16 +47,16 @@ export default function Join() {
       console.log(
         "Stored playerId is for a different game, redirecting to player join page",
       );
-      navigate(`${playerJoinUrl}?${gameIdParam}=${gameId}`);
+      navigate(`${playerJoinUrl}?${gameIdParamCookie}=${gameId}`);
       return;
     }
 
     try {
-      gameState.setupState(gameId, playerId);
+      gameState.setupState(gameId, playerId, password);
       setConnected(true);
     } catch (e) {
       console.error(`Cannot setup the connection ${e}`);
-      navigate(`${joinErrorUrl}?${gameIdParam}=${gameId}`);
+      navigate(`${joinErrorUrl}?${gameIdParamCookie}=${gameId}`);
     }
   });
 

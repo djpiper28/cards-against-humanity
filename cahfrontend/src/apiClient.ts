@@ -1,4 +1,5 @@
 import { Api, HttpClient } from "./api";
+import { CookieOptions } from "@solid-primitives/storage";
 
 const defaultBaseUrl = new HttpClient().baseUrl;
 
@@ -16,3 +17,9 @@ export const apiClient = new Api({
 export const wsBaseUrl =
   import.meta.env.VITE_WS_BASE_URL ??
   "ws://" + defaultBaseUrl.split("://")[1] + "/games/join";
+
+export const cookieOptions: Readonly<CookieOptions> = {
+  path: "/",
+  sameSite: "None",
+  secure: true,
+};

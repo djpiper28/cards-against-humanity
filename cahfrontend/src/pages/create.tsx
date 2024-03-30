@@ -4,9 +4,13 @@ import Checkbox from "../components/inputs/Checkbox";
 import Input, { InputType } from "../components/inputs/Input";
 import { useNavigate } from "@solidjs/router";
 import { MaxPlayerNameLength, MinPlayerNameLength } from "../gameLogicTypes";
-import { gameIdParam, playerIdCookie } from "../gameState/gameState";
+import {
+  gameIdParamCookie,
+  gamePasswordCookie,
+  playerIdCookie,
+} from "../gameState/gameState";
 import { cookieStorage } from "@solid-primitives/storage";
-import { apiClient } from "../apiClient";
+import { apiClient, cookieOptions } from "../apiClient";
 import GameSettingsInput, {
   Settings,
 } from "../components/gameControls/GameSettingsInput";
@@ -159,13 +163,20 @@ export default function Create() {
                 cookieStorage.setItem(
                   playerIdCookie,
                   newGame.data.playerId ?? "error",
+                  cookieOptions,
                 );
                 cookieStorage.setItem(
-                  gameIdParam,
+                  gameIdParamCookie,
                   newGame.data.gameId ?? "error",
+                  cookieOptions,
+                );
+                cookieStorage.setItem(
+                  gamePasswordCookie,
+                  gameSettings().gamePassword,
+                  cookieOptions,
                 );
                 navigate(
-                  `${joinGameUrl}?${gameIdParam}=${encodeURIComponent(
+                  `${joinGameUrl}?${gameIdParamCookie}=${encodeURIComponent(
                     newGame.data.gameId ?? "error",
                   )}`,
                 );

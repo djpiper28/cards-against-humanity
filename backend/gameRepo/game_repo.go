@@ -71,7 +71,7 @@ func (gr *GameRepo) GetGames() []*gameLogic.Game {
 	return games
 }
 
-func (gr *GameRepo) JoinGame(gameId, playerId uuid.UUID) error {
+func (gr *GameRepo) JoinGame(gameId, playerId uuid.UUID, password string) error {
 	gr.lock.RLock()
 	defer gr.lock.RUnlock()
 
@@ -80,6 +80,10 @@ func (gr *GameRepo) JoinGame(gameId, playerId uuid.UUID) error {
 		msg := fmt.Sprintf("Cannot find game with id %s", gameId)
 		log.Println(msg)
 		return errors.New(msg)
+	}
+
+	if game.Settings.Password != password {
+		return errors.New("Incorrect password")
 	}
 
 	_, found = game.PlayersMap[playerId]
@@ -102,19 +106,23 @@ func (gr *GameRepo) GetGame(gameId uuid.UUID) (*gameLogic.Game, error) {
 	return game, nil
 }
 
-func (gr *GameRepo) CreatePlayer(gameId uuid.UUID, playerName string) (uuid.UUID, error) {
-  gr.lock.Lock()
-  defer gr.lock.Unlock()
+func (gr *GameRepo) CreatePlayer(gameId uuid.UUID, playerName, password string) (uuid.UUID, error) {
+	gr.lock.Lock()
+	defer gr.lock.Unlock()
 
-  game, found := gr.GameMap[gameId]
-  if !found {
-    return uuid.UUID{}, errors.New("Cannot find game")
-  }
+	game, found := gr.GameMap[gameId]
+	if !found {
+		return uuid.UUID{}, errors.New("Cannot find game")
+	}
 
-  playerId, err := game.AddPlayer(playerName)
-  if err != nil {
-    return uuid.UUID{}, err
-  }
+	if game.Settings.Password != password {
+		return uuid.UUID{}, errors.New("Incorrect password")
+	}
 
-  return playerId, nil
+	playerId, err := game.AddPlayer(playerName)
+	if err != nil {
+		return uuid.UUID{}, err
+	}
+
+	return playerId, nil
 }

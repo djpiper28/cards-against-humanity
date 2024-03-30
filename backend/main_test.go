@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -123,20 +124,43 @@ func (s *ServerTestSuite) TestCreateGameEndpoint() {
 	assert.NotEmpty(t, gameIds.PlayerId, "Player ID should be set")
 }
 
+// A cookie jar and cookie header implementation for the ws dailer and http clients
+type GameJoinParams struct {
+	GameId, PlayerId uuid.UUID
+	Password         string
+}
+
+func (g *GameJoinParams) Headers() http.Header {
+	headers := make(http.Header)
+	headers["Cookie"] = []string{fmt.Sprintf("%s=%s; %s=%s; %s=%s", JoinGamePlayerIdParam, g.PlayerId, JoinGameGameIdParam, g.GameId, PasswordParam, g.Password)}
+	return headers
+}
+
+func (g *GameJoinParams) SetCookies(u *url.URL, cookies []*http.Cookie) {
+	log.Fatal("Setting cookies is not desired for this API")
+}
+
+func (g *GameJoinParams) Cookies() []*http.Cookie {
+	cookies := make([]*http.Cookie, 0)
+	cookies = append(cookies, &http.Cookie{Name: JoinGamePlayerIdParam, Value: g.PlayerId.String()})
+	cookies = append(cookies, &http.Cookie{Name: JoinGameGameIdParam, Value: g.GameId.String()})
+	cookies = append(cookies, &http.Cookie{Name: PasswordParam, Value: g.Password})
+	return cookies
+}
+
 func (s *ServerTestSuite) TestJoinGameEndpoint() {
 	t := s.T()
 	t.Parallel()
 
 	game := createTestGame(t)
-	url := WsBaseUrl + "/games/join" +
-		"?" + JoinGameGameIdParam + "=" + game.GameId.String() +
-		"&" + JoinGamePlayerIdParam + "=" + game.PlayerId.String()
+	url := WsBaseUrl + "/games/join"
+	cookies := GameJoinParams{GameId: game.GameId, PlayerId: game.PlayerId, Password: ""}
 
 	dialer := websocket.DefaultDialer
 	dialer.HandshakeTimeout = time.Millisecond * 100
 
 	log.Print("Dialing server")
-	conn, _, err := dialer.Dial(url, nil)
+	conn, _, err := dialer.Dial(url, cookies.Headers())
 	assert.Nil(t, err, "Should have connected to the ws server successfully")
 	defer conn.Close()
 	assert.NotNil(t, conn)

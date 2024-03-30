@@ -1,8 +1,8 @@
 package main
 
 import (
+	"fmt"
 	"log"
-  "fmt"
 
 	"github.com/go-rod/rod"
 )

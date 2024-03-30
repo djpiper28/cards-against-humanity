@@ -14,6 +14,12 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	JoinGameGameIdParam   = "gameId"
+	JoinGamePlayerIdParam = "playerId"
+	PasswordParam         = "password"
+)
+
 // @Summary		Gets all of the games that are not full
 // @Description	Returns a list of the games
 // @Tags			games
@@ -104,60 +110,57 @@ func createGame(c *gin.Context) {
 	c.JSON(http.StatusCreated, resp)
 }
 
-const (
-	JoinGameGameIdParam   = "game_id"
-	JoinGamePlayerIdParam = "player_id"
-)
-
 type CreatePlayerRequest struct {
-  PlayerName string `json:"playerName"`
-  GameId    uuid.UUID `json:"gameId"`
+	PlayerName string    `json:"playerName"`
+	GameId     uuid.UUID `json:"gameId"`
 }
 
-
-// @Summary	Creates a player to allow you to join a game (first step of game joining, followed by /join ing)	
-// @Description Validates the player information, then tries to add them to a game and returns their ID.	
+// @Summary		Creates a player to allow you to join a game (first step of game joining, followed by /join ing)
+// @Description	Validates the player information, then tries to add them to a game and returns their ID.
 // @Tags			games
 // @Accept			json
 // @Produce		json
 // @Param			request	body		CreatePlayerRequest	true	"Player information"
-// @Success		200 {string}	uuid	"Player ID"
-// @Failure		500	{object}	ApiError
-// @Failure		400	{object}	ApiError
+// @Success		200		{string}	uuid				"Player ID"
+// @Failure		500		{object}	ApiError
+// @Failure		400		{object}	ApiError
 // @Router			/games/join [post]
 func createPlayerForJoining(c *gin.Context) {
-  req, err := io.ReadAll(c.Request.Body)
-  if err != nil {
-    log.Printf("Cannot read body: %s", err)
-    c.JSON(http.StatusInternalServerError, NewApiError(errors.New("Failed to read request body")))
-    return
-  }
+	req, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		log.Printf("Cannot read body: %s", err)
+		c.JSON(http.StatusInternalServerError, NewApiError(errors.New("Failed to read request body")))
+		return
+	}
 
-  var createReq CreatePlayerRequest
-  err = json.Unmarshal(req, &createReq)
-  if err != nil {
-    log.Printf("Cannot unmarshal request: %s", err)
-    c.JSON(http.StatusBadRequest, NewApiError(errors.New("Invalid request")))
-    return
-  }
+	var createReq CreatePlayerRequest
+	err = json.Unmarshal(req, &createReq)
+	if err != nil {
+		log.Printf("Cannot unmarshal request: %s", err)
+		c.JSON(http.StatusBadRequest, NewApiError(errors.New("Invalid request")))
+		return
+	}
 
-  playerId, err := network.GameRepo.CreatePlayer(createReq.GameId, createReq.PlayerName)
-  if err != nil {
-    log.Printf("Cannot create player: %s", err)
-    c.JSON(http.StatusInternalServerError, NewApiError(err))
-    return
-  }
+	password, err := c.Cookie(PasswordParam)
+	if err != nil {
+		log.Print("There is no password provided")
+	}
 
-  c.JSON(http.StatusCreated, playerId)
+	playerId, err := network.GameRepo.CreatePlayer(createReq.GameId, createReq.PlayerName, password)
+	if err != nil {
+		log.Printf("Cannot create player: %s", err)
+		c.JSON(http.StatusInternalServerError, NewApiError(err))
+		return
+	}
+
+	c.JSON(http.StatusCreated, playerId)
 }
 
 // @Summary		Joins a game and upgrades the connection to a websocket if all is well
-// @Description	Validates the input, checks the game exists then tries to upgrade the socket and register the connection. See the RPC docs for what to expect on the websocket.
+// @Description	Validates the input, checks the game exists then tries to upgrade the socket and register the connection. See the RPC docs for what to expect on the websocket. Use playerId, password and gameId cookies to authenticate.
 // @Tags			games
 // @Accept			json
 // @Produce		json
-// @Param			game_id		query	string	true	"Game ID to join"
-// @Param			player_id	query	string	true	"Player ID to join to join as"
 // @Success		200
 // @Failure		500	{object}	ApiError
 // @Failure		404	{object}	ApiError
@@ -165,9 +168,11 @@ func createPlayerForJoining(c *gin.Context) {
 // @Router			/games/join [get]
 func joinGame(c *gin.Context) {
 	// Validate input
-	rawGameId := c.Query(JoinGameGameIdParam)
-	if rawGameId == "" {
-		c.JSON(http.StatusBadRequest, NewApiError(errors.New(fmt.Sprintf("No %s search parameter", JoinGameGameIdParam))))
+	rawGameId, err := c.Cookie(JoinGameGameIdParam)
+	if err != nil {
+		errMsg := fmt.Sprintf("Cannot find cookie %s", JoinGameGameIdParam)
+		log.Print(errMsg)
+		c.JSON(http.StatusBadRequest, NewApiError(errors.New(errMsg)))
 		return
 	}
 
@@ -177,23 +182,29 @@ func joinGame(c *gin.Context) {
 		return
 	}
 
-	rawPlayerId := c.Query(JoinGamePlayerIdParam)
-	if rawPlayerId == "" {
-		c.JSON(http.StatusBadRequest, NewApiError(errors.New(fmt.Sprintf("No %s search parameter", JoinGamePlayerIdParam))))
+	rawPlayerId, err := c.Cookie(JoinGamePlayerIdParam)
+	if err != nil {
+		errMsg := fmt.Sprintf("Cannot find cookie %s", JoinGamePlayerIdParam)
+		log.Print(errMsg)
+		c.JSON(http.StatusBadRequest, NewApiError(errors.New(errMsg)))
 		return
 	}
 
 	playerId, err := uuid.Parse(rawPlayerId)
 	if err != nil {
-		c.Error(err)
 		c.JSON(http.StatusBadRequest, NewApiError(err))
 		return
 	}
 
-	// Join the game
-	err = network.GameRepo.JoinGame(gameId, playerId)
+	password, err := c.Cookie(PasswordParam)
 	if err != nil {
-		c.Error(err)
+		log.Print("There is no password provided")
+	}
+
+	// Join the game
+	err = network.GameRepo.JoinGame(gameId, playerId, password)
+	if err != nil {
+		log.Printf("Cannot join game (%s): %s", gameId, err)
 		c.JSON(http.StatusNotFound, NewApiError(err))
 		return
 	}
@@ -208,6 +219,6 @@ func SetupGamesEndpoints(r *gin.Engine) {
 		gamesRoute.GET("/notFull", getGames)
 		gamesRoute.POST("/create", createGame)
 		gamesRoute.GET("/join", joinGame)
-    gamesRoute.POST("/join", createPlayerForJoining)
+		gamesRoute.POST("/join", createPlayerForJoining)
 	}
 }
