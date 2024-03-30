@@ -58,6 +58,10 @@ type onJoinRpcMsg struct {
 	Data network.RpcOnJoinMsg `json:"data"`
 }
 
+type onPlayerJoinMsg struct {
+	Data network.RpcOnPlayerJoinMsg `json:"data"`
+}
+
 // A cookie jar and cookie header implementation for the ws dailer and http clients
 type GameJoinParams struct {
 	GameId, PlayerId uuid.UUID
@@ -83,9 +87,9 @@ func (g *GameJoinParams) Cookies(_ *url.URL) []*http.Cookie {
 }
 
 func Test_GameJoinCookiesIsCookieJar(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  var jar http.CookieJar
-  jar = &GameJoinParams{}
-  assert.NotNil(t, jar, "Should be able to create a cookie jar")
+	var jar http.CookieJar
+	jar = &GameJoinParams{}
+	assert.NotNil(t, jar, "Should be able to create a cookie jar")
 }

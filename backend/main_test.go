@@ -140,7 +140,22 @@ func (s *ServerTestSuite) TestJoinGameEndpoint() {
 	defer conn.Close()
 	assert.NotNil(t, conn)
 
-	msgType, msg, err := conn.ReadMessage()
+  // First message should be the player join broadcast, which we ignore
+  msgType, msg, err := conn.ReadMessage()
+
+	assert.Nil(t, err, "Should be able to read (the initial game state)")
+	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
+	assert.Equal(t, msgType, websocket.TextMessage)
+
+  var onPlayerJoinMsg onPlayerJoinMsg
+  err = json.Unmarshal(msg, &onPlayerJoinMsg)
+  assert.Nil(t, err)
+  assert.Equal(t, game.PlayerId, onPlayerJoinMsg.Data.Id, "The current user should have joined the game")
+
+  // Second message should be the state
+
+	msgType, msg, err = conn.ReadMessage()
+
 	assert.Nil(t, err, "Should be able to read (the initial game state)")
 	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
 	assert.Equal(t, msgType, websocket.TextMessage)

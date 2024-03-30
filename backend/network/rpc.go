@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
+	"github.com/google/uuid"
 )
 
 type RpcMessageType int
@@ -12,6 +13,10 @@ type RpcMessageType int
 const (
 	// Tx the initial game state when the user joins
 	MsgOnJoin = 0
+	// Tx the player's name and id when they join
+	MsgOnPlayerJoin = 1
+	// Tx the player's id and reason when they disconnect
+	MsgOnPlayerDisconnect = 2
 )
 
 type RpcMessageBody struct {
@@ -38,4 +43,22 @@ type RpcOnJoinMsg struct {
 
 func (msg RpcOnJoinMsg) Type() RpcMessageType {
 	return MsgOnJoin
+}
+
+type RpcOnPlayerJoinMsg struct {
+	Name string    `json:"name"`
+	Id   uuid.UUID `json:"id"`
+}
+
+func (msg RpcOnPlayerJoinMsg) Type() RpcMessageType {
+	return MsgOnPlayerJoin
+}
+
+type RpcOnPlayerDisconnectMsg struct {
+	Id     uuid.UUID `json:"id"`
+	Reason string    `json:"reason"`
+}
+
+func (msg RpcOnPlayerDisconnectMsg) Type() RpcMessageType {
+	return MsgOnPlayerDisconnect
 }

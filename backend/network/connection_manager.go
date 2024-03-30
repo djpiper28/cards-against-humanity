@@ -54,8 +54,34 @@ func (g *IntegratedConnectionManager) RegisterConnection(gameId, playerId uuid.U
 		g.GameConnectionMap[gameId] = game
 		log.Printf("Registered game %s", gameId)
 	}
+
+  playerConnection, foundPlayer := game.playerConnectionMap[playerId]
+  if foundPlayer {
+    playerConnection.Conn.Close()
+  }
+
 	game.playerConnectionMap[playerId] = connection
+
 	go connection.ListenAndHandle(g)
+
+	name, err := GameRepo.GetPlayerName(gameId, playerId)
+	if err != nil {
+		log.Printf("Cannot get the player's name: %s", err)
+		name = "Error"
+	}
+
+	onPlayerJoinmsg := RpcOnPlayerJoinMsg{
+		Id:   playerId,
+		Name: name,
+	}
+
+	message, err := EncodeRpcMessage(onPlayerJoinmsg)
+	if err != nil {
+		log.Printf("Cannot encode the message: %s", err)
+		return
+	}
+
+	go g.Broadcast(gameId, message)
 }
 
 func (g *IntegratedConnectionManager) UnregisterConnection(gameId, playerId uuid.UUID) {
@@ -68,5 +94,38 @@ func (g *IntegratedConnectionManager) UnregisterConnection(gameId, playerId uuid
 		delete(game.playerConnectionMap, playerId)
 	} else {
 		log.Printf("Cannot unregister game %s as it cannot be found", gameId)
+	}
+}
+
+func (g *IntegratedConnectionManager) Broadcast(gameId uuid.UUID, message []byte) {
+	g.lock.Lock()
+	defer g.lock.Unlock()
+
+	game, found := g.GameConnectionMap[gameId]
+	if !found {
+		log.Printf("Cannot find game: %s", gameId)
+		return
+	}
+
+	overallError := false
+	var wg sync.WaitGroup
+	wg.Add(len(game.playerConnectionMap))
+
+	for playerId, conn := range game.playerConnectionMap {
+		go func() {
+			defer wg.Done()
+			err := conn.Conn.Send(message)
+			if err != nil {
+				log.Printf("Cannot send a message to %s", playerId)
+				overallError = true
+
+				go g.UnregisterConnection(gameId, playerId)
+			}
+		}()
+	}
+
+	wg.Wait()
+	if overallError {
+		log.Print("There was an error sending a message to a player during a broadcast operation")
 	}
 }
