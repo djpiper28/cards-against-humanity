@@ -5,11 +5,17 @@ import { cookieStorage } from "@solid-primitives/storage";
 import { validatePlayerName } from "../components/gameControls/GameSettingsInput";
 import { apiClient, cookieOptions } from "../apiClient";
 import { indexUrl, joinGameUrl } from "../routes";
-import { gameIdParamCookie, playerIdCookie } from "../gameState/gameState";
+import {
+  gameIdParamCookie,
+  gamePasswordCookie,
+  playerIdCookie,
+} from "../gameState/gameState";
+import { MaxPasswordLength } from "../gameLogicTypes";
 
 export default function PlayerJoin() {
   const [searchParams] = useSearchParams();
   const [playerName, setPlayerName] = createSignal("");
+  const [password, setPassword] = createSignal("");
   const [error, setError] = createSignal("");
   const naviagte = useNavigate();
 
@@ -31,6 +37,15 @@ export default function PlayerJoin() {
         placeHolder="John Smith"
         errorState={!validatePlayerName(playerName())}
       />
+      <Input
+        inputType={InputType.Text}
+        autocomplete="password"
+        label="Password, leave blank if none"
+        value={password()}
+        onChanged={(value) => setPassword(value)}
+        placeHolder="Password"
+        errorState={password().length > MaxPasswordLength}
+      />
       <p class="text-error-colour">{error()}</p>
 
       <button
@@ -48,6 +63,12 @@ export default function PlayerJoin() {
             .then((res) => {
               cookieStorage.setItem(playerIdCookie, res.data, cookieOptions);
               cookieStorage.setItem(gameIdParamCookie, gameId, cookieOptions);
+              cookieStorage.setItem(
+                gamePasswordCookie,
+                password(),
+                cookieOptions,
+              );
+
               naviagte(
                 `${joinGameUrl}?${gameIdParamCookie}=${encodeURIComponent(gameId)}`,
               );
