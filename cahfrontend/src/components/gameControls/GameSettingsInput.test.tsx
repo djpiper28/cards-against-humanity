@@ -5,6 +5,7 @@ import GameSettingsInput, {
   validateMaxGameRounds,
   validateMaxPlayers,
   validatePointsToPlayTo,
+  validatePlayerName,
 } from "./GameSettingsInput";
 import { screen, render, waitFor } from "solid-testing-library";
 import {
@@ -12,9 +13,11 @@ import {
   MaxPlayers,
   MaxPlayingToPoints,
   MaxRounds,
+  MinPlayerNameLength,
   MinPlayers,
   MinPlayingToPoints,
   MinRounds,
+  MaxPlayerNameLength,
 } from "../../gameLogicTypes";
 
 describe("GameSettingsInput", () => {
@@ -85,5 +88,15 @@ describe("GameSettingsInput", () => {
     expect(validateMaxGameRounds(MinRounds + 1)).toBe(true);
     expect(validateMaxGameRounds(MaxRounds)).toBe(true);
     expect(validateMaxGameRounds(MaxRounds + 1)).toBe(false);
+  });
+
+  it("Should validate the player name", () => {
+    expect(validatePlayerName("")).toBe(false);
+    expect(validatePlayerName("a")).toBe(false);
+    expect(validatePlayerName("a".repeat(MinPlayerNameLength - 1))).toBe(false);
+    expect(validatePlayerName("a".repeat(MinPlayerNameLength))).toBe(true);
+    expect(validatePlayerName("a".repeat(MinPlayerNameLength + 1))).toBe(true);
+    expect(validatePlayerName("a".repeat(MaxPlayerNameLength))).toBe(true);
+    expect(validatePlayerName("a".repeat(MaxPlayerNameLength + 1))).toBe(false);
   });
 });

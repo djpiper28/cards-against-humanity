@@ -8,6 +8,8 @@ import {
   MinRounds,
   MaxRounds,
   GameSettings,
+  MaxPlayerNameLength,
+  MinPlayerNameLength,
 } from "../../gameLogicTypes";
 
 export type Settings = Omit<GameSettings, "cardPacks">;
@@ -93,4 +95,8 @@ export function validatePointsToPlayTo(points: number): boolean {
 
 export function validateMaxGameRounds(maxRounds: number): boolean {
   return maxRounds >= MinRounds && maxRounds <= MaxRounds;
+}
+
+export function validatePlayerName(playerName: string): boolean {
+  return playerName.length >= MinPlayerNameLength && playerName.length <= MaxPlayerNameLength;
 }

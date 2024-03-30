@@ -121,7 +121,7 @@ type CreatePlayerRequest struct {
 // @Accept			json
 // @Produce		json
 // @Param			request	body		CreatePlayerRequest	true	"Player information"
-// @Success		200
+// @Success		200 {string}	uuid	"Player ID"
 // @Failure		500	{object}	ApiError
 // @Failure		400	{object}	ApiError
 // @Router			/games/join [post]
