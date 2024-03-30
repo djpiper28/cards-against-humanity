@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -124,30 +123,6 @@ func (s *ServerTestSuite) TestCreateGameEndpoint() {
 	assert.NotEmpty(t, gameIds.PlayerId, "Player ID should be set")
 }
 
-// A cookie jar and cookie header implementation for the ws dailer and http clients
-type GameJoinParams struct {
-	GameId, PlayerId uuid.UUID
-	Password         string
-}
-
-func (g *GameJoinParams) Headers() http.Header {
-	headers := make(http.Header)
-	headers["Cookie"] = []string{fmt.Sprintf("%s=%s; %s=%s; %s=%s", JoinGamePlayerIdParam, g.PlayerId, JoinGameGameIdParam, g.GameId, PasswordParam, g.Password)}
-	return headers
-}
-
-func (g *GameJoinParams) SetCookies(u *url.URL, cookies []*http.Cookie) {
-	log.Fatal("Setting cookies is not desired for this API")
-}
-
-func (g *GameJoinParams) Cookies() []*http.Cookie {
-	cookies := make([]*http.Cookie, 0)
-	cookies = append(cookies, &http.Cookie{Name: JoinGamePlayerIdParam, Value: g.PlayerId.String()})
-	cookies = append(cookies, &http.Cookie{Name: JoinGameGameIdParam, Value: g.GameId.String()})
-	cookies = append(cookies, &http.Cookie{Name: PasswordParam, Value: g.Password})
-	return cookies
-}
-
 func (s *ServerTestSuite) TestJoinGameEndpoint() {
 	t := s.T()
 	t.Parallel()
@@ -179,6 +154,53 @@ func (s *ServerTestSuite) TestJoinGameEndpoint() {
 	assert.Contains(t, onJoinMsg.Data.State.Players, gameLogic.Player{
 		Id:   game.PlayerId,
 		Name: "Dave"})
+}
+
+func (s *ServerTestSuite) TestJoinGameEndpointFailsWrongPassword() {
+	t := s.T()
+	t.Parallel()
+
+	game := createTestGame(t)
+	url := WsBaseUrl + "/games/join"
+	cookies := GameJoinParams{GameId: game.GameId, PlayerId: game.PlayerId, Password: "wrong password"}
+
+	dialer := websocket.DefaultDialer
+	dialer.HandshakeTimeout = time.Millisecond * 100
+
+	log.Print("Dialing server")
+	_, _, err := dialer.Dial(url, cookies.Headers())
+	assert.NotNil(t, err, "Should have connected to the ws server successfully")
+}
+
+func (s *ServerTestSuite) TestJoinGameEndpointFailsPlayerNotReal() {
+	t := s.T()
+	t.Parallel()
+
+	game := createTestGame(t)
+	url := WsBaseUrl + "/games/join"
+	cookies := GameJoinParams{GameId: game.GameId, PlayerId: uuid.New(), Password: ""}
+
+	dialer := websocket.DefaultDialer
+	dialer.HandshakeTimeout = time.Millisecond * 100
+
+	log.Print("Dialing server")
+	_, _, err := dialer.Dial(url, cookies.Headers())
+	assert.NotNil(t, err, "Should have connected to the ws server successfully")
+}
+
+func (s *ServerTestSuite) TestJoinGameEndpointFailsGameNotReal() {
+	t := s.T()
+	t.Parallel()
+
+	url := WsBaseUrl + "/games/join"
+	cookies := GameJoinParams{GameId: uuid.New(), PlayerId: uuid.New(), Password: ""}
+
+	dialer := websocket.DefaultDialer
+	dialer.HandshakeTimeout = time.Millisecond * 100
+
+	log.Print("Dialing server")
+	_, _, err := dialer.Dial(url, cookies.Headers())
+	assert.NotNil(t, err, "Should have connected to the ws server successfully")
 }
 
 func (s *ServerTestSuite) TestGetCardPacks() {
@@ -230,7 +252,7 @@ func (s *ServerTestSuite) createDefaultGame() testGameInfo {
 	return testGameInfo{gameId: gameIds.GameId, playerId: gameIds.PlayerId, maxPlayers: gs.MaxPlayers, password: gs.Password}
 }
 
-func (s *ServerTestSuite) createPlayer(gameId uuid.UUID, name string) uuid.UUID {
+func (s *ServerTestSuite) createPlayer(gameId uuid.UUID, name, password string) uuid.UUID {
 	t := s.T()
 
 	jsonBody := CreatePlayerRequest{
@@ -240,7 +262,11 @@ func (s *ServerTestSuite) createPlayer(gameId uuid.UUID, name string) uuid.UUID 
 	body, err := json.Marshal(jsonBody)
 	assert.Nil(t, err)
 
-	resp, err := http.Post(HttpBaseUrl+"/games/join", jsonContentType, bytes.NewReader(body))
+	client := http.Client{
+		Jar: &GameJoinParams{GameId: gameId, Password: password},
+	}
+
+	resp, err := client.Post(HttpBaseUrl+"/games/join", jsonContentType, bytes.NewReader(body))
 	assert.Nil(t, err)
 
 	assert.Equal(t, http.StatusCreated, resp.StatusCode)
@@ -260,7 +286,7 @@ func (s *ServerTestSuite) TestCreatePlayerValid() {
 	t.Parallel()
 
 	details := s.createDefaultGame()
-	assert.NotEmpty(t, s.createPlayer(details.gameId, "Bob"))
+	assert.NotEmpty(t, s.createPlayer(details.gameId, "Bob", ""))
 }
 
 func (s *ServerTestSuite) TestCreatePlayerInvalidBodyFails() {
@@ -278,7 +304,7 @@ func (s *ServerTestSuite) TestCreatePlayerDuplicateNameFails() {
 
 	const name = "Bob"
 	details := s.createDefaultGame()
-	assert.NotEmpty(t, s.createPlayer(details.gameId, name))
+	assert.NotEmpty(t, s.createPlayer(details.gameId, name, ""))
 
 	jsonBody := CreatePlayerRequest{
 		PlayerName: name,
@@ -293,6 +319,30 @@ func (s *ServerTestSuite) TestCreatePlayerDuplicateNameFails() {
 	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
 }
 
+func (s *ServerTestSuite) TestCreatePlayerInvalidPasswordFails() {
+	t := s.T()
+	t.Parallel()
+
+	const name = "Bob"
+	details := s.createDefaultGame()
+
+	jsonBody := CreatePlayerRequest{
+		PlayerName: name,
+		GameId:     details.gameId,
+	}
+	body, err := json.Marshal(jsonBody)
+	assert.Nil(t, err)
+
+	client := http.Client{
+		Jar: &GameJoinParams{GameId: details.gameId, Password: "wrong pasword"},
+	}
+
+	resp, err := client.Post(HttpBaseUrl+"/games/join", jsonContentType, bytes.NewReader(body))
+	assert.Nil(t, err)
+
+	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+}
+
 func (s *ServerTestSuite) TestCreatePlayerGameFullFails() {
 	t := s.T()
 	t.Parallel()
@@ -301,8 +351,8 @@ func (s *ServerTestSuite) TestCreatePlayerGameFullFails() {
 
 	// A player has already joined on line 275
 	var i uint
-	for i = 0; i < details.maxPlayers-1; i++ {
-		assert.NotEmpty(t, s.createPlayer(details.gameId, fmt.Sprintf("Player #%d", i)))
+	for i = 1; i < details.maxPlayers; i++ {
+		assert.NotEmpty(t, s.createPlayer(details.gameId, fmt.Sprintf("Player #%d", i), ""))
 	}
 
 	jsonBody := CreatePlayerRequest{
