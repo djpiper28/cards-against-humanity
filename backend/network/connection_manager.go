@@ -55,11 +55,11 @@ func (g *IntegratedConnectionManager) RegisterConnection(gameId, playerId uuid.U
 		log.Printf("Registered game %s", gameId)
 	}
 
-  playerConnection, foundPlayer := game.playerConnectionMap[playerId]
-  if foundPlayer {
-    // Do not trigger a disconnect event in the internal system, just hot-swap the connection
-    playerConnection.conn.Close()
-  }
+	playerConnection, foundPlayer := game.playerConnectionMap[playerId]
+	if foundPlayer {
+		// Do not trigger a disconnect event in the internal system, just hot-swap the connection
+		playerConnection.conn.Close()
+	}
 
 	game.playerConnectionMap[playerId] = connection
 

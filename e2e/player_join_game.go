@@ -18,10 +18,12 @@ func GetPlayerJoinGameUrl() string {
 	return GetBasePage() + "game/playerJoin"
 }
 
-func UpgradeFromJoinPage(p *JoinGamePage) (PlayerJoinGame, error) {
+func UpgradeFromJoinPage(p JoinGamePage) (PlayerJoinGame, error) {
 	ret := PlayerJoinGame{Page: p.Page}
-	if !strings.Contains(GetPlayerJoinGameUrl(), ret.Page.MustInfo().URL) {
-		logMsg := fmt.Sprintf("Not on the correct page. Expected %s, got %s", GetPlayerJoinGameUrl(), ret.Page.MustInfo().URL)
+	currentUrl := ret.Page.MustInfo().URL
+
+	if !strings.Contains(currentUrl, GetPlayerJoinGameUrl()) {
+		logMsg := fmt.Sprintf("Not on the correct page. Expected %s, got %s", GetPlayerJoinGameUrl(), currentUrl)
 		log.Print(logMsg)
 		return PlayerJoinGame{}, errors.New(logMsg)
 	}

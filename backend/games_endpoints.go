@@ -210,8 +210,8 @@ func joinGame(c *gin.Context) {
 	}
 
 	// Attempt to upgrade the websocket
-  log.Printf("Upgrading connection for game %s and player %s", gameId, playerId)
-  network.WsUpgrade(c.Writer, c.Request, gameId, playerId, network.GlobalConnectionManager)
+	log.Printf("Upgrading connection for game %s and player %s", gameId, playerId)
+	network.WsUpgrade(c.Writer, c.Request, gameId, playerId, network.GlobalConnectionManager)
 }
 
 func SetupGamesEndpoints(r *gin.Engine) {

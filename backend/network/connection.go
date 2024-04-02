@@ -47,18 +47,18 @@ type WsConnection struct {
 	PlayerId     uuid.UUID
 	JoinTime     time.Time
 	LastPingTime time.Time
-  lock        sync.Mutex
+	lock         sync.Mutex
 }
 
 func (wsconn *WsConnection) Send(msg []byte) error {
-  wsconn.lock.Lock()
-  defer wsconn.lock.Unlock()
-  return wsconn.conn.Send(msg)
+	wsconn.lock.Lock()
+	defer wsconn.lock.Unlock()
+	return wsconn.conn.Send(msg)
 }
 
 func (wsconn *WsConnection) Close() {
-  wsconn.lock.Lock()
-  defer wsconn.lock.Unlock()
+	wsconn.lock.Lock()
+	defer wsconn.lock.Unlock()
 	wsconn.conn.Close()
 }
 

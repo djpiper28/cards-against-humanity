@@ -128,18 +128,18 @@ func (gr *GameRepo) CreatePlayer(gameId uuid.UUID, playerName, password string) 
 }
 
 func (gr *GameRepo) GetPlayerName(gameId, playerId uuid.UUID) (string, error) {
-  gr.lock.RLock()
-  defer gr.lock.RUnlock()
+	gr.lock.RLock()
+	defer gr.lock.RUnlock()
 
-  game, found := gr.GameMap[gameId]
-  if !found {
-    return "", errors.New("Cannot find game")
-  }
+	game, found := gr.GameMap[gameId]
+	if !found {
+		return "", errors.New("Cannot find game")
+	}
 
-  player, found := game.PlayersMap[playerId]
-  if !found {
-    return "", errors.New("Cannot find player")
-  }
+	player, found := game.PlayersMap[playerId]
+	if !found {
+		return "", errors.New("Cannot find player")
+	}
 
-  return player.Name, nil
+	return player.Name, nil
 }
