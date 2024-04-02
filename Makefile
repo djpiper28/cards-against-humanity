@@ -3,21 +3,26 @@ all: frontend backend
 	echo "Building Done"
 
 # Swagger defs
+.PHONY: swagger
 swagger:
 	go install github.com/swaggo/swag/cmd/swag@latest
 	cd backend && swag init --requiredByDefault 
 
 # Frontend
+.PHONY: frontend-install
 frontend-install:
 	cd ./cahfrontend/ && pnpm i
 
+.PHONY: frontend-api
 frontend-api: swagger 
 	npx swagger-typescript-api -p ./backend/docs/swagger.json -o ./cahfrontend/src/ -n api.ts
 
+.PHONY: frontend-tygo
 frontend-tygo:
 	go install github.com/gzuidhof/tygo@latest
 	cd backend && tygo generate
 
+.PHONY: frontend-types
 frontend-types: frontend-tygo frontend-api 
 	echo "Generated types"
 
@@ -39,7 +44,7 @@ backend: swagger
 test-frontend: frontend-types
 	cd ./cahfrontend && pnpm run test
 	
-GO_TEST_ARGS=-v -benchmem -parallel 16 ./... -covermode=atomic -coverprofile=coverage.out -timeout 60s
+GO_TEST_ARGS=-v -benchmem -parallel 16 ./... -covermode=atomic -coverprofile=coverage.out
 
 .PHONY: test-backend
 test-backend: backend
