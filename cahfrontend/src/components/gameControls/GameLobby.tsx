@@ -5,6 +5,7 @@ import { GameStateInfo } from "../../gameLogicTypes";
 import GameSettingsInput from "./GameSettingsInput";
 import GameSettingsView from "./GameSettingsView";
 import RoundedWhite from "../containers/RoundedWhite";
+import Header from "../typography/Header";
 
 interface Props {
   state: GameStateInfo;
@@ -14,9 +15,12 @@ interface Props {
 function GameLobbyLoaded(props: Readonly<Props>) {
   return (
     <RoundedWhite>
-      <h1>{`${
-        props.state.players.find((x) => x.id === props.state.gameOwnerId)?.name
-      }'s Game`}</h1>
+      <Header
+        text={`${
+          props.state.players.find((x) => x.id === props.state.gameOwnerId)
+            ?.name
+        }'s Game`}
+      />
       {props.gameOwner ? (
         <GameSettingsInput
           settings={props.state.settings}

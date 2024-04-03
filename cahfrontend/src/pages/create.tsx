@@ -17,6 +17,7 @@ import GameSettingsInput, {
 import { validate as validateGameSettings } from "../components/gameControls/GameSettingsInputValidation";
 import { joinGameUrl } from "../routes";
 import RoundedWhite from "../components/containers/RoundedWhite";
+import Header from "../components/typography/Header";
 
 interface Checked {
   checked: boolean;
@@ -77,7 +78,7 @@ export default function Create() {
     `text-xl ${blackCards() + whiteCards() === 0 ? "text-error-colour font-bold" : "text-black"}`;
   return (
     <>
-      <h1 class="text-2xl font-bold">Create A Game</h1>
+      <Header text="Create a game" />
       <RoundedWhite>
         <h2 class={`${panelTitleCss()}`}>
           {`Choose Some Card Packs ${

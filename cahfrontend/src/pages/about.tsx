@@ -1,7 +1,9 @@
+import Header from "../components/typography/Header";
+
 export default function About() {
   return (
     <section class="flex flex-col gap-3">
-      <h1 class="text-2xl font-bold">About - Cards Against Humanity</h1>
+      <Header text="About" />
 
       <h2 class="text-xl">A party game for horrible people</h2>
       <p>

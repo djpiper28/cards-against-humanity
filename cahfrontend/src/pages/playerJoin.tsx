@@ -12,6 +12,7 @@ import {
 } from "../gameState/gameState";
 import { MaxPasswordLength } from "../gameLogicTypes";
 import RoundedWhite from "../components/containers/RoundedWhite";
+import Header from "../components/typography/Header";
 
 export default function PlayerJoin() {
   const [searchParams] = useSearchParams();
@@ -29,7 +30,7 @@ export default function PlayerJoin() {
 
   return (
     <RoundedWhite>
-      <h1 class="text-2xl font-bold">Enter a username to join the game</h1>
+      <Header text="Enter a username to join the game" />
       <Input
         inputType={InputType.Text}
         label="Player Name"

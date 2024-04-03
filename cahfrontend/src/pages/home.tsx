@@ -5,6 +5,7 @@ import { GameLogicGameInfo } from "../api";
 import { apiClient } from "../apiClient";
 import { createGameUrl, joinGameUrl } from "../routes";
 import { gameIdParamCookie } from "../gameState/gameState";
+import Header from "../components/typography/Header";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -31,9 +32,11 @@ export default function Home() {
           packName="Click me to make a game"
         />
       </button>
-      <h1 class="text-3xl">
-        {currentGames().length === 0 ? "No games in progress" : "Join a Game"}
-      </h1>
+      <Header
+        text={
+          currentGames().length === 0 ? "No games in progress" : "Join a Game"
+        }
+      />
       <div class="flex flex-row flex-wrap gap-5">
         <For each={currentGames()}>
           {(game, _) => (
