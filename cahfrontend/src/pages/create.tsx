@@ -16,6 +16,7 @@ import GameSettingsInput, {
 } from "../components/gameControls/GameSettingsInput";
 import { validate as validateGameSettings } from "../components/gameControls/GameSettingsInputValidation";
 import { joinGameUrl } from "../routes";
+import RoundedWhite from "../components/containers/RoundedWhite";
 
 interface Checked {
   checked: boolean;
@@ -72,14 +73,12 @@ export default function Create() {
       .reduce((a, b) => a + b, 0);
   };
 
-  const editPanelCss =
-    "flex flex-col gap-5 rounded-2xl border-2 p-3 md:p-5 bg-gray-100";
   const panelTitleCss = () =>
     `text-xl ${blackCards() + whiteCards() === 0 ? "text-error-colour font-bold" : "text-black"}`;
   return (
     <>
       <h1 class="text-2xl font-bold">Create A Game</h1>
-      <div class={editPanelCss}>
+      <RoundedWhite>
         <h2 class={`${panelTitleCss()}`}>
           {`Choose Some Card Packs ${
             selectedPacks().length === 0 ? "(No Packs Selected)" : ""
@@ -117,9 +116,9 @@ export default function Create() {
         <p class={panelTitleCss()}>
           {`You have added ${whiteCards()} white cards and ${blackCards()} black cards.`}
         </p>
-      </div>
+      </RoundedWhite>
 
-      <div class={editPanelCss}>
+      <RoundedWhite>
         <h2 class={panelTitleCss()}>Other Game Settings</h2>
         <Input
           inputType={InputType.Text}
@@ -188,7 +187,7 @@ export default function Create() {
         >
           Create Game
         </button>
-      </div>
+      </RoundedWhite>
     </>
   );
 }

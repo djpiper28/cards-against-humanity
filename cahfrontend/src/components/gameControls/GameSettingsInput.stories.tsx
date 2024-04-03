@@ -5,7 +5,7 @@ export default {
   component: GameSettingsInput,
 } as Meta;
 
-export const Primar = {
+export const Primary = {
   args: {
     settings: {
       gamePassword: "password",

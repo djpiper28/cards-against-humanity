@@ -4,6 +4,7 @@ import { gameState } from "../../gameState/gameState";
 import { GameStateInfo } from "../../gameLogicTypes";
 import GameSettingsInput from "./GameSettingsInput";
 import GameSettingsView from "./GameSettingsView";
+import RoundedWhite from "../containers/RoundedWhite";
 
 interface Props {
   state: GameStateInfo;
@@ -12,7 +13,7 @@ interface Props {
 
 function GameLobbyLoaded(props: Readonly<Props>) {
   return (
-    <div class="flex flex-col items-between flex-wrap">
+    <RoundedWhite>
       <h1>{`${
         props.state.players.find((x) => x.id === props.state.gameOwnerId)?.name
       }'s Game`}</h1>
@@ -25,7 +26,7 @@ function GameLobbyLoaded(props: Readonly<Props>) {
       ) : (
         <GameSettingsView settings={props.state.settings} />
       )}
-    </div>
+    </RoundedWhite>
   );
 }
 
