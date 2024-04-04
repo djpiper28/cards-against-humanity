@@ -113,6 +113,7 @@ func createGame(c *gin.Context) {
 type CreatePlayerRequest struct {
 	PlayerName string    `json:"playerName"`
 	GameId     uuid.UUID `json:"gameId"`
+	Password   string    `json:"password"`
 }
 
 // @Summary		Creates a player to allow you to join a game (first step of game joining, followed by /join ing)
@@ -141,12 +142,7 @@ func createPlayerForJoining(c *gin.Context) {
 		return
 	}
 
-	password, err := c.Cookie(PasswordParam)
-	if err != nil {
-		log.Print("There is no password provided")
-	}
-
-	playerId, err := network.GameRepo.CreatePlayer(createReq.GameId, createReq.PlayerName, password)
+	playerId, err := network.GameRepo.CreatePlayer(createReq.GameId, createReq.PlayerName, createReq.Password)
 	if err != nil {
 		log.Printf("Cannot create player: %s", err)
 		c.JSON(http.StatusInternalServerError, NewApiError(err))

@@ -7,14 +7,6 @@ import (
 	"github.com/go-rod/rod"
 )
 
-const (
-	joinGameInputPlayerName     = "/Player Name/i"
-	joinGameInputGamePassword   = "/Game Password/i"
-	joinGameInputMaxPlayers     = "/Max Players/i"
-	joinGameInputPointsToPlayTo = "/Points To Play To/i"
-	joinGameInputMaxGameRounds  = "/Max Game Rounds/i"
-)
-
 type JoinGamePage struct {
 	Page *rod.Page
 }
@@ -36,22 +28,57 @@ func (page *JoinGamePage) InLobby() bool {
 	return true
 }
 
-func (j *JoinGamePage) PlayerName() *rod.Element {
+const (
+	joinGameInputPlayerName     = "/Player Name/i"
+	joinGameInputGamePassword   = "/Game Password/i"
+	joinGameInputMaxPlayers     = "/Max Players/i"
+	joinGameInputPointsToPlayTo = "/Points To Play To/i"
+	joinGameInputMaxGameRounds  = "/Max Game Rounds/i"
+)
+
+func (j *JoinGamePage) AdminPlayerName() *rod.Element {
 	return GetInputByLabel(j.Page, joinGameInputPlayerName)
 }
 
-func (j *JoinGamePage) GamePasssowrd() *rod.Element {
+func (j *JoinGamePage) AdminGamePasssowrd() *rod.Element {
 	return GetInputByLabel(j.Page, joinGameInputGamePassword)
 }
 
-func (j *JoinGamePage) MaxPlayers() *rod.Element {
+func (j *JoinGamePage) AdminMaxPlayers() *rod.Element {
 	return GetInputByLabel(j.Page, joinGameInputMaxPlayers)
 }
 
-func (j *JoinGamePage) PointsToPlayTo() *rod.Element {
+func (j *JoinGamePage) AdminPointsToPlayTo() *rod.Element {
 	return GetInputByLabel(j.Page, joinGameInputPointsToPlayTo)
 }
 
-func (j *JoinGamePage) MaxGameRounds() *rod.Element {
+func (j *JoinGamePage) AdminMaxGameRounds() *rod.Element {
 	return GetInputByLabel(j.Page, joinGameInputMaxGameRounds)
+}
+
+const (
+	joinGameViewGamePasswordId    = "game-password"
+	joinGameViewMaxPlayersId      = "max-players"
+	joinGameViewPlayingToPointsId = "playing-to-points"
+	joinGameViewMaxGameRoundsId   = "max-game-rounds"
+)
+
+func (j *JoinGamePage) UserGamePassword() *rod.Element {
+	return j.Page.Timeout(Timeout).MustElement("#" + joinGameViewGamePasswordId)
+}
+
+func (j *JoinGamePage) UserMaxPlayers() *rod.Element {
+	return j.Page.Timeout(Timeout).MustElement("#" + joinGameViewMaxPlayersId)
+}
+
+func (j *JoinGamePage) UserPlayingToPoints() *rod.Element {
+	return j.Page.Timeout(Timeout).MustElement("#" + joinGameViewPlayingToPointsId)
+}
+
+func (j *JoinGamePage) UserMaxGameRounds() *rod.Element {
+	return j.Page.Timeout(Timeout).MustElement("#" + joinGameViewMaxGameRoundsId)
+}
+
+func (j *JoinGamePage) HasCardPack(packId string) bool {
+	return j.Page.Timeout(Timeout).MustElement("#"+packId) != nil
 }

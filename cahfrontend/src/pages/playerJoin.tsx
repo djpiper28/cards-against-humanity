@@ -61,15 +61,16 @@ export default function PlayerJoin() {
             .joinCreate({
               gameId: gameId,
               playerName: playerName(),
+              password: password(),
             })
             .then((res) => {
-              cookieStorage.setItem(playerIdCookie, res.data, cookieOptions);
-              cookieStorage.setItem(gameIdParamCookie, gameId, cookieOptions);
               cookieStorage.setItem(
                 gamePasswordCookie,
                 password(),
                 cookieOptions,
               );
+              cookieStorage.setItem(playerIdCookie, res.data, cookieOptions);
+              cookieStorage.setItem(gameIdParamCookie, gameId, cookieOptions);
 
               naviagte(
                 `${joinGameUrl}?${gameIdParamCookie}=${encodeURIComponent(gameId)}`,

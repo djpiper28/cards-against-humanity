@@ -344,15 +344,12 @@ func (s *ServerTestSuite) TestCreatePlayerInvalidPasswordFails() {
 	jsonBody := CreatePlayerRequest{
 		PlayerName: name,
 		GameId:     details.gameId,
+    Password: "wrong password",
 	}
 	body, err := json.Marshal(jsonBody)
 	assert.Nil(t, err)
 
-	client := http.Client{
-		Jar: &GameJoinParams{GameId: details.gameId, Password: "wrong pasword"},
-	}
-
-	resp, err := client.Post(HttpBaseUrl+"/games/join", jsonContentType, bytes.NewReader(body))
+	resp, err := http.Post(HttpBaseUrl+"/games/join", jsonContentType, bytes.NewReader(body))
 	assert.Nil(t, err)
 
 	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
