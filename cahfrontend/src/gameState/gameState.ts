@@ -1,9 +1,13 @@
 import { GameStateInfo, Player } from "../gameLogicTypes";
 import {
   MsgOnJoin,
+  MsgOnPlayerCreate,
+  MsgOnPlayerDisconnect,
   MsgOnPlayerJoin,
   RpcMessageBody,
   RpcOnJoinMsg,
+  RpcOnPlayerCreateMsg,
+  RpcOnPlayerDisconnectMsg,
   RpcOnPlayerJoinMsg,
 } from "../rpcTypes";
 import { WebSocketClient, toWebSocketClient } from "./websocketClient";
@@ -78,11 +82,11 @@ class GameState {
   private setState(state: GameStateInfo) {
     this.state = state;
     this.ownerId = state.gameOwnerId;
-    this.players = state.players.map(x => ({
+    this.players = state.players.map((x) => ({
       id: x.id,
       name: x.name,
       connected: true,
-    }))
+    }));
     this.emitState();
   }
 
@@ -114,6 +118,29 @@ class GameState {
     this.onPlayerListChange?.(this.playerList());
   }
 
+  private handleOnPlayerCreate(msg: RpcOnPlayerCreateMsg) {
+    this.players = this.players.filter((x: Player) => x.id !== msg.id);
+    this.players.push({
+      id: msg.id,
+      name: msg.name,
+      connected: false,
+    });
+
+    this.onPlayerListChange?.(this.playerList());
+  }
+
+  private handleOnPlayerDisconnect(msg: RpcOnPlayerDisconnectMsg) {
+    const oldPlayer = this.players.find((x: Player) => x.id === msg.id);
+    this.players = this.players.filter((x: Player) => x.id !== msg.id);
+    this.players.push({
+      id: msg.id,
+      name: oldPlayer?.name ?? "error",
+      connected: false,
+    });
+
+    this.onPlayerListChange?.(this.playerList());
+  }
+
   /**
    * Handles an RPC message from the server. When testing call the private method and ignore the "error".
    */
@@ -127,6 +154,16 @@ class GameState {
       case MsgOnPlayerJoin:
         console.log("Handling on player join message");
         return this.handleOnPlayerJoin(rpcMessage.data as RpcOnPlayerJoinMsg);
+      case MsgOnPlayerCreate:
+        console.log("Handling on player create message");
+        return this.handleOnPlayerCreate(
+          rpcMessage.data as RpcOnPlayerCreateMsg,
+        );
+      case MsgOnPlayerDisconnect:
+        console.log("Handling on player disconnect message");
+        return this.handleOnPlayerDisconnect(
+          rpcMessage.data as RpcOnPlayerDisconnectMsg,
+        );
       default:
         throw new Error(
           `Cannot handle RPC message as type is not valid ${rpcMessage.type}`,

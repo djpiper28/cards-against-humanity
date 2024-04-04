@@ -3,7 +3,12 @@ import WebSocket from "isomorphic-ws";
 import { v4 } from "uuid";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { wsBaseUrl } from "../apiClient";
-import { MsgOnPlayerJoin, RpcMessage } from "../rpcTypes";
+import {
+  MsgOnPlayerCreate,
+  MsgOnPlayerDisconnect,
+  MsgOnPlayerJoin,
+  RpcMessage,
+} from "../rpcTypes";
 import { gameState } from "./gameState";
 
 describe("Game state tests", () => {
@@ -138,5 +143,66 @@ describe("Game state tests", () => {
       name: msg.data.name,
       connected: true,
     });
+  });
+
+  it("Should add a player when they are created", () => {
+    const gid = v4();
+    const pid = v4();
+    gameState.setupState(gid, pid, "");
+
+    const msg: RpcMessage = {
+      type: MsgOnPlayerCreate,
+      data: {
+        id: v4(),
+        name: "Player 1",
+      },
+    };
+
+    gameState.onPlayerListChange = vi.fn();
+    gameState.handleRpcMessage(JSON.stringify(msg));
+
+    expect(gameState.playerList().length).toBe(1);
+    expect(gameState.playerList()[0]).toEqual({
+      id: msg.data.id,
+      name: msg.data.name,
+      connected: false,
+    });
+    expect(gameState.onPlayerListChange).toBeCalledWith(gameState.playerList());
+  });
+
+  it("Should set a player to disconnected when they disconnect", () => {
+    const gid = v4();
+    const pid = v4();
+    gameState.setupState(gid, pid, "");
+
+    // Join as the player
+    const joinMsg: RpcMessage = {
+      type: MsgOnPlayerCreate,
+      data: {
+        id: v4(),
+        name: "Player 1",
+      },
+    };
+
+    gameState.handleRpcMessage(JSON.stringify(joinMsg));
+
+    // Disconnect the player
+    const msg: RpcMessage = {
+      type: MsgOnPlayerDisconnect,
+      data: {
+        id: joinMsg.data.id,
+      },
+    };
+
+    gameState.onPlayerListChange = vi.fn();
+    gameState.handleRpcMessage(JSON.stringify(msg));
+
+    expect(gameState.playerList().length).toBe(1);
+    expect(gameState.playerList()[0]).toEqual({
+      id: msg.data.id,
+      name: joinMsg.data.name,
+      connected: false,
+    });
+    expect(gameState.onPlayerListChange).toBeCalledWith(gameState.playerList());
   });
 });
