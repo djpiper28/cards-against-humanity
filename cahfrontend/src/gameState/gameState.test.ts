@@ -58,6 +58,33 @@ describe("Game state tests", () => {
     });
   });
 
+  it("Should call on player joined method on join", () => {
+    const gid = v4();
+    const pid = v4();
+    gameState.setupState(gid, pid, "");
+    gameState.onPlayerListChange = vi.fn();
+
+    const msg: RpcMessage = {
+      type: MsgOnPlayerJoin,
+      data: {
+        id: v4(),
+        name: "Player 1",
+      },
+    };
+
+    expect(gameState.playerList().length).toBe(0);
+    gameState.handleRpcMessage(JSON.stringify(msg));
+
+    expect(gameState.playerList().length).toBe(1);
+    expect(gameState.playerList()[0]).toEqual({
+      id: msg.data.id,
+      name: msg.data.name,
+      connected: true,
+    });
+
+    expect(gameState.onPlayerListChange).toBeCalledWith(gameState.playerList());
+  });
+
   it("Should not duplicate a player if they are added twice", () => {
     const gid = v4();
     const pid = v4();

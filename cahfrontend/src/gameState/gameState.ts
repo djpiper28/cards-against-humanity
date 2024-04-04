@@ -30,6 +30,7 @@ class GameState {
 
   // Events
   public onStateChange?: (state?: GameStateInfo) => void;
+  public onPlayerListChange?: (players: PlayerList) => void;
 
   // Logic lmao
   constructor() {}
@@ -39,6 +40,9 @@ class GameState {
     this.playerId = playerId;
     this.password = password;
     this.players = [];
+
+    this.onStateChange = undefined;
+    this.onPlayerListChange = undefined;
 
     const url = wsBaseUrl;
     console.log(`Connecting to ${url}`);
@@ -79,6 +83,7 @@ class GameState {
 
   public emitState() {
     this.onStateChange?.(structuredClone(this.state));
+    this.onPlayerListChange?.(this.playerList());
   }
 
   public isOwner(): boolean {
@@ -100,6 +105,8 @@ class GameState {
       name: msg.name,
       connected: true,
     });
+
+    this.onPlayerListChange?.(this.playerList());
   }
 
   /**
