@@ -96,6 +96,18 @@ func (g *IntegratedConnectionManager) UnregisterConnection(gameId, playerId uuid
 	} else {
 		log.Printf("Cannot unregister game %s as it cannot be found", gameId)
 	}
+
+	onPlayerDisconnectMsg := RpcOnPlayerDisconnectMsg{
+		Id: playerId,
+	}
+
+	message, err := EncodeRpcMessage(onPlayerDisconnectMsg)
+	if err != nil {
+		log.Printf("Cannot encode the message: %s", err)
+		return
+	}
+
+	go g.Broadcast(gameId, message)
 }
 
 func (g *IntegratedConnectionManager) Broadcast(gameId uuid.UUID, message []byte) {

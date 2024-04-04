@@ -62,6 +62,14 @@ type onPlayerJoinMsg struct {
 	Data network.RpcOnPlayerJoinMsg `json:"data"`
 }
 
+type onPlayerCreateMsg struct {
+	Data network.RpcOnPlayerCreateMsg `json:"data"`
+}
+
+type onPlayerDisconnectMsg struct {
+	Data network.RpcOnPlayerDisconnectMsg `json:"data"`
+}
+
 // A cookie jar and cookie header implementation for the ws dailer and http clients
 type GameJoinParams struct {
 	GameId, PlayerId uuid.UUID
