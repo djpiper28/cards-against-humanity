@@ -57,28 +57,28 @@ func (j *JoinGamePage) AdminMaxGameRounds() *rod.Element {
 }
 
 const (
-  joinGameViewGamePasswordId = "game-password"
-  joinGameViewMaxPlayersId = "max-players"
-  joinGameViewPlayingToPointsId = "playing-to-points"
-  joinGameViewMaxGameRoundsId = "max-game-rounds"
+	joinGameViewGamePasswordId    = "game-password"
+	joinGameViewMaxPlayersId      = "max-players"
+	joinGameViewPlayingToPointsId = "playing-to-points"
+	joinGameViewMaxGameRoundsId   = "max-game-rounds"
 )
 
 func (j *JoinGamePage) UserGamePassword() *rod.Element {
-  return j.Page.Timeout(Timeout).MustElement("#" + joinGameViewGamePasswordId)
+	return j.Page.Timeout(Timeout).MustElement("#" + joinGameViewGamePasswordId)
 }
 
 func (j *JoinGamePage) UserMaxPlayers() *rod.Element {
-  return j.Page.Timeout(Timeout).MustElement("#" + joinGameViewMaxPlayersId)
+	return j.Page.Timeout(Timeout).MustElement("#" + joinGameViewMaxPlayersId)
 }
 
 func (j *JoinGamePage) UserPlayingToPoints() *rod.Element {
-  return j.Page.Timeout(Timeout).MustElement("#" + joinGameViewPlayingToPointsId)
+	return j.Page.Timeout(Timeout).MustElement("#" + joinGameViewPlayingToPointsId)
 }
 
 func (j *JoinGamePage) UserMaxGameRounds() *rod.Element {
-  return j.Page.Timeout(Timeout).MustElement("#" + joinGameViewMaxGameRoundsId)
+	return j.Page.Timeout(Timeout).MustElement("#" + joinGameViewMaxGameRoundsId)
 }
 
 func (j *JoinGamePage) HasCardPack(packId string) bool {
-  return j.Page.Timeout(Timeout).Element("#" + packId) != nil
+	return j.Page.Timeout(Timeout).MustElement("#"+packId) != nil
 }

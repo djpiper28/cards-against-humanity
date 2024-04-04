@@ -21,6 +21,8 @@ func NewCreateGamePage(b *rod.Browser) CreateGamePage {
 	return createGamePage
 }
 
+const DefaultPassword = "poop"
+
 const (
 	createGameInputPlayerName     = "/Player Name/i"
 	createGameInputGamePassword   = "/Game Password/i"
@@ -62,7 +64,7 @@ func (c *CreateGamePage) InsertDefaultValidSettings() {
 	c.ClearInputs()
 
 	c.PlayerName().Input("Steve")
-	c.GamePasssowrd().Input("poop")
+	c.GamePasssowrd().Input(DefaultPassword)
 
 	GetInputByLabel(c.Page, "/.*CAH:? Base Set.*/").Timeout(Timeout).MustClick()
 }

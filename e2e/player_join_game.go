@@ -30,6 +30,24 @@ func UpgradeFromJoinPage(p JoinGamePage) (PlayerJoinGame, error) {
 	return ret, nil
 }
 
-func NewPlayerGamePage(b *rod.Browser, gameId string) PlayerJoinGame {
-	return PlayerJoinGame{Page: b.MustPage(GetPlayerJoinGameUrl() + "?gameId=" + gameId).MustWaitStable()}
+func NewPlayerGamePage(b *rod.Browser, adminJoinPage JoinGamePage) PlayerJoinGame {
+	ret := PlayerJoinGame{Page: b.MustPage(adminJoinPage.Page.MustInfo().URL).MustWaitStable()}
+	return ret
+}
+
+func (p *PlayerJoinGame) InPlayerJoinPage() bool {
+	return strings.Contains(p.Page.MustInfo().URL, GetPlayerJoinGameUrl())
+}
+
+func (p *PlayerJoinGame) PlayerName(name string) {
+	GetInputByLabel(p.Page, "Player Name").MustInput(name)
+}
+
+func (p *PlayerJoinGame) Password(password string) {
+	GetInputByLabel(p.Page, "Password, leave blank if none").MustInput(password)
+}
+
+func (p *PlayerJoinGame) Join() {
+	p.Page.Timeout(Timeout).MustElementR("button", "/Join Game/i").MustClick()
+	return
 }
