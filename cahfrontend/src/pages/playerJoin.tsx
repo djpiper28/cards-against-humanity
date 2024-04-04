@@ -56,15 +56,19 @@ export default function PlayerJoin() {
             return;
           }
 
-          cookieStorage.setItem(gamePasswordCookie, password(), cookieOptions);
-
           setError("");
           apiClient.games
             .joinCreate({
               gameId: gameId,
               playerName: playerName(),
+              password: password(),
             })
             .then((res) => {
+              cookieStorage.setItem(
+                gamePasswordCookie,
+                password(),
+                cookieOptions,
+              );
               cookieStorage.setItem(playerIdCookie, res.data, cookieOptions);
               cookieStorage.setItem(gameIdParamCookie, gameId, cookieOptions);
 

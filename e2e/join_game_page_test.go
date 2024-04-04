@@ -53,15 +53,26 @@ func (s *WithServicesSuite) TestGamesShowTheSameInitialSettings() {
 	assert.True(s.T(), playerPage.InPlayerJoinPage())
 	playerPage.Password(DefaultPassword)
 	playerPage.PlayerName("Geoff")
+
 	playerPage.Join()
 
 	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
 
-	time.Sleep(Timeout)
+	playerPage.Page.MustScreenshotFullPage("error.png")
 	assert.True(s.T(), playerLobbyPage.InLobby())
 
-	assert.Equal(s.T(), adminLobbyPage.AdminMaxPlayers().MustText(), playerLobbyPage.UserMaxGameRounds().MustText())
-	assert.Equal(s.T(), adminLobbyPage.AdminPointsToPlayTo().MustText(), playerLobbyPage.UserPlayingToPoints().MustText())
-	assert.Equal(s.T(), adminLobbyPage.AdminMaxGameRounds().MustText(), playerLobbyPage.UserMaxGameRounds().MustText())
-	assert.Equal(s.T(), adminLobbyPage.AdminGamePasssowrd().MustText(), playerLobbyPage.UserGamePassword().MustText())
+	assert.Equal(s.T(),
+		adminLobbyPage.AdminMaxPlayers().MustText(),
+		playerLobbyPage.UserMaxPlayers().MustText())
+	assert.Equal(s.T(),
+		adminLobbyPage.AdminPointsToPlayTo().MustText(),
+		playerLobbyPage.UserPlayingToPoints().MustText())
+	assert.Equal(s.T(),
+		adminLobbyPage.AdminMaxGameRounds().MustText(),
+		playerLobbyPage.UserMaxGameRounds().MustText())
+	assert.Equal(s.T(),
+		adminLobbyPage.AdminGamePasssowrd().MustText(),
+		playerLobbyPage.UserGamePassword().MustText())
+
+	playerLobbyPage.Page.MustScreenshotFullPage("../wiki/player_lobby_page.png")
 }
