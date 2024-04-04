@@ -113,7 +113,7 @@ func (g *IntegratedConnectionManager) Broadcast(gameId uuid.UUID, message []byte
 	wg.Add(len(game.playerConnectionMap))
 
 	for playerId, conn := range game.playerConnectionMap {
-		go func() {
+		go func(conn *WsConnection, playerId uuid.UUID) {
 			defer wg.Done()
 			err := conn.Send(message)
 			if err != nil {
@@ -122,7 +122,7 @@ func (g *IntegratedConnectionManager) Broadcast(gameId uuid.UUID, message []byte
 
 				go g.UnregisterConnection(gameId, playerId)
 			}
-		}()
+		}(conn, playerId)
 	}
 
 	wg.Wait()

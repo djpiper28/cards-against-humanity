@@ -12,11 +12,13 @@ type RpcMessageType int
 // The type of the message
 const (
 	// Tx the initial game state when the user joins
-	MsgOnJoin = 0
+	MsgOnJoin = iota + 1
 	// Tx the player's name and id when they join
-	MsgOnPlayerJoin = 1
+	MsgOnPlayerJoin
+	// Tx when the player is created in a game
+	MsgOnPlayerCreate
 	// Tx the player's id and reason when they disconnect
-	MsgOnPlayerDisconnect = 2
+	MsgOnPlayerDisconnect
 )
 
 type RpcMessageBody struct {
@@ -61,4 +63,13 @@ type RpcOnPlayerDisconnectMsg struct {
 
 func (msg RpcOnPlayerDisconnectMsg) Type() RpcMessageType {
 	return MsgOnPlayerDisconnect
+}
+
+type RpcOnPlayerCreateMsg struct {
+	Id   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
+}
+
+func (msg RpcOnPlayerCreateMsg) Type() RpcMessageType {
+	return MsgOnPlayerCreate
 }

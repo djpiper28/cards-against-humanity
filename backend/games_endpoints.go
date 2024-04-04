@@ -149,7 +149,19 @@ func createPlayerForJoining(c *gin.Context) {
 		return
 	}
 
+  onCreateMessage := network.RpcOnPlayerCreateMsg{
+    Id: playerId,
+    Name: createReq.PlayerName,
+  }
+
 	c.JSON(http.StatusCreated, playerId)
+
+  // Transmit to the 
+  msg, err := network.EncodeRpcMessage(onCreateMessage)
+  if err != nil {
+    log.Printf("Error encoding message: %s", err)
+  }
+  go network.GlobalConnectionManager.Broadcast(createReq.GameId, msg)
 }
 
 // @Summary		Joins a game and upgrades the connection to a websocket if all is well
