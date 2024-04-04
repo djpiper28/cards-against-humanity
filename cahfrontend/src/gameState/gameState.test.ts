@@ -3,6 +3,7 @@ import WebSocket from "isomorphic-ws";
 import { v4 } from "uuid";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { wsBaseUrl } from "../apiClient";
+import { MsgOnPlayerJoin, RpcMessage } from "../rpcTypes";
 import { gameState } from "./gameState";
 
 describe("Game state tests", () => {
@@ -31,5 +32,84 @@ describe("Game state tests", () => {
     gameState.setupState(gid, pid, "");
     expect(gameState.validate()).toBeTruthy();
     expect(WebSocket).toHaveBeenCalledWith(`${wsBaseUrl}`);
+  });
+
+  it("Should add a new player to the player list when they connect", () => {
+    const gid = v4();
+    const pid = v4();
+    gameState.setupState(gid, pid, "");
+
+    const msg: RpcMessage = {
+      type: MsgOnPlayerJoin,
+      data: {
+        id: v4(),
+        name: "Player 1",
+      },
+    };
+
+    expect(gameState.playerList().length).toBe(0);
+    gameState.handleRpcMessage(JSON.stringify(msg));
+
+    expect(gameState.playerList().length).toBe(1);
+    expect(gameState.playerList()[0]).toEqual({
+      id: msg.data.id,
+      name: msg.data.name,
+      connected: true,
+    });
+  });
+
+  it("Should not duplicate a player if they are added twice", () => {
+    const gid = v4();
+    const pid = v4();
+    gameState.setupState(gid, pid, "");
+
+    const msg: RpcMessage = {
+      type: MsgOnPlayerJoin,
+      data: {
+        id: v4(),
+        name: "Player 1",
+      },
+    };
+
+    gameState.handleRpcMessage(JSON.stringify(msg));
+    gameState.handleRpcMessage(JSON.stringify(msg));
+
+    expect(gameState.playerList()[0]).toEqual({
+      id: msg.data.id,
+      name: msg.data.name,
+      connected: true,
+    });
+    expect(gameState.playerList().length).toBe(1);
+  });
+
+  it("Should set a player to connected if they are in the players list but disconnected", () => {
+    const gid = v4();
+    const pid = v4();
+    gameState.setupState(gid, pid, "");
+
+    const msg: RpcMessage = {
+      type: MsgOnPlayerJoin,
+      data: {
+        id: v4(),
+        name: "Player 1",
+      },
+    };
+
+    gameState.players = [
+      {
+        id: msg.data.id,
+        name: msg.data.name,
+        connected: false,
+      },
+    ];
+
+    gameState.handleRpcMessage(JSON.stringify(msg));
+
+    expect(gameState.playerList().length).toBe(1);
+    expect(gameState.playerList()[0]).toEqual({
+      id: msg.data.id,
+      name: msg.data.name,
+      connected: true,
+    });
   });
 });

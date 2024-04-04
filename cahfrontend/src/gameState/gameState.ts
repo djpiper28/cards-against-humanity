@@ -1,8 +1,15 @@
 import { GameStateInfo } from "../gameLogicTypes";
-import { MsgOnJoin, RpcMessageBody, RpcOnJoinMsg } from "../rpcTypes";
+import {
+  MsgOnJoin,
+  MsgOnPlayerJoin,
+  RpcMessageBody,
+  RpcOnJoinMsg,
+  RpcOnPlayerJoinMsg,
+} from "../rpcTypes";
 import { WebSocketClient, toWebSocketClient } from "./websocketClient";
 import { wsBaseUrl } from "../apiClient";
 import WebSocket from "isomorphic-ws";
+import { PlayerList } from "./playersList";
 
 export const playerIdCookie = "playerId";
 /**
@@ -17,8 +24,9 @@ class GameState {
   private ownerId: string = "";
   private password: string = "";
   private setup: boolean = false;
-  private wsClient: WebSocketClient;
+  private wsClient?: WebSocketClient;
   private state?: GameStateInfo;
+  private players: PlayerList = [];
 
   // Events
   public onStateChange?: (state?: GameStateInfo) => void;
@@ -30,6 +38,7 @@ class GameState {
     this.gameId = gameId;
     this.playerId = playerId;
     this.password = password;
+    this.players = [];
 
     const url = wsBaseUrl;
     console.log(`Connecting to ${url}`);
@@ -80,6 +89,22 @@ class GameState {
     this.setState(msg.state as GameStateInfo);
   }
 
+  public playerList(): PlayerList {
+    return structuredClone(this.players);
+  }
+
+  private handleOnPlayerJoin(msg: RpcOnPlayerJoinMsg) {
+    this.players = this.players.filter((x) => x.id !== msg.id);
+    this.players.push({
+      id: msg.id,
+      name: msg.name,
+      connected: true,
+    });
+  }
+
+  /**
+   * Handles an RPC message from the server. When testing call the private method and ignore the "error".
+   */
   private handleRpcMessage(msg: string): void {
     console.log(`Received a message ${msg}`);
     const rpcMessage = JSON.parse(msg) as RpcMessageBody;
@@ -87,6 +112,9 @@ class GameState {
       case MsgOnJoin:
         console.log("Handling on join message");
         return this.handleOnJoin(rpcMessage.data as RpcOnJoinMsg);
+      case MsgOnPlayerJoin:
+        console.log("Handling on player join message");
+        return this.handleOnPlayerJoin(rpcMessage.data as RpcOnPlayerJoinMsg);
       default:
         throw new Error(
           `Cannot handle RPC message as type is not valid ${rpcMessage.type}`,
