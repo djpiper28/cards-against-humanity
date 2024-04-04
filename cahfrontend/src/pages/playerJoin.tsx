@@ -56,6 +56,8 @@ export default function PlayerJoin() {
             return;
           }
 
+          cookieStorage.setItem(gamePasswordCookie, password(), cookieOptions);
+
           setError("");
           apiClient.games
             .joinCreate({
@@ -65,11 +67,6 @@ export default function PlayerJoin() {
             .then((res) => {
               cookieStorage.setItem(playerIdCookie, res.data, cookieOptions);
               cookieStorage.setItem(gameIdParamCookie, gameId, cookieOptions);
-              cookieStorage.setItem(
-                gamePasswordCookie,
-                password(),
-                cookieOptions,
-              );
 
               naviagte(
                 `${joinGameUrl}?${gameIdParamCookie}=${encodeURIComponent(gameId)}`,
