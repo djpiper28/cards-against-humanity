@@ -6,9 +6,12 @@ import GameSettingsInput from "./GameSettingsInput";
 import GameSettingsView from "./GameSettingsView";
 import RoundedWhite from "../containers/RoundedWhite";
 import Header from "../typography/Header";
+import PlayerList from "../gameItems/PlayerList";
+import { GamePlayerList } from "../../gameState/playersList";
 
 interface Props {
   state: GameStateInfo;
+  players: GamePlayerList;
   gameOwner: boolean;
 }
 
@@ -30,6 +33,7 @@ function GameLobbyLoaded(props: Readonly<Props>) {
       ) : (
         <GameSettingsView settings={props.state.settings} />
       )}
+      <PlayerList players={props.players} />
     </RoundedWhite>
   );
 }
@@ -37,7 +41,12 @@ function GameLobbyLoaded(props: Readonly<Props>) {
 export default function GameLobby() {
   const [state, setState] = createSignal<GameStateInfo | undefined>(undefined);
   const [gameOwner, setGameOwner] = createSignal(false);
+  const [players, setPlayers] = createSignal<GamePlayerList>([]);
+
   onMount(() => {
+    gameState.onPlayerListChange = (players: GamePlayerList) => {
+      setPlayers(players);
+    };
     gameState.onStateChange = (state?: GameStateInfo) => {
       console.log("State change detected");
       setState(state);
@@ -50,10 +59,26 @@ export default function GameLobby() {
     gameState.emitState();
   });
 
+  gameState.onPlayerListChange = (players: GamePlayerList) => {
+    setPlayers(players);
+  };
+  gameState.onStateChange = (state?: GameStateInfo) => {
+    console.log("State change detected");
+    setState(state);
+
+    if (gameState.isOwner()) {
+      setGameOwner(true);
+    }
+  };
+
   return (
     <>
       {!!state() ? (
-        <GameLobbyLoaded state={state()} gameOwner={gameOwner()} />
+        <GameLobbyLoaded
+          state={state()}
+          gameOwner={gameOwner()}
+          players={players()}
+        />
       ) : (
         <div class="flex flex-grow justify-center items-center text-2xl">
           Waiting for lobby information <LoadingSlug />

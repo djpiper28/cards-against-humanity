@@ -10,4 +10,4 @@ export interface Player {
 /**
  * A list of players who are in a game
  */
-export type PlayerList = Player[];
+export type GamePlayerList = Player[];

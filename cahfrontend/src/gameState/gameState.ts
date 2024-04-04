@@ -1,4 +1,4 @@
-import { GameStateInfo } from "../gameLogicTypes";
+import { GameStateInfo, Player } from "../gameLogicTypes";
 import {
   MsgOnJoin,
   MsgOnPlayerJoin,
@@ -9,7 +9,7 @@ import {
 import { WebSocketClient, toWebSocketClient } from "./websocketClient";
 import { wsBaseUrl } from "../apiClient";
 import WebSocket from "isomorphic-ws";
-import { PlayerList } from "./playersList";
+import { GamePlayerList } from "./playersList";
 
 export const playerIdCookie = "playerId";
 /**
@@ -26,11 +26,11 @@ class GameState {
   private setup: boolean = false;
   private wsClient?: WebSocketClient;
   private state?: GameStateInfo;
-  private players: PlayerList = [];
+  private players: GamePlayerList = [];
 
   // Events
   public onStateChange?: (state?: GameStateInfo) => void;
-  public onPlayerListChange?: (players: PlayerList) => void;
+  public onPlayerListChange?: (players: GamePlayerList) => void;
 
   // Logic lmao
   constructor() {}
@@ -78,6 +78,11 @@ class GameState {
   private setState(state: GameStateInfo) {
     this.state = state;
     this.ownerId = state.gameOwnerId;
+    this.players = state.players.map(x => ({
+      id: x.id,
+      name: x.name,
+      connected: true,
+    }))
     this.emitState();
   }
 
@@ -94,12 +99,12 @@ class GameState {
     this.setState(msg.state as GameStateInfo);
   }
 
-  public playerList(): PlayerList {
-    return structuredClone(this.players);
+  public playerList(): GamePlayerList {
+    return [...this.players];
   }
 
   private handleOnPlayerJoin(msg: RpcOnPlayerJoinMsg) {
-    this.players = this.players.filter((x) => x.id !== msg.id);
+    this.players = this.players.filter((x: Player) => x.id !== msg.id);
     this.players.push({
       id: msg.id,
       name: msg.name,
