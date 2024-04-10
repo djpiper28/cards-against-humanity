@@ -2,7 +2,7 @@
 
 Cards Against Humanity website written in Golang.
 
-Live on [changeme](changeme).
+(WIP) Live on [cards.djpiper28.co.uk](https://cards.djpiper28.co.uk).
 
 [![codecov](https://codecov.io/gh/djpiper28/cards-against-humanity/graph/badge.svg?token=X6YLDCVVLL)](https://codecov.io/gh/djpiper28/cards-against-humanity)
 [![Go](https://github.com/djpiper28/cards-against-humanity/actions/workflows/coverage.yml/badge.svg)](https://github.com/djpiper28/cards-against-humanity/actions/workflows/coverage.yml)
