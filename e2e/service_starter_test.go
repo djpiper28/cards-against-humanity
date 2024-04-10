@@ -114,6 +114,7 @@ func (s *WithServicesSuite) TearDownSuite() {
 	if err := s.frontendProcess.Process.Kill(); err != nil {
 		log.Printf("Cannot kill frontend: %s", err)
 	}
+	log.Print("Shutdown has completed")
 }
 
 func TestWithServicesSuite(t *testing.T) {

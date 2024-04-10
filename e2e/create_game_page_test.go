@@ -9,13 +9,19 @@ import (
 )
 
 func (s *WithServicesSuite) TestCreateGamePageRender() {
-	page := NewCreateGamePage(GetBrowser())
+	browser := GetBrowser()
+	defer browser.Close()
+
+	page := NewCreateGamePage(browser)
 	assert.NotNil(s.T(), page, "Page should render and not be nil")
 	page.Page.MustScreenshotFullPage("../wiki/assets/create_game.png")
 }
 
 func (s *WithServicesSuite) TestCreateGamePageDefaultInput() {
-	page := NewCreateGamePage(GetBrowser())
+	browser := GetBrowser()
+	defer browser.Close()
+
+	page := NewCreateGamePage(browser)
 	assert.NotNil(s.T(), page, "Page should render and not be nil")
 	page.InsertDefaultValidSettings()
 	page.Page.MustScreenshotFullPage("../wiki/assets/create_game_default_input.png")

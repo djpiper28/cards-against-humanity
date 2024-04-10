@@ -5,13 +5,19 @@ import (
 )
 
 func (s *WithServicesSuite) TestHomePageRender() {
-	page := NewHomePage(GetBrowser())
+	browser := GetBrowser()
+	defer browser.Close()
+
+	page := NewHomePage(browser)
 	assert.NotNil(s.T(), page, "Page should render and not be nil")
 	page.Page.MustScreenshotFullPage("../wiki/assets/home.png")
 }
 
 func (s *WithServicesSuite) TestClickCreateAGame() {
-	page := NewHomePage(GetBrowser())
+	browser := GetBrowser()
+	defer browser.Close()
+
+	page := NewHomePage(browser)
 	createAGameButton := page.GetCreateGameButton()
 	assert.NotNil(s.T(), createAGameButton, "Should find a create a game button")
 

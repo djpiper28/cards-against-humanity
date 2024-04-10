@@ -10,8 +10,10 @@ import (
 
 func (s *WithServicesSuite) TestJoinGameRedirectsOnEmptyGameId() {
 	t := s.T()
+	browser := GetBrowser()
+	defer browser.Close()
 
-	joinGame := NewJoinGamePage(GetBrowser(), "")
+	joinGame := NewJoinGamePage(browser, "")
 	time.Sleep(Timeout)
 	assert.Equal(t, GetBasePage(), joinGame.Page.MustInfo().URL)
 }
@@ -20,7 +22,10 @@ func (s *WithServicesSuite) TestJoinGameRedirectsOnEmptyPlayerId() {
 	t := s.T()
 
 	gameId := "testing123"
-	joinGame := NewJoinGamePage(GetBrowser(), gameId)
+	browser := GetBrowser()
+	defer browser.Close()
+
+	joinGame := NewJoinGamePage(browser, gameId)
 	time.Sleep(Timeout)
 	assert.Equal(t, GetBasePage()+"game/playerJoin?gameId="+gameId, joinGame.Page.MustInfo().URL)
 
@@ -29,7 +34,10 @@ func (s *WithServicesSuite) TestJoinGameRedirectsOnEmptyPlayerId() {
 }
 
 func (s *WithServicesSuite) TestGamesShowTheSameInitialSettings() {
-	createPage := NewCreateGamePage(GetBrowser())
+	browser := GetBrowser()
+	defer browser.Close()
+
+	createPage := NewCreateGamePage(browser)
 	assert.NotNil(s.T(), createPage, "Page should render and not be nil")
 	createPage.InsertDefaultValidSettings()
 
@@ -48,7 +56,9 @@ func (s *WithServicesSuite) TestGamesShowTheSameInitialSettings() {
 	assert.Equal(s.T(), adminLobbyPage.AdminGamePasssowrd().MustText(), DefaultPassword)
 
 	// Connect with another client then assert that the settings remain equal
-	playerPage := NewPlayerGamePage(GetBrowser(), adminLobbyPage)
+	browser2 := GetBrowser()
+	defer browser2.Close()
+	playerPage := NewPlayerGamePage(browser2, adminLobbyPage)
 
 	assert.True(s.T(), playerPage.InPlayerJoinPage())
 	playerPage.Password(DefaultPassword)
