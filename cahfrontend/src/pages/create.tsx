@@ -19,24 +19,19 @@ import { joinGameUrl } from "../routes";
 import RoundedWhite from "../components/containers/RoundedWhite";
 import Header from "../components/typography/Header";
 import Button from "../components/buttons/Button";
-
-interface Checked {
-  checked: boolean;
-}
-
-type CardPack = GameLogicCardPack & Checked;
+import CardsSelector from "../components/gameControls/CardsSelector";
 
 export default function Create() {
   const navigate = useNavigate();
-  const [packs, setPacks] = createSignal<CardPack[]>([]);
+  const [packs, setPacks] = createSignal<GameLogicCardPack[]>([]);
   const [errorMessage, setErrorMessage] = createSignal("");
   onMount(async () => {
     try {
       const packs = await apiClient.res.packsList();
-      const cardPacksList: CardPack[] = [];
+      const cardPacksList: GameLogicCardPack[] = [];
       const packData = packs.data;
       for (let cardId in packData) {
-        cardPacksList.push({ ...packData[cardId], checked: false });
+        cardPacksList.push({ ...packData[cardId] });
       }
       setPacks(
         cardPacksList.sort((a, b) => {
@@ -86,34 +81,11 @@ export default function Create() {
             selectedPacks().length === 0 ? "(No Packs Selected)" : ""
           }`}
         </h2>
-        <div class="flex flex-row flex-wrap gap-2 md:gap-1 overflow-auto max-h-64">
-          <For each={packs()}>
-            {(pack, index) => {
-              return (
-                <Checkbox
-                  checked={pack.checked}
-                  label={`${pack.name} (${
-                    pack ? (pack.whiteCards ?? 0) + (pack.blackCards ?? 0) : 0
-                  } Cards)`}
-                  onSetChecked={(checked) => {
-                    if (checked && !selectedPacks().includes(pack.id ?? "")) {
-                      setSelectedPacks([...selectedPacks(), pack.id ?? ""]);
-                    } else {
-                      setSelectedPacks(
-                        selectedPacks().filter((x) => x !== pack.id),
-                      );
-                    }
-
-                    const newPacks = structuredClone(packs());
-                    newPacks[index()].checked = !pack.checked;
-                    setPacks(newPacks);
-                  }}
-                  secondary={/^CAH:?.*$/i.test(pack.name ?? "")}
-                />
-              );
-            }}
-          </For>
-        </div>
+        <CardsSelector
+          setSelectedPackIds={setSelectedPacks}
+          selectedPackIds={selectedPacks()}
+          cards={packs()}
+        />
 
         <p class={panelTitleCss()}>
           {`You have added ${whiteCards()} white cards and ${blackCards()} black cards.`}
