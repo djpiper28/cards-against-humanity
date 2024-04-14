@@ -18,6 +18,7 @@ import { validate as validateGameSettings } from "../components/gameControls/Gam
 import { joinGameUrl } from "../routes";
 import RoundedWhite from "../components/containers/RoundedWhite";
 import Header from "../components/typography/Header";
+import Button from "../components/buttons/Button";
 
 interface Checked {
   checked: boolean;
@@ -140,8 +141,8 @@ export default function Create() {
           setSettings={setGameSettings}
         />
 
-        <button
-          onclick={() => {
+        <Button
+          onClick={() => {
             if (!validateGameSettings(settings)) {
               console.error("The game settings are invalid");
               return;
@@ -187,7 +188,7 @@ export default function Create() {
           }}
         >
           Create Game
-        </button>
+        </Button>
       </RoundedWhite>
     </>
   );

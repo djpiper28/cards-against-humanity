@@ -13,6 +13,7 @@ import {
 import { MaxPasswordLength } from "../gameLogicTypes";
 import RoundedWhite from "../components/containers/RoundedWhite";
 import Header from "../components/typography/Header";
+import Button from "../components/buttons/Button";
 
 export default function PlayerJoin() {
   const [searchParams] = useSearchParams();
@@ -50,7 +51,7 @@ export default function PlayerJoin() {
       />
       <p class="text-error-colour">{error()}</p>
 
-      <button
+      <Button
         onClick={async () => {
           if (!validatePlayerName(playerName())) {
             return;
@@ -82,7 +83,7 @@ export default function PlayerJoin() {
         }}
       >
         Join Game
-      </button>
+      </Button>
     </RoundedWhite>
   );
 }

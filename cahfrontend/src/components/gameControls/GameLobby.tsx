@@ -7,7 +7,7 @@ import GameSettingsView from "./GameSettingsView";
 import RoundedWhite from "../containers/RoundedWhite";
 import Header from "../typography/Header";
 import PlayerList from "../gameItems/PlayerList";
-import { GamePlayerList } from "../../gameState/playersList";
+import { GamePlayerList } from "../../gameState/gamePlayersList";
 
 interface Props {
   state: GameStateInfo;
