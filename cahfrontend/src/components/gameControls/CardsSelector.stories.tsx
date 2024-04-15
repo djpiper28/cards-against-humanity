@@ -33,7 +33,7 @@ export const Primary = {
         name: "CAH: Test Pack 4",
         whiteCards: 10,
         blackCards: 0,
-      }
+      },
     ],
   },
 };

@@ -6,6 +6,11 @@ import (
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+
+	"time"
+
+	"github.com/chenyahui/gin-cache"
+	"github.com/chenyahui/gin-cache/persist"
 )
 
 type getPacksResp map[uuid.UUID]*gameLogic.CardPack
@@ -22,8 +27,10 @@ func getPacks(c *gin.Context) {
 }
 
 func SetupResoucesEndpoints(r *gin.Engine) {
+	memoryStore := persist.NewMemoryStore(time.Hour)
+
 	resourcesRoutes := r.Group("/res")
 	{
-		resourcesRoutes.GET("/packs", getPacks)
+		resourcesRoutes.GET("/packs", cache.CacheByRequestURI(memoryStore, 2*time.Minute), getPacks)
 	}
 }
