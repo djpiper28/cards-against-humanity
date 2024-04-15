@@ -38,6 +38,7 @@ function GameLobbyLoaded(props: Readonly<Props>) {
       />
       {props.gameOwner ? (
         <>
+          <Header text="Change your game's settings" />
           <CardsSelector
             cards={props.cardPacks}
             selectedPackIds={selectedPackIds()}
@@ -107,7 +108,6 @@ export default function GameLobby() {
     };
     // Just incase the update has already happened
     gameState.emitState();
-
   });
 
   gameState.onPlayerListChange = (players: GamePlayerList) => {
@@ -136,7 +136,9 @@ export default function GameLobby() {
           Waiting for lobby information <LoadingSlug />
         </div>
       )}
-      <p id="error-message" class="text-error-colour">{errorMessage()}</p>
+      <p id="error-message" class="text-error-colour">
+        {errorMessage()}
+      </p>
     </>
   );
 }
