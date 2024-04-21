@@ -101,11 +101,11 @@ func (c *WsConnection) listenAndHandle() error {
 			return errors.New("Cannot read from websocket")
 		}
 
-    handler := "Unknown"
-    startTime := time.Now()
+		handler := "Unknown"
+		startTime := time.Now()
 		err = DecodeRpcMessage(msg, RpcCommandHandlers{
 			ChangeSettingsHandler: func(msg RpcChangeSettingsMsg) error {
-        handler = "Change Settings"
+				handler = "Change Settings"
 				game, err := GameRepo.GetGame(gid)
 				if err != nil {
 					return errors.New("Cannot find the game")
@@ -130,10 +130,10 @@ func (c *WsConnection) listenAndHandle() error {
 			},
 		})
 
-    endTime := time.Now()
-    microSeconds := endTime.Sub(startTime).Microseconds()
+		endTime := time.Now()
+		microSeconds := endTime.Sub(startTime).Microseconds()
 
-    log.Printf("Command Handler \"%s\" | %s | %dµs", handler, gid, microSeconds)
+		log.Printf("Command Handler \"%s\" | %s | %dµs", handler, gid, microSeconds)
 
 		if err != nil {
 			log.Printf("Error processing message: %s; for gid %s pid %s", err, c.GameId, c.PlayerId)
