@@ -1,10 +1,16 @@
 import { GameStateInfo, Player } from "../gameLogicTypes";
 import {
+  MsgChangeSettings,
+  MsgCommandError,
   MsgOnJoin,
   MsgOnPlayerCreate,
   MsgOnPlayerDisconnect,
   MsgOnPlayerJoin,
+  RpcChangeSettingsMsg,
+  RpcCommandErrorMsg,
+  RpcMessage,
   RpcMessageBody,
+  RpcMessageType,
   RpcOnJoinMsg,
   RpcOnPlayerCreateMsg,
   RpcOnPlayerDisconnectMsg,
@@ -35,6 +41,8 @@ class GameState {
   // Events
   public onStateChange?: (state?: GameStateInfo) => void;
   public onPlayerListChange?: (players: GamePlayerList) => void;
+  public onCommandError?: (error: RpcCommandErrorMsg) => void;
+  public onChangeSettings?: (settings: RpcChangeSettingsMsg) => void;
 
   // Logic lmao
   constructor() {}
@@ -164,11 +172,32 @@ class GameState {
         return this.handleOnPlayerDisconnect(
           rpcMessage.data as RpcOnPlayerDisconnectMsg,
         );
+      case MsgCommandError:
+        console.log("Handling command error message");
+        return this.onCommandError?.(rpcMessage.data as RpcCommandErrorMsg);
+      case MsgChangeSettings:
+        console.log("Handling change settings message");
+        return this.onChangeSettings?.(rpcMessage.data as RpcChangeSettingsMsg);
       default:
         throw new Error(
           `Cannot handle RPC message as type is not valid ${rpcMessage.type}`,
         );
     }
+  }
+
+  public encodeMessage(type: RpcMessageType, data: RpcMessage): RpcMessageBody {
+    return {
+      type: type,
+      data: data,
+    };
+  }
+
+  public sendRpcMessage(type: RpcMessageType, data: RpcMessage) {
+    if (!this.wsClient) {
+      throw new Error("Cannot send message as websocket is not connected");
+    }
+
+    this.wsClient.sendMessage(JSON.stringify(this.encodeMessage(type, data)));
   }
 }
 

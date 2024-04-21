@@ -4,9 +4,12 @@ import { v4 } from "uuid";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { wsBaseUrl } from "../apiClient";
 import {
+  MsgChangeSettings,
+  MsgCommandError,
   MsgOnPlayerCreate,
   MsgOnPlayerDisconnect,
   MsgOnPlayerJoin,
+  RpcChangeSettingsMsg,
   RpcMessage,
 } from "../rpcTypes";
 import { gameState } from "./gameState";
@@ -204,5 +207,56 @@ describe("Game state tests", () => {
       connected: false,
     });
     expect(gameState.onPlayerListChange).toBeCalledWith(gameState.playerList());
+  });
+
+  it("Should encode a RPC message", () => {
+    var msg: RpcChangeSettingsMsg = {
+      settings: {
+        maxPlayers: 4,
+        name: "Test Game",
+        password: "password",
+        public: true,
+      },
+    };
+
+    var encoded = gameState.encodeMessage(MsgChangeSettings, msg);
+
+    expect(encoded).toEqual({
+      type: MsgChangeSettings,
+      data: msg,
+    });
+  });
+
+  it("Should call callback function when a command error occurs", () => {
+    const msg: RpcMessage = {
+      type: MsgCommandError,
+      data: {
+        reason: "An error occurred",
+      },
+    };
+
+    gameState.onCommandError = vi.fn();
+    gameState.handleRpcMessage(JSON.stringify(msg));
+
+    expect(gameState.onCommandError).toBeCalledWith(msg.data);
+  });
+
+  it("Should call callback function when settings change", () => {
+    const msg: RpcMessage = {
+      type: MsgChangeSettings,
+      data: {
+        settings: {
+          maxPlayers: 4,
+          name: "Test Game",
+          password: "password",
+          public: true,
+        },
+      },
+    };
+
+    gameState.onChangeSettings = vi.fn();
+    gameState.handleRpcMessage(JSON.stringify(msg));
+
+    expect(gameState.onChangeSettings).toBeCalledWith(msg.data);
   });
 });
