@@ -57,7 +57,7 @@ func (j *JoinGamePage) AdminMaxGameRounds() *rod.Element {
 }
 
 func (j *JoinGamePage) Saved() bool {
-	return j.Page.Timeout(Timeout).MustElementR("h1", "/Settings are saved./i") != nil
+	return j.Page.Timeout(Timeout).MustElementR("p", "/Settings are saved./i") != nil
 }
 
 const (

@@ -124,7 +124,7 @@ func (s *WithServicesSuite) TestChangingSettingsSyncsBetweenClients() {
 	adminLobbyPage.AdminGamePasssowrd().MustInput("Password 123")
 	assert.Equal(s.T(), adminLobbyPage.AdminGamePasssowrd().MustText(), "poopPassword 123")
 
-	time.Sleep(Timeout)
+	assert.True(s.T(), adminLobbyPage.Saved())
 
 	found := false
 	for _, cookie := range browser.MustGetCookies() {
