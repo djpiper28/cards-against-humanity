@@ -2,6 +2,7 @@
 import WebSocket from "isomorphic-ws";
 import { v4 } from "uuid";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { wsBaseUrl } from "../apiClient";
 import {
   MsgChangeSettings,
@@ -12,16 +13,19 @@ import {
   RpcChangeSettingsMsg,
   RpcMessage,
 } from "../rpcTypes";
+
 import { gameState } from "./gameState";
 
 describe("Game state tests", () => {
   vi.mock("isomorphic-ws", () => {
     const wsConstructor = vi.fn(function con() {
-      this.send = vi.fn();
-      this.onclose = vi.fn();
-      this.onopen = vi.fn();
-      this.onmessage = vi.fn();
-      this.onerror = vi.fn();
+      return {
+        send: vi.fn(),
+        onclose: vi.fn(),
+        onopen: vi.fn(),
+        onmessage: vi.fn(),
+        onerror: vi.fn(),
+      };
     });
 
     return { default: wsConstructor };
@@ -258,5 +262,35 @@ describe("Game state tests", () => {
     gameState.handleRpcMessage(JSON.stringify(msg));
 
     expect(gameState.onChangeSettings).toBeCalledWith(msg.data);
+  });
+
+  it("Should send a command and reset the error", () => {
+    const gid = v4();
+    const pid = v4();
+    gameState.setupState(gid, pid, "");
+
+    const msg: RpcMessage = {
+      type: MsgChangeSettings,
+      data: {
+        settings: {
+          maxPlayers: 4,
+          name: "Test Game",
+          password: "password",
+          public: true,
+        },
+      },
+    };
+
+    gameState.wsClient = {
+      sendMessage: vi.fn(),
+    };
+
+    gameState.onCommandError = vi.fn();
+    gameState.sendRpcMessage(MsgChangeSettings, msg.data);
+
+    expect(gameState.onCommandError).toBeCalledWith({ reason: "" });
+    expect(gameState.wsClient?.sendMessage).toHaveBeenCalledWith(
+      JSON.stringify(msg),
+    );
   });
 });

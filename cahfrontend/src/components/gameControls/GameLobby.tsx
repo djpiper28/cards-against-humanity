@@ -1,7 +1,7 @@
-import { createSignal, onMount } from "solid-js";
+import { createSignal, onMount, runWithOwner } from "solid-js";
 import LoadingSlug from "../loading/LoadingSlug";
 import { gameState } from "../../gameState/gameState";
-import { GameStateInfo } from "../../gameLogicTypes";
+import { GameSettings, GameStateInfo } from "../../gameLogicTypes";
 import GameSettingsInput, { Settings } from "./GameSettingsInput";
 import GameSettingsView from "./GameSettingsView";
 import RoundedWhite from "../containers/RoundedWhite";
@@ -11,22 +11,42 @@ import { GamePlayerList } from "../../gameState/gamePlayersList";
 import CardsSelector from "./CardsSelector";
 import { apiClient } from "../../apiClient";
 import { GameLogicCardPack } from "../../api";
+import {
+  MsgChangeSettings,
+  RpcChangeSettingsMsg,
+  RpcCommandErrorMsg,
+} from "../../rpcTypes";
 
 interface Props {
   state: GameStateInfo;
   players: GamePlayerList;
   gameOwner: boolean;
   cardPacks: GameLogicCardPack[];
+  commandError: string;
+  dirtyState: boolean;
+  setStateAsDirty: () => void;
 }
 
 function GameLobbyLoaded(props: Readonly<Props>) {
-  const [dirtyState, setDirtyState] = createSignal(false);
   const [selectedPackIds, setSelectedPackIds] = createSignal(
     props.state.settings.cardPacks.map((x) => x?.id ?? "no-id"),
   );
   const [gameSettings, setGameSettings] = createSignal<Settings>(
     props.state.settings,
   );
+
+  const updateSettings = () => {
+    const changeSettings: RpcChangeSettingsMsg = {
+      settings: {
+        ...gameSettings(),
+        cardPacks: selectedPackIds().map((id) =>
+          props.cardPacks.find((x) => x.id === id),
+        ),
+      },
+    };
+
+    gameState.sendRpcMessage(MsgChangeSettings, changeSettings);
+  };
 
   return (
     <RoundedWhite>
@@ -43,20 +63,28 @@ function GameLobbyLoaded(props: Readonly<Props>) {
             cards={props.cardPacks}
             selectedPackIds={selectedPackIds()}
             setSelectedPackIds={(packs) => {
-              setDirtyState(true);
+              props.setStateAsDirty();
               setSelectedPackIds(packs);
+              updateSettings();
             }}
           />
           <GameSettingsInput
             settings={gameSettings()}
             setSettings={(settings) => {
-              setDirtyState(true);
+              props.setStateAsDirty();
               setGameSettings(settings);
+              updateSettings();
             }}
-            errorMessage="TODO: Implement me!"
+            errorMessage={props.commandError}
           />
           <p id="settings-saved">
-            {dirtyState() ? "Settings are NOT saved..." : "Settings are saved."}
+            {props.dirtyState ? (
+              <>
+                Settings are NOT saved <LoadingSlug />{" "}
+              </>
+            ) : (
+              "Settings are saved."
+            )}
           </p>
         </>
       ) : (
@@ -74,6 +102,9 @@ export default function GameLobby() {
 
   const [packs, setPacks] = createSignal<GameLogicCardPack[]>([]);
   const [errorMessage, setErrorMessage] = createSignal("");
+  const [commandError, setCommandError] = createSignal("");
+
+  const [dirtyState, setDirtyState] = createSignal(false);
 
   onMount(async () => {
     try {
@@ -100,27 +131,27 @@ export default function GameLobby() {
     };
     gameState.onStateChange = (state?: GameStateInfo) => {
       console.log("State change detected");
+      setDirtyState(false);
       setState(state);
 
       if (gameState.isOwner()) {
         setGameOwner(true);
       }
     };
+    gameState.onChangeSettings = (settings: RpcChangeSettingsMsg) => {
+      setDirtyState(false);
+
+      const newState = state();
+      newState.settings = settings.settings;
+      setState(newState);
+    };
+    gameState.onCommandError = (error: RpcCommandErrorMsg) => {
+      setCommandError(error.reason);
+    };
+
     // Just incase the update has already happened
     gameState.emitState();
   });
-
-  gameState.onPlayerListChange = (players: GamePlayerList) => {
-    setPlayers(players);
-  };
-  gameState.onStateChange = (state?: GameStateInfo) => {
-    console.log("State change detected");
-    setState(state);
-
-    if (gameState.isOwner()) {
-      setGameOwner(true);
-    }
-  };
 
   return (
     <>
@@ -130,6 +161,9 @@ export default function GameLobby() {
           gameOwner={gameOwner()}
           players={players()}
           cardPacks={packs()}
+          commandError={commandError()}
+          dirtyState={dirtyState()}
+          setStateAsDirty={() => setDirtyState(true)}
         />
       ) : (
         <div class="flex flex-grow justify-center items-center text-2xl">

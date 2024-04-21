@@ -197,6 +197,9 @@ class GameState {
       throw new Error("Cannot send message as websocket is not connected");
     }
 
+    this.onCommandError?.({
+      reason: "",
+    });
     this.wsClient.sendMessage(JSON.stringify(this.encodeMessage(type, data)));
   }
 }
