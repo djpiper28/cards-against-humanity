@@ -134,7 +134,7 @@ type Game struct {
 	CardDeck         *CardDeck
 	CreationTime     time.Time
 	GameState        GameState
-	lock             sync.Mutex
+	Lock             sync.Mutex
 }
 
 func NewGame(gameSettings *GameSettings, hostPlayerName string) (*Game, error) {
@@ -174,8 +174,8 @@ type GameInfo struct {
 
 // Info about a game to see before you join it
 func (g *Game) Info() GameInfo {
-	g.lock.Lock()
-	defer g.lock.Unlock()
+	g.Lock.Lock()
+	defer g.Lock.Unlock()
 
 	return GameInfo{Id: g.Id,
 		PlayerCount: len(g.Players),
@@ -203,8 +203,8 @@ type GameStateInfo struct {
 // The state of a game for player who has just joined a game
 // or has become de-synced
 func (g *Game) StateInfo() GameStateInfo {
-	g.lock.Lock()
-	defer g.lock.Unlock()
+	g.Lock.Lock()
+	defer g.Lock.Unlock()
 
 	players := make([]Player, len(g.Players))
 	for i, playerId := range g.Players {
@@ -227,8 +227,8 @@ func (g *Game) StateInfo() GameStateInfo {
 }
 
 func (g *Game) AddPlayer(playerName string) (uuid.UUID, error) {
-	g.lock.Lock()
-	defer g.lock.Unlock()
+	g.Lock.Lock()
+	defer g.Lock.Unlock()
 
 	if len(g.Players) >= int(g.Settings.MaxPlayers) {
 		return uuid.UUID{}, errors.New("Cannot add more than max players")
@@ -256,8 +256,8 @@ func (g *Game) AddPlayer(playerName string) (uuid.UUID, error) {
 }
 
 func (g *Game) StartGame() error {
-	g.lock.Lock()
-	defer g.lock.Unlock()
+	g.Lock.Lock()
+	defer g.Lock.Unlock()
 
 	if g.GameState != GameStateInLobby {
 		return errors.New("The game is not in the lobby so cannot be started")

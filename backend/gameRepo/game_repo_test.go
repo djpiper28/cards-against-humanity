@@ -5,8 +5,16 @@ import (
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/djpiper28/cards-against-humanity/backend/gameRepo"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestPacksAreLaoded(t *testing.T) {
+	if len(gameLogic.AllPacks) == 0 {
+		err := gameLogic.LoadPacks()
+		assert.NoError(t, err)
+	}
+}
 
 func TestNew(t *testing.T) {
 	repo := gameRepo.New()
@@ -106,4 +114,52 @@ func TestGetGames(t *testing.T) {
 	games := repo.GetGames()
 	assert.Contains(t, games, repo.GameMap[id], "The game should be in the games returned by the repo")
 	assert.Len(t, games, 1, "There should only be one game in the repo")
+}
+
+func TestGameChangeSettingsCannotFindGame(t *testing.T) {
+	repo := gameRepo.New()
+	err := repo.ChangeSettings(uuid.New(), *gameLogic.DefaultGameSettings())
+	assert.Error(t, err, "There should be an error when the game does not exist")
+}
+
+func TestGameChangeSettings(t *testing.T) {
+	repo := gameRepo.New()
+	gameSettings := *gameLogic.DefaultGameSettings()
+	name := "Dave"
+	gid, _, err := repo.CreateGame(&gameSettings, name)
+	assert.NoError(t, err)
+
+	newSettings := *&gameSettings
+	newSettings.Password = "password123"
+	newSettings.MaxPlayers = 7
+
+	assert.True(t, newSettings.Validate())
+
+	err = repo.ChangeSettings(gid, newSettings)
+	assert.NoError(t, err, "The settings should have been changed")
+
+	game, err := repo.GetGame(gid)
+	assert.NoError(t, err, "The game should exist")
+
+	assert.Equal(t, newSettings, *game.Settings, "The settings should have been changed")
+}
+
+func TestGameChangeSettingsInvalidSettings(t *testing.T) {
+	repo := gameRepo.New()
+	gameSettings := gameLogic.DefaultGameSettings()
+	name := "Dave"
+	gid, _, err := repo.CreateGame(gameSettings, name)
+	assert.NoError(t, err)
+
+	newSettings := *gameSettings
+	newSettings.MaxPlayers = 0
+
+	assert.False(t, newSettings.Validate())
+
+	err = repo.ChangeSettings(gid, newSettings)
+	assert.Error(t, err, "The settings should not have been changed")
+
+	game, err := repo.GetGame(gid)
+	assert.NoError(t, err)
+	assert.Equal(t, *gameSettings, *game.Settings, "The game settings should not have changed")
 }

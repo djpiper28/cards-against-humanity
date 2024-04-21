@@ -107,8 +107,8 @@ func (gr *GameRepo) GetGame(gameId uuid.UUID) (*gameLogic.Game, error) {
 }
 
 func (gr *GameRepo) CreatePlayer(gameId uuid.UUID, playerName, password string) (uuid.UUID, error) {
-	gr.lock.Lock()
-	defer gr.lock.Unlock()
+	gr.lock.RLock()
+	defer gr.lock.RUnlock()
 
 	game, found := gr.GameMap[gameId]
 	if !found {
@@ -136,10 +136,33 @@ func (gr *GameRepo) GetPlayerName(gameId, playerId uuid.UUID) (string, error) {
 		return "", errors.New("Cannot find game")
 	}
 
+	game.Lock.Lock()
+	defer game.Lock.Unlock()
+
 	player, found := game.PlayersMap[playerId]
 	if !found {
 		return "", errors.New("Cannot find player")
 	}
 
 	return player.Name, nil
+}
+
+func (gr *GameRepo) ChangeSettings(gameId uuid.UUID, settings gameLogic.GameSettings) error {
+	if !settings.Validate() {
+		return errors.New("Invalid settings")
+	}
+
+	gr.lock.RLock()
+	defer gr.lock.RUnlock()
+
+	game, found := gr.GameMap[gameId]
+	if !found {
+		return errors.New("Cannot find game")
+	}
+
+	game.Lock.Lock()
+	defer game.Lock.Unlock()
+
+	game.Settings = &settings
+	return nil
 }

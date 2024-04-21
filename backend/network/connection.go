@@ -1,7 +1,6 @@
 package network
 
 import (
-	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
@@ -103,12 +102,44 @@ func (c *WsConnection) listenAndHandle() error {
 		}
 
 		log.Printf("Got a message: %s", string(msg))
-		var message RpcMessage
-		err = json.Unmarshal(msg, &message)
+		err = DecodeRpcMessage(msg, RpcCommandHandlers{
+			ChangeSettingsHandler: func(msg RpcChangeSettingsMsg) error {
+				game, err := GameRepo.GetGame(gid)
+				if err != nil {
+					return errors.New("Cannot find the game")
+				}
+
+				if game.GameOwnerId != c.PlayerId {
+					return errors.New("You cannot change the settings as you are not the game owner")
+				}
+
+				err = GameRepo.ChangeSettings(gid, msg.Settings)
+				if err != nil {
+					return err
+				}
+
+				broadcastMessage, err := EncodeRpcMessage(msg)
+				if err != nil {
+					return err
+				}
+
+				go GlobalConnectionManager.Broadcast(gid, broadcastMessage)
+				return nil
+			},
+		})
+
 		if err != nil {
-			log.Printf("Error unmarshalling message: %s; closing connection for gid %s pid %s", err, c.GameId, c.PlayerId)
-			c.Close()
-			continue
+			log.Printf("Error processing message: %s; for gid %s pid %s", err, c.GameId, c.PlayerId)
+
+			var message RpcCommandErrorMsg
+			message.Reason = err.Error()
+			encodedMessage, err := EncodeRpcMessage(message)
+			if err != nil {
+				log.Printf("Cannot encode the error message: %s", err)
+				continue
+			}
+
+			go c.Send(encodedMessage)
 		}
 	}
 }

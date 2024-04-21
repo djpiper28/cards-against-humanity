@@ -2,6 +2,8 @@ package network
 
 import (
 	"encoding/json"
+	"errors"
+	"log"
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/google/uuid"
@@ -12,13 +14,18 @@ type RpcMessageType int
 // The type of the message
 const (
 	// Tx the initial game state when the user joins
-	MsgOnJoin = iota + 1
+	MsgOnJoin RpcMessageType = iota + 1
 	// Tx the player's name and id when they join
 	MsgOnPlayerJoin
 	// Tx when the player is created in a game
 	MsgOnPlayerCreate
 	// Tx the player's id and reason when they disconnect
 	MsgOnPlayerDisconnect
+	// Tx when a command cannot be processed
+	MsgCommandError
+
+	// Rx change the settings of the game
+	MsgChangeSettings
 )
 
 type RpcMessageBody struct {
@@ -37,6 +44,46 @@ func EncodeRpcMessage(msg RpcMessage) ([]byte, error) {
 		return nil, err
 	}
 	return ret, nil
+}
+
+type RpcCommandHandlers struct {
+	ChangeSettingsHandler func(msg RpcChangeSettingsMsg) error
+}
+
+func decodeAs[T any](data []byte) (T, error) {
+	type TProxy struct {
+		Type RpcMessageType `json:"type"`
+		Data T              `json:"data"`
+	}
+
+	var proxy TProxy
+	err := json.Unmarshal(data, &proxy)
+	if err != nil {
+		return proxy.Data, err
+	}
+
+	return proxy.Data, nil
+}
+
+func DecodeRpcMessage(data []byte, handlers RpcCommandHandlers) error {
+	var cmd RpcMessageBody
+	err := json.Unmarshal(data, &cmd)
+	if err != nil {
+		return err
+	}
+
+	switch cmd.Type {
+	case MsgChangeSettings:
+		command, err := decodeAs[RpcChangeSettingsMsg](data)
+		if err != nil {
+			return err
+		}
+
+		return handlers.ChangeSettingsHandler(command)
+	default:
+		log.Printf("Unknown command: %d", cmd.Type)
+		return errors.New("Unknown command")
+	}
 }
 
 type RpcOnJoinMsg struct {
@@ -72,4 +119,20 @@ type RpcOnPlayerCreateMsg struct {
 
 func (msg RpcOnPlayerCreateMsg) Type() RpcMessageType {
 	return MsgOnPlayerCreate
+}
+
+type RpcCommandErrorMsg struct {
+	Reason string `json:"reason"`
+}
+
+func (msg RpcCommandErrorMsg) Type() RpcMessageType {
+	return MsgCommandError
+}
+
+type RpcChangeSettingsMsg struct {
+	Settings gameLogic.GameSettings `json:"settings"`
+}
+
+func (msg RpcChangeSettingsMsg) Type() RpcMessageType {
+	return MsgChangeSettings
 }
