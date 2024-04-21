@@ -56,6 +56,10 @@ func (j *JoinGamePage) AdminMaxGameRounds() *rod.Element {
 	return GetInputByLabel(j.Page, joinGameInputMaxGameRounds)
 }
 
+func (j *JoinGamePage) Saved() bool {
+	return j.Page.Timeout(Timeout).MustElementR("h1", "/Settings are saved./i") != nil
+}
+
 const (
 	joinGameViewGamePasswordId    = "game-password"
 	joinGameViewMaxPlayersId      = "max-players"
