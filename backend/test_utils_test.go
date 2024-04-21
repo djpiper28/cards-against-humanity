@@ -30,7 +30,7 @@ func (s *ServerTestSuite) SetupSuite() {
 	t := s.T()
 
 	go Start()
-	t.Log("Sleeping whils the server starts")
+	t.Log("Sleeping while the server starts")
 	time.Sleep(time.Second)
 	resp, err := http.Get(HttpBaseUrl + "/healthcheck")
 	assert.Nil(t, err, "There should not be an error on the started server", err)
