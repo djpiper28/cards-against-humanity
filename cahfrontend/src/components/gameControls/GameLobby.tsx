@@ -94,6 +94,14 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
       <Show when={!isGameOwner()}>
         <GameSettingsView settings={settings()} />
       </Show>
+
+      <Show when={isGameOwner()}>
+        <Show when={!dirtyState()} fallback={"Cannot start a game with unsaved changes."}>
+          <Button onClick={() => {
+
+          }}>Start Game</Button>
+        </Show>
+      </Show>
       <PlayerList players={props.players} />
     </RoundedWhite>
   );
