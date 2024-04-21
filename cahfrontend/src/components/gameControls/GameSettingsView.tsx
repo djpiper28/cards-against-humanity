@@ -33,11 +33,14 @@ export default function GameSettingsView(props: Readonly<Props>) {
               {pack?.name}
             </span>
           ))
-          .reduce((a, b) => (
-            <>
-              {a}, {b}
-            </>
-          ))}
+          .reduce(
+            (a, b) => (
+              <>
+                {a}, {b}
+              </>
+            ),
+            <></>,
+          )}
       </p>
     </div>
   );

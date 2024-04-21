@@ -1,4 +1,4 @@
-import { createSignal, onMount, runWithOwner } from "solid-js";
+import { Show, createSignal, onMount } from "solid-js";
 import LoadingSlug from "../loading/LoadingSlug";
 import { gameState } from "../../gameState/gameState";
 import { GameSettings, GameStateInfo } from "../../gameLogicTypes";
@@ -16,88 +16,108 @@ import {
   RpcChangeSettingsMsg,
   RpcCommandErrorMsg,
 } from "../../rpcTypes";
+import Button from "../buttons/Button";
 
-interface Props {
-  state: GameStateInfo;
+interface LobbyLoadedProps {
+  setSettings: (settings: Settings) => void;
+  setSelectedPackIds: (ids: string[]) => void;
   players: GamePlayerList;
-  gameOwner: boolean;
-  cardPacks: GameLogicCardPack[];
   commandError: string;
+  setCommandError: (error: string) => void;
   dirtyState: boolean;
+  cardPacks: GameLogicCardPack[];
+  state: GameStateInfo;
   setStateAsDirty: () => void;
 }
 
-function GameLobbyLoaded(props: Readonly<Props>) {
-  const [selectedPackIds, setSelectedPackIds] = createSignal(
-    props.state.settings.cardPacks.map((x) => x?.id ?? "no-id"),
-  );
-  const [gameSettings, setGameSettings] = createSignal<Settings>(
-    props.state.settings,
-  );
-
+function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
   const updateSettings = () => {
     const changeSettings: RpcChangeSettingsMsg = {
       settings: {
-        ...gameSettings(),
-        cardPacks: selectedPackIds().map((id) =>
-          props.cardPacks.find((x) => x.id === id),
-        ),
+        ...props.state.settings,
+        cardPacks: props.state.settings.cardPacks,
       },
     };
-
     gameState.sendRpcMessage(MsgChangeSettings, changeSettings);
   };
+
+  const state = () => props.state;
+  const isGameOwner = () => state().gameOwnerId === gameState.getPlayerId();
+  const settings = () => state().settings;
+  const dirtyState = () => props.dirtyState;
 
   return (
     <RoundedWhite>
       <Header
         text={`${
-          props.state.players.find((x) => x.id === props.state.gameOwnerId)
-            ?.name
+          props.players.find((x) => x.id === props.state.gameOwnerId)?.name
         }'s Game`}
       />
-      {props.gameOwner ? (
-        <>
-          <Header text="Change your game's settings" />
-          <CardsSelector
-            cards={props.cardPacks}
-            selectedPackIds={selectedPackIds()}
-            setSelectedPackIds={(packs) => {
-              props.setStateAsDirty();
-              setSelectedPackIds(packs);
-              updateSettings();
-            }}
-          />
-          <GameSettingsInput
-            settings={gameSettings()}
-            setSettings={(settings) => {
-              props.setStateAsDirty();
-              setGameSettings(settings);
-              updateSettings();
-            }}
-            errorMessage={props.commandError}
-          />
-          <p id="settings-saved">
-            {props.dirtyState ? (
-              <>
-                Settings are NOT saved <LoadingSlug />{" "}
-              </>
-            ) : (
-              "Settings are saved."
-            )}
-          </p>
-        </>
-      ) : (
-        <GameSettingsView settings={props.state.settings} />
-      )}
+      <Show when={isGameOwner()}>
+        <Header text="Change your game's settings" />
+        <CardsSelector
+          cards={props.cardPacks}
+          selectedPackIds={settings().cardPacks.map((x) => x?.id ?? "no-id")}
+          setSelectedPackIds={(packs) => {
+            props.setStateAsDirty();
+            props.setSelectedPackIds(packs);
+            updateSettings();
+          }}
+        />
+        <GameSettingsInput
+          settings={settings()}
+          setSettings={(settings) => {
+            props.setStateAsDirty();
+            props.setSettings(settings);
+            updateSettings();
+          }}
+          errorMessage={props.commandError}
+        />
+        <p id="settings-saved">
+          <Show when={dirtyState()} fallback={"Settings are saved."}>
+            <div class="flex flex-row gap-2">
+              <p class="text-error-colour">Settings are NOT saved.</p>
+              <Button onClick={updateSettings}>Save</Button>
+              <Button
+                onClick={() => {
+                  gameState.emitState();
+                  props.setCommandError("");
+                }}
+              >
+                Reset
+              </Button>
+            </div>
+          </Show>
+        </p>
+      </Show>
+
+      <Show when={!isGameOwner()}>
+        <GameSettingsView settings={settings()} />
+      </Show>
       <PlayerList players={props.players} />
     </RoundedWhite>
   );
 }
 
+const emptyState: GameStateInfo = {
+  id: "",
+  gameOwnerId: "",
+  settings: {
+    cardPacks: [],
+    maxPlayers: 0,
+    maxRounds: 0,
+    playingToPoints: 0,
+    gamePassword: "",
+  },
+  currentRound: 0,
+  creationTime: "",
+  gameState: 0,
+  players: [],
+  currentCardCzarId: "",
+};
+
 export default function GameLobby() {
-  const [state, setState] = createSignal<GameStateInfo | undefined>(undefined);
-  const [gameOwner, setGameOwner] = createSignal(false);
+  const [state, setState] = createSignal<GameStateInfo>(emptyState);
   const [players, setPlayers] = createSignal<GamePlayerList>([]);
 
   const [packs, setPacks] = createSignal<GameLogicCardPack[]>([]);
@@ -106,6 +126,35 @@ export default function GameLobby() {
 
   const [dirtyState, setDirtyState] = createSignal(false);
 
+  const setupHandlers = () => {
+    // Sync UI state with the source of truth
+    gameState.onPlayerListChange = (players: GamePlayerList) => {
+      setPlayers(players);
+    };
+    gameState.onStateChange = (state?: GameStateInfo) => {
+      console.log("State change detected");
+      setDirtyState(false);
+      setState(state ?? emptyState);
+    };
+    gameState.onChangeSettings = (settings: RpcChangeSettingsMsg) => {
+      setDirtyState(false);
+
+      const newState = state() ?? emptyState;
+      const data = settings.settings as GameSettings;
+
+      newState.settings.maxRounds = data.maxRounds;
+      newState.settings.maxPlayers = data.maxPlayers;
+      newState.settings.playingToPoints = data.playingToPoints;
+      newState.settings.gamePassword = data.gamePassword;
+
+      setState(newState);
+    };
+    gameState.onCommandError = (error: RpcCommandErrorMsg) => {
+      setCommandError(error.reason);
+    };
+  };
+
+  setupHandlers();
   onMount(async () => {
     try {
       const packs = await apiClient.res.packsList();
@@ -125,51 +174,46 @@ export default function GameLobby() {
       setErrorMessage(`Error getting card packs: ${err}`);
     }
 
-    // Sync UI state with the source of truth
-    gameState.onPlayerListChange = (players: GamePlayerList) => {
-      setPlayers(players);
-    };
-    gameState.onStateChange = (state?: GameStateInfo) => {
-      console.log("State change detected");
-      setDirtyState(false);
-      setState(state);
-
-      if (gameState.isOwner()) {
-        setGameOwner(true);
-      }
-    };
-    gameState.onChangeSettings = (settings: RpcChangeSettingsMsg) => {
-      setDirtyState(false);
-
-      const newState = state();
-      newState.settings = settings.settings;
-      setState(newState);
-    };
-    gameState.onCommandError = (error: RpcCommandErrorMsg) => {
-      setCommandError(error.reason);
-    };
-
+    setupHandlers();
     // Just incase the update has already happened
     gameState.emitState();
   });
 
   return (
     <>
-      {!!state() ? (
+      <Show when={!!state()}>
         <GameLobbyLoaded
           state={state()}
-          gameOwner={gameOwner()}
+          setSettings={(settings) => {
+            const newState = state();
+            newState.settings.maxRounds = settings.maxRounds;
+            newState.settings.maxPlayers = settings.maxPlayers;
+            newState.settings.playingToPoints = settings.playingToPoints;
+            newState.settings.gamePassword = settings.gamePassword;
+            setState(newState);
+          }}
+          setSelectedPackIds={(ids) => {
+            const newState = state();
+            newState.settings.cardPacks = ids.map((id) =>
+              packs().find((x) => x.id === id),
+            );
+            setState(newState);
+          }}
           players={players()}
           cardPacks={packs()}
           commandError={commandError()}
+          setCommandError={setCommandError}
           dirtyState={dirtyState()}
           setStateAsDirty={() => setDirtyState(true)}
         />
-      ) : (
+      </Show>
+
+      <Show when={!state()}>
         <div class="flex flex-grow justify-center items-center text-2xl">
           Waiting for lobby information <LoadingSlug />
         </div>
-      )}
+      </Show>
+
       <p id="error-message" class="text-error-colour">
         {errorMessage()}
       </p>

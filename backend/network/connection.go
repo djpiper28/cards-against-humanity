@@ -101,7 +101,6 @@ func (c *WsConnection) listenAndHandle() error {
 			return errors.New("Cannot read from websocket")
 		}
 
-		log.Printf("Got a message: %s", string(msg))
 		err = DecodeRpcMessage(msg, RpcCommandHandlers{
 			ChangeSettingsHandler: func(msg RpcChangeSettingsMsg) error {
 				game, err := GameRepo.GetGame(gid)

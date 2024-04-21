@@ -18,7 +18,6 @@ export function toWebSocketClient(
 ): WebSocketClient {
   const ret: WebSocketClient = {
     sendMessage: (msg: string) => {
-      console.log(`Sending message: ${msg}`);
       ws.send(msg, (err?: Error) => {
         console.error(`Cannot send message ${err}`);
         ws.close();

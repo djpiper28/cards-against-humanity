@@ -20,6 +20,7 @@ import { WebSocketClient, toWebSocketClient } from "./websocketClient";
 import { wsBaseUrl } from "../apiClient";
 import WebSocket from "isomorphic-ws";
 import { GamePlayerList } from "./playersList";
+import { cookieStorage } from "@solid-primitives/storage";
 
 export const playerIdCookie = "playerId";
 /**
@@ -71,7 +72,6 @@ class GameState {
         console.log("Connected to the game server");
       },
       onReceive: (msg: string) => {
-        console.log(`Received a message ${msg}`);
         this.handleRpcMessage(msg);
       },
     });
@@ -85,6 +85,10 @@ class GameState {
     if (!this.gameId) return false;
     if (!this.playerId) return false;
     return true;
+  }
+
+  public getPlayerId(): string {
+    return this.playerId;
   }
 
   private setState(state: GameStateInfo) {
@@ -153,7 +157,6 @@ class GameState {
    * Handles an RPC message from the server. When testing call the private method and ignore the "error".
    */
   private handleRpcMessage(msg: string): void {
-    console.log(`Received a message ${msg}`);
     const rpcMessage = JSON.parse(msg) as RpcMessageBody;
     switch (rpcMessage.type) {
       case MsgOnJoin:
@@ -177,7 +180,20 @@ class GameState {
         return this.onCommandError?.(rpcMessage.data as RpcCommandErrorMsg);
       case MsgChangeSettings:
         console.log("Handling change settings message");
-        return this.onChangeSettings?.(rpcMessage.data as RpcChangeSettingsMsg);
+        const data = rpcMessage.data as RpcChangeSettingsMsg;
+        cookieStorage.setItem(gamePasswordCookie, data.settings.gamePassword);
+
+        if (this.state) {
+          const newState: GameStateInfo = this.state;
+          newState.settings.maxRounds = data.settings.maxRounds;
+          newState.settings.maxPlayers = data.settings.maxPlayers;
+          newState.settings.playingToPoints = data.settings.playingToPoints;
+          newState.settings.gamePassword = data.settings.gamePassword;
+          newState.settings.cardPacks = data.settings.cardPacks;
+          this.setState(newState);
+        }
+
+        return this.onChangeSettings?.(data);
       default:
         throw new Error(
           `Cannot handle RPC message as type is not valid ${rpcMessage.type}`,
