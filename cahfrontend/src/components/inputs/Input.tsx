@@ -20,7 +20,7 @@ export default function Input(props: Readonly<Props>) {
       <input
         id={props.label.replaceAll(" ", "-").toLowerCase()}
         class={`rounded-xl border-2 ${
-          props.errorState && "border-red-600 bg-red-100"
+          props.errorState ? "border-red-600 bg-red-100" : "border-gray-300"
         } p-1 placeholder-gray-400 font-mono h-full`}
         value={props.value}
         onChange={(e) => {
