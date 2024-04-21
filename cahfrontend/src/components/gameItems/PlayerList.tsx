@@ -11,11 +11,12 @@ export default function PlayerList(props: Readonly<Props>) {
     <RoundedWhite>
       <For each={props.players} fallback={<p>No players</p>}>
         {(player) => (
-          <div class="flex flex-col gap-1">
+          <div class="flex flex-row gap-2">
             <p class="font-bold">{player.name}</p>
             <p class="font-mono">
               {player.connected ? "CONNECTED" : "DISCONNECTED"}
             </p>
+            <p class="font-bold">{player.points} points</p>
           </div>
         )}
       </For>

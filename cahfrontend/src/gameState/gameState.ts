@@ -19,8 +19,7 @@ import {
 import { WebSocketClient, toWebSocketClient } from "./websocketClient";
 import { wsBaseUrl } from "../apiClient";
 import WebSocket from "isomorphic-ws";
-import { GamePlayerList } from "./playersList";
-import { cookieStorage } from "@solid-primitives/storage";
+import { GamePlayerList } from "./gamePlayersList";
 
 export const playerIdCookie = "playerId";
 /**
@@ -98,6 +97,7 @@ class GameState {
       id: x.id,
       name: x.name,
       connected: true,
+      points: x.points,
     }));
     this.emitState();
   }
@@ -120,34 +120,40 @@ class GameState {
   }
 
   private handleOnPlayerJoin(msg: RpcOnPlayerJoinMsg) {
+    const player = this.players.find((x: Player) => x.id === msg.id);
     this.players = this.players.filter((x: Player) => x.id !== msg.id);
     this.players.push({
       id: msg.id,
       name: msg.name,
       connected: true,
+      points: player?.points ?? 0,
     });
 
     this.onPlayerListChange?.(this.playerList());
   }
 
   private handleOnPlayerCreate(msg: RpcOnPlayerCreateMsg) {
+    const player = this.players.find((x: Player) => x.id === msg.id);
     this.players = this.players.filter((x: Player) => x.id !== msg.id);
     this.players.push({
       id: msg.id,
       name: msg.name,
       connected: false,
+      points: player?.points ?? 0,
     });
 
     this.onPlayerListChange?.(this.playerList());
   }
 
   private handleOnPlayerDisconnect(msg: RpcOnPlayerDisconnectMsg) {
+    const player = this.players.find((x: Player) => x.id === msg.id);
     const oldPlayer = this.players.find((x: Player) => x.id === msg.id);
     this.players = this.players.filter((x: Player) => x.id !== msg.id);
     this.players.push({
       id: msg.id,
       name: oldPlayer?.name ?? "error",
       connected: false,
+      points: player?.points ?? 0,
     });
 
     this.onPlayerListChange?.(this.playerList());
@@ -181,7 +187,6 @@ class GameState {
       case MsgChangeSettings:
         console.log("Handling change settings message");
         const data = rpcMessage.data as RpcChangeSettingsMsg;
-        cookieStorage.setItem(gamePasswordCookie, data.settings.gamePassword);
 
         if (this.state) {
           const newState: GameStateInfo = this.state;

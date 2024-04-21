@@ -92,6 +92,7 @@ describe("Game state tests", () => {
       id: msg.data.id,
       name: msg.data.name,
       connected: true,
+      points: 0,
     });
 
     expect(gameState.onPlayerListChange).toBeCalledWith(gameState.playerList());
@@ -209,6 +210,7 @@ describe("Game state tests", () => {
       id: msg.data.id,
       name: joinMsg.data.name,
       connected: false,
+      points: 0,
     });
     expect(gameState.onPlayerListChange).toBeCalledWith(gameState.playerList());
   });

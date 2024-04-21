@@ -1,6 +1,6 @@
-import { Show, createSignal, onMount } from "solid-js";
+import { Show, createEffect, createSignal, onMount } from "solid-js";
 import LoadingSlug from "../loading/LoadingSlug";
-import { gameState } from "../../gameState/gameState";
+import { gamePasswordCookie, gameState } from "../../gameState/gameState";
 import { GameSettings, GameStateInfo } from "../../gameLogicTypes";
 import GameSettingsInput, { Settings } from "./GameSettingsInput";
 import GameSettingsView from "./GameSettingsView";
@@ -17,6 +17,7 @@ import {
   RpcCommandErrorMsg,
 } from "../../rpcTypes";
 import Button from "../buttons/Button";
+import { cookieStorage } from "@solid-primitives/storage";
 
 interface LobbyLoadedProps {
   setSettings: (settings: Settings) => void;
@@ -45,6 +46,10 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
   const isGameOwner = () => state().gameOwnerId === gameState.getPlayerId();
   const settings = () => state().settings;
   const dirtyState = () => props.dirtyState;
+
+  createEffect(() => {
+    cookieStorage.setItem(gamePasswordCookie, settings().gamePassword);
+  });
 
   return (
     <RoundedWhite>
@@ -96,10 +101,11 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
       </Show>
 
       <Show when={isGameOwner()}>
-        <Show when={!dirtyState()} fallback={"Cannot start a game with unsaved changes."}>
-          <Button onClick={() => {
-
-          }}>Start Game</Button>
+        <Show
+          when={!dirtyState()}
+          fallback={"Cannot start a game with unsaved changes."}
+        >
+          <Button onClick={() => {}}>Start Game</Button>
         </Show>
       </Show>
       <PlayerList players={props.players} />
