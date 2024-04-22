@@ -64,3 +64,62 @@ func BenchmarkClaims(b *testing.B) {
 		security.ParseToken(token)
 	}
 }
+
+func TestCheckValidTokenWithCorrectIds(t *testing.T) {
+	t.Parallel()
+
+	gid := uuid.New()
+	pid := uuid.New()
+
+	token, err := security.NewToken(gid, pid)
+	assert.NoError(t, err)
+
+	err = security.CheckToken(gid, pid, token)
+	assert.NoError(t, err)
+}
+
+func TestCheckInValidTokenWithIncorrectGid(t *testing.T) {
+	t.Parallel()
+
+	gid := uuid.New()
+	pid := uuid.New()
+
+	token, err := security.NewToken(gid, pid)
+	assert.NoError(t, err)
+
+	err = security.CheckToken(uuid.New(), pid, token)
+	assert.Error(t, err)
+}
+
+func TestCheckInValidTokenWithIncorrectPidAndGid(t *testing.T) {
+	t.Parallel()
+
+	gid := uuid.New()
+	pid := uuid.New()
+
+	token, err := security.NewToken(gid, pid)
+	assert.NoError(t, err)
+
+	err = security.CheckToken(uuid.New(), uuid.New(), token)
+	assert.Error(t, err)
+}
+
+func TestCheckInValidTokenWithIncorrectPid(t *testing.T) {
+	t.Parallel()
+
+	gid := uuid.New()
+	pid := uuid.New()
+
+	token, err := security.NewToken(gid, pid)
+	assert.NoError(t, err)
+
+	err = security.CheckToken(gid, uuid.New(), token)
+	assert.Error(t, err)
+}
+
+func TestCheckInvalidToken(t *testing.T) {
+	t.Parallel()
+
+	err := security.CheckToken(uuid.New(), uuid.New(), "invalid token")
+	assert.Error(t, err)
+}
