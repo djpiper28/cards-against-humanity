@@ -10,6 +10,7 @@ import (
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/djpiper28/cards-against-humanity/backend/network"
+	"github.com/djpiper28/cards-against-humanity/backend/security"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -18,6 +19,7 @@ const (
 	JoinGameGameIdParam   = "gameId"
 	JoinGamePlayerIdParam = "playerId"
 	PasswordParam         = "password"
+	AuthorizationCookie   = "Authorization"
 )
 
 // @Summary		Gets all of the games that are not full
@@ -106,6 +108,14 @@ func createGame(c *gin.Context) {
 		return
 	}
 
+	token, err := security.NewToken(gameId, playerId)
+	if err != nil {
+		c.Error(err)
+		c.JSON(http.StatusInternalServerError, NewApiError(errors.New("Cannot create authorization token")))
+		return
+	}
+
+	c.SetCookie(AuthorizationCookie, token, -1, "/", "", true, true)
 	resp := GameCreatedResp{GameId: gameId, PlayerId: playerId}
 	c.JSON(http.StatusCreated, resp)
 }
@@ -154,9 +164,18 @@ func createPlayerForJoining(c *gin.Context) {
 		Name: createReq.PlayerName,
 	}
 
+	token, err := security.NewToken(createReq.GameId, playerId)
+	if err != nil {
+		c.Error(err)
+		c.JSON(http.StatusInternalServerError, NewApiError(errors.New("Cannot create authorization token")))
+		return
+	}
+
+	c.SetCookie(AuthorizationCookie, token, -1, "/", "", true, true)
+
 	c.JSON(http.StatusCreated, playerId)
 
-	// Transmit to the
+	// Transmit to the other players
 	msg, err := network.EncodeRpcMessage(onCreateMessage)
 	if err != nil {
 		log.Printf("Error encoding message: %s", err)
@@ -201,6 +220,22 @@ func joinGame(c *gin.Context) {
 	playerId, err := uuid.Parse(rawPlayerId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, NewApiError(err))
+		return
+	}
+
+	token, err := c.Cookie(AuthorizationCookie)
+	if err != nil {
+		c.JSON(http.StatusForbidden, NewApiError(errors.New("No authorization token provided")))
+		return
+	}
+
+	err = security.CheckToken(gameId, playerId, token)
+	if err != nil {
+		log.Printf("Player %s in game %s tried to to join a game with invalid authorisation: %s",
+			playerId,
+			gameId,
+			err)
+		c.JSON(http.StatusForbidden, NewApiError(errors.New("Not authorized")))
 		return
 	}
 

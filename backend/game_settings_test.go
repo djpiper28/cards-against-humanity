@@ -17,13 +17,12 @@ func (s *ServerTestSuite) TestChangeSettings() {
 
 	game := createTestGame(t)
 	url := WsBaseUrl + "/games/join"
-	cookies := GameJoinParams{GameId: game.GameId, PlayerId: game.PlayerId, Password: ""}
 
 	dialer := websocket.DefaultDialer
 	dialer.HandshakeTimeout = time.Millisecond * 100
 
 	log.Print("Dialing server")
-	conn, _, err := dialer.Dial(url, cookies.Headers())
+	conn, _, err := dialer.Dial(url, game.Jar.Headers())
 	assert.Nil(t, err, "Should have connected to the ws server successfully")
 	defer conn.Close()
 	assert.NotNil(t, conn)
@@ -38,7 +37,7 @@ func (s *ServerTestSuite) TestChangeSettings() {
 	var onPlayerJoinMsg onPlayerJoinMsg
 	err = json.Unmarshal(msg, &onPlayerJoinMsg)
 	assert.Nil(t, err)
-	assert.Equal(t, game.PlayerId, onPlayerJoinMsg.Data.Id, "The current user should have joined the game")
+	assert.Equal(t, game.Ids.PlayerId, onPlayerJoinMsg.Data.Id, "The current user should have joined the game")
 
 	// Second message should be the state
 
@@ -52,10 +51,10 @@ func (s *ServerTestSuite) TestChangeSettings() {
 	err = json.Unmarshal(msg, &onJoinMsg)
 
 	assert.Nil(t, err, "Should be a join message")
-	assert.Equal(t, game.GameId, onJoinMsg.Data.State.Id)
+	assert.Equal(t, game.Ids.GameId, onJoinMsg.Data.State.Id)
 	assert.Len(t, onJoinMsg.Data.State.Players, 1)
 	assert.Contains(t, onJoinMsg.Data.State.Players, gameLogic.Player{
-		Id:   game.PlayerId,
+		Id:   game.Ids.PlayerId,
 		Name: "Dave"})
 
 	// Change the settings

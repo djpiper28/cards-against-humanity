@@ -50,8 +50,13 @@ func TestServerStart(t *testing.T) {
 	suite.Run(t, new(ServerTestSuite))
 }
 
+type GameData struct {
+	Ids GameCreatedResp
+	Jar *GameJoinCookieJar
+}
+
 // This game has no password
-func createTestGame(t *testing.T) GameCreatedResp {
+func createTestGame(t *testing.T) GameData {
 	name := "Dave"
 	gs := DefaultGameSettings()
 
@@ -60,7 +65,12 @@ func createTestGame(t *testing.T) GameCreatedResp {
 
 	reader := bytes.NewReader(postBody)
 
-	resp, err := http.Post(HttpBaseUrl+"/games/create", jsonContentType, reader)
+	jar := &GameJoinCookieJar{}
+	client := &http.Client{
+		Timeout: time.Second * 10,
+		Jar:     jar,
+	}
+	resp, err := client.Post(HttpBaseUrl+"/games/create", jsonContentType, reader)
 	assert.Nil(t, err, "Should be able to POST")
 	assert.Equal(t, http.StatusCreated, resp.StatusCode, "Game should have been made and is ready for connecting to")
 
@@ -70,7 +80,11 @@ func createTestGame(t *testing.T) GameCreatedResp {
 	var gameIds GameCreatedResp
 	err = json.Unmarshal(body, &gameIds)
 	assert.Nil(t, err, "There should not be an error reading the game ids")
-	return gameIds
+
+	jar.GameId = gameIds.GameId
+	jar.PlayerId = gameIds.PlayerId
+	jar.Password = gs.Password
+	return GameData{Ids: gameIds, Jar: jar}
 }
 
 const jsonContentType = "application/json"
@@ -109,26 +123,37 @@ type onCommandError struct {
 }
 
 // A cookie jar and cookie header implementation for the ws dailer and http clients
-type GameJoinParams struct {
+type GameJoinCookieJar struct {
 	GameId, PlayerId uuid.UUID
 	Password         string
+	Token            string
 }
 
-func (g *GameJoinParams) Headers() http.Header {
+func (jar *GameJoinCookieJar) Headers() http.Header {
 	headers := make(http.Header)
-	headers["Cookie"] = []string{fmt.Sprintf("%s=%s; %s=%s; %s=%s", JoinGamePlayerIdParam, g.PlayerId, JoinGameGameIdParam, g.GameId, PasswordParam, g.Password)}
+	headers["Cookie"] = []string{fmt.Sprintf("%s=%s; %s=%s; %s=%s; %s=%s;",
+		JoinGamePlayerIdParam, jar.PlayerId,
+		JoinGameGameIdParam, jar.GameId,
+		PasswordParam, jar.Password,
+		AuthorizationCookie, jar.Token)}
 	return headers
 }
 
-func (g *GameJoinParams) SetCookies(_ *url.URL, _ []*http.Cookie) {
-	log.Fatal("Setting cookies is not desired for this API")
+func (jar *GameJoinCookieJar) SetCookies(_ *url.URL, cookies []*http.Cookie) {
+	for _, c := range cookies {
+		if c.Name == AuthorizationCookie {
+			jar.Token = c.Value
+		} else {
+			log.Printf("Ignoring cookie %s", c.Name)
+		}
+	}
 }
 
-func (g *GameJoinParams) Cookies(_ *url.URL) []*http.Cookie {
+func (jar *GameJoinCookieJar) Cookies(_ *url.URL) []*http.Cookie {
 	cookies := make([]*http.Cookie, 0)
-	cookies = append(cookies, &http.Cookie{Name: JoinGamePlayerIdParam, Value: g.PlayerId.String()})
-	cookies = append(cookies, &http.Cookie{Name: JoinGameGameIdParam, Value: g.GameId.String()})
-	cookies = append(cookies, &http.Cookie{Name: PasswordParam, Value: g.Password})
+	cookies = append(cookies, &http.Cookie{Name: JoinGamePlayerIdParam, Value: jar.PlayerId.String()})
+	cookies = append(cookies, &http.Cookie{Name: JoinGameGameIdParam, Value: jar.GameId.String()})
+	cookies = append(cookies, &http.Cookie{Name: PasswordParam, Value: jar.Password})
 	return cookies
 }
 
@@ -136,7 +161,7 @@ func Test_GameJoinCookiesIsCookieJar(t *testing.T) {
 	t.Parallel()
 
 	var jar http.CookieJar
-	jar = &GameJoinParams{}
+	jar = &GameJoinCookieJar{}
 	assert.NotNil(t, jar, "Should be able to create a cookie jar")
 }
 
@@ -184,7 +209,7 @@ func (s *ServerTestSuite) CreatePlayer(gameId uuid.UUID, name, password string) 
 	assert.Nil(t, err)
 
 	client := http.Client{
-		Jar: &GameJoinParams{GameId: gameId, Password: password},
+		Jar: &GameJoinCookieJar{GameId: gameId, Password: password},
 	}
 
 	resp, err := client.Post(HttpBaseUrl+"/games/join", jsonContentType, bytes.NewReader(body))

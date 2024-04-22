@@ -25,7 +25,13 @@ func (s *ServerTestSuite) TestCreateGameEndpoint() {
 
 	reader := bytes.NewReader(postBody)
 
-	resp, err := http.Post(HttpBaseUrl+"/games/create", jsonContentType, reader)
+	jar := &GameJoinCookieJar{}
+	client := &http.Client{
+		Timeout: time.Second * 10,
+		Jar:     jar,
+	}
+
+	resp, err := client.Post(HttpBaseUrl+"/games/create", jsonContentType, reader)
 	assert.Nil(t, err, "Should be able to POST")
 	assert.Equal(t, http.StatusCreated, resp.StatusCode, "Game should have been made and is ready for connecting to")
 
@@ -37,6 +43,7 @@ func (s *ServerTestSuite) TestCreateGameEndpoint() {
 	assert.Nil(t, err, "There should not be an error reading the game ids")
 	assert.NotEmpty(t, gameIds.GameId, "Game ID should be set")
 	assert.NotEmpty(t, gameIds.PlayerId, "Player ID should be set")
+	assert.NotEmpty(t, jar, "Token should be set")
 }
 
 func (s *ServerTestSuite) TestCommandError() {
@@ -45,13 +52,12 @@ func (s *ServerTestSuite) TestCommandError() {
 
 	game := createTestGame(t)
 	url := WsBaseUrl + "/games/join"
-	cookies := GameJoinParams{GameId: game.GameId, PlayerId: game.PlayerId, Password: ""}
 
 	dialer := websocket.DefaultDialer
 	dialer.HandshakeTimeout = time.Millisecond * 100
 
 	log.Print("Dialing server")
-	conn, _, err := dialer.Dial(url, cookies.Headers())
+	conn, _, err := dialer.Dial(url, game.Jar.Headers())
 	assert.Nil(t, err, "Should have connected to the ws server successfully")
 	defer conn.Close()
 	assert.NotNil(t, conn)
@@ -66,7 +72,7 @@ func (s *ServerTestSuite) TestCommandError() {
 	var onPlayerJoinMsg onPlayerJoinMsg
 	err = json.Unmarshal(msg, &onPlayerJoinMsg)
 	assert.Nil(t, err)
-	assert.Equal(t, game.PlayerId, onPlayerJoinMsg.Data.Id, "The current user should have joined the game")
+	assert.Equal(t, game.Ids.PlayerId, onPlayerJoinMsg.Data.Id, "The current user should have joined the game")
 
 	// Second message should be the state
 
@@ -80,10 +86,10 @@ func (s *ServerTestSuite) TestCommandError() {
 	err = json.Unmarshal(msg, &onJoinMsg)
 
 	assert.Nil(t, err, "Should be a join message")
-	assert.Equal(t, game.GameId, onJoinMsg.Data.State.Id)
+	assert.Equal(t, game.Ids.GameId, onJoinMsg.Data.State.Id)
 	assert.Len(t, onJoinMsg.Data.State.Players, 1)
 	assert.Contains(t, onJoinMsg.Data.State.Players, gameLogic.Player{
-		Id:   game.PlayerId,
+		Id:   game.Ids.PlayerId,
 		Name: "Dave"})
 
 	conn.WriteMessage(websocket.TextMessage, []byte(`{"type":1,"data":{"command":"start"}}`))
@@ -104,13 +110,12 @@ func (s *ServerTestSuite) TestJoinGameEndpoint() {
 
 	game := createTestGame(t)
 	url := WsBaseUrl + "/games/join"
-	cookies := GameJoinParams{GameId: game.GameId, PlayerId: game.PlayerId, Password: ""}
 
 	dialer := websocket.DefaultDialer
 	dialer.HandshakeTimeout = time.Millisecond * 100
 
 	log.Print("Dialing server")
-	conn, _, err := dialer.Dial(url, cookies.Headers())
+	conn, _, err := dialer.Dial(url, game.Jar.Headers())
 	assert.Nil(t, err, "Should have connected to the ws server successfully")
 	defer conn.Close()
 	assert.NotNil(t, conn)
@@ -125,7 +130,7 @@ func (s *ServerTestSuite) TestJoinGameEndpoint() {
 	var onPlayerJoinMsg onPlayerJoinMsg
 	err = json.Unmarshal(msg, &onPlayerJoinMsg)
 	assert.Nil(t, err)
-	assert.Equal(t, game.PlayerId, onPlayerJoinMsg.Data.Id, "The current user should have joined the game")
+	assert.Equal(t, game.Ids.PlayerId, onPlayerJoinMsg.Data.Id, "The current user should have joined the game")
 
 	// Second message should be the state
 
@@ -139,9 +144,9 @@ func (s *ServerTestSuite) TestJoinGameEndpoint() {
 	err = json.Unmarshal(msg, &onJoinMsg)
 
 	assert.Nil(t, err, "Should be a join message")
-	assert.Equal(t, game.GameId, onJoinMsg.Data.State.Id)
+	assert.Equal(t, game.Ids.GameId, onJoinMsg.Data.State.Id)
 	assert.Len(t, onJoinMsg.Data.State.Players, 1)
 	assert.Contains(t, onJoinMsg.Data.State.Players, gameLogic.Player{
-		Id:   game.PlayerId,
+		Id:   game.Ids.PlayerId,
 		Name: "Dave"})
 }

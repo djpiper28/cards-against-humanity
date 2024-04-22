@@ -105,44 +105,50 @@ func (s *ServerTestSuite) TestCreateJoinAndLeaveMessagesAreSent() {
 
 	game := createTestGame(t)
 	url := WsBaseUrl + "/games/join"
-	cookies := GameJoinParams{GameId: game.GameId, PlayerId: game.PlayerId, Password: ""}
 
 	dialer := websocket.DefaultDialer
 	dialer.HandshakeTimeout = time.Millisecond * 100
 
 	log.Print("Dialing server")
-	conn, _, err := dialer.Dial(url, cookies.Headers())
+	conn, _, err := dialer.Dial(url, game.Jar.Headers())
 	assert.Nil(t, err, "Should have connected to the ws server successfully")
 	defer conn.Close()
 	assert.NotNil(t, conn)
 
-	// First message should be the player join broadcast, which we ignore
+	// First message should be the player join broadcast
 	msgType, msg, err := conn.ReadMessage()
+	assert.NoError(t, err)
 
 	var onPlayerJoinMsg onPlayerJoinMsg
 	err = json.Unmarshal(msg, &onPlayerJoinMsg)
-	assert.Equal(t, game.PlayerId, onPlayerJoinMsg.Data.Id, "The current user should have joined the game")
+	assert.NoError(t, err)
+	assert.Equal(t, game.Ids.PlayerId, onPlayerJoinMsg.Data.Id, "The current user should have joined the game")
 
 	// Second message should be the state
 	msgType, msg, err = conn.ReadMessage()
+	assert.NoError(t, err)
 	assert.Equal(t, msgType, websocket.TextMessage)
 
 	var onJoinMsg onJoinRpcMsg
 	err = json.Unmarshal(msg, &onJoinMsg)
 
 	assert.Nil(t, err, "Should be a join message")
-	assert.Equal(t, game.GameId, onJoinMsg.Data.State.Id)
+	assert.Equal(t, game.Ids.GameId, onJoinMsg.Data.State.Id)
 
 	// Check that player create is sent
 	// Create the player
 	createPlayerReq := CreatePlayerRequest{
 		PlayerName: "Bob",
-		GameId:     game.GameId,
+		GameId:     game.Ids.GameId,
 	}
 	createPlayerReqBody, err := json.Marshal(createPlayerReq)
 	assert.Nil(t, err)
 
-	resp, err := http.Post(HttpBaseUrl+"/games/join", jsonContentType, bytes.NewReader(createPlayerReqBody))
+	cookies := GameJoinCookieJar{GameId: game.Ids.GameId, Password: ""}
+	client := &http.Client{
+		Jar: &cookies,
+	}
+	resp, err := client.Post(HttpBaseUrl+"/games/join", jsonContentType, bytes.NewReader(createPlayerReqBody))
 	assert.Nil(t, err)
 
 	playerIdBytes, err := io.ReadAll(resp.Body)
@@ -150,6 +156,8 @@ func (s *ServerTestSuite) TestCreateJoinAndLeaveMessagesAreSent() {
 
 	newPlayerId, err := uuid.ParseBytes(playerIdBytes)
 	assert.Nil(t, err)
+
+	cookies.PlayerId = newPlayerId
 
 	// Read the create message
 	msgType, msg, err = conn.ReadMessage()
@@ -166,7 +174,6 @@ func (s *ServerTestSuite) TestCreateJoinAndLeaveMessagesAreSent() {
 	assert.Equal(t, createPlayerReq.PlayerName, onCreateMsg.Data.Name)
 
 	// Check that player join is sent
-	cookies = GameJoinParams{GameId: game.GameId, PlayerId: newPlayerId, Password: ""}
 
 	dialerPlayer := websocket.DefaultDialer
 	dialerPlayer.HandshakeTimeout = time.Millisecond * 100

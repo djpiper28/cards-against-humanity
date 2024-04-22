@@ -69,14 +69,14 @@ func (s *ServerTestSuite) TestJoinGameEndpointFailsWrongPassword() {
 	t.Parallel()
 
 	game := createTestGame(t)
+	game.Jar.Password = "wrong password"
 	url := WsBaseUrl + "/games/join"
-	cookies := GameJoinParams{GameId: game.GameId, PlayerId: game.PlayerId, Password: "wrong password"}
 
 	dialer := websocket.DefaultDialer
 	dialer.HandshakeTimeout = time.Millisecond * 100
 
 	log.Print("Dialing server")
-	_, _, err := dialer.Dial(url, cookies.Headers())
+	_, _, err := dialer.Dial(url, game.Jar.Headers())
 	assert.NotNil(t, err, "Should have connected to the ws server successfully")
 }
 
@@ -85,14 +85,14 @@ func (s *ServerTestSuite) TestJoinGameEndpointFailsPlayerNotReal() {
 	t.Parallel()
 
 	game := createTestGame(t)
+	game.Jar.PlayerId = uuid.New()
 	url := WsBaseUrl + "/games/join"
-	cookies := GameJoinParams{GameId: game.GameId, PlayerId: uuid.New(), Password: ""}
 
 	dialer := websocket.DefaultDialer
 	dialer.HandshakeTimeout = time.Millisecond * 100
 
 	log.Print("Dialing server")
-	_, _, err := dialer.Dial(url, cookies.Headers())
+	_, _, err := dialer.Dial(url, game.Jar.Headers())
 	assert.NotNil(t, err, "Should have connected to the ws server successfully")
 }
 
@@ -101,7 +101,7 @@ func (s *ServerTestSuite) TestJoinGameEndpointFailsGameNotReal() {
 	t.Parallel()
 
 	url := WsBaseUrl + "/games/join"
-	cookies := GameJoinParams{GameId: uuid.New(), PlayerId: uuid.New(), Password: ""}
+	cookies := GameJoinCookieJar{GameId: uuid.New(), PlayerId: uuid.New(), Password: ""}
 
 	dialer := websocket.DefaultDialer
 	dialer.HandshakeTimeout = time.Millisecond * 100

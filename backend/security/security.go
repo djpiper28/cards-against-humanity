@@ -129,12 +129,12 @@ func CheckToken(gameId, playerId uuid.UUID, token string) error {
 	claims, err := ParseToken(token)
 	if err != nil {
 		log.Printf("Error parsing authorisation token: %s", err)
-    return errors.New("Error parsing authorisation token")
+		return errors.New("Error parsing authorisation token")
 	}
 
 	if claims.PlayerId != playerId || claims.GameId != gameId {
-    return errors.New("Token's claims do not match the provided ids")
+		return errors.New("Token's claims do not match the provided ids")
 	}
 
-  return nil
+	return nil
 }
