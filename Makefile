@@ -5,8 +5,7 @@ all: frontend backend
 # Swagger defs
 .PHONY: swagger
 swagger:
-	go install github.com/swaggo/swag/cmd/swag@latest
-	cd backend && swag init --requiredByDefault 
+	cd backend && go generate ./...
 
 # Frontend
 .PHONY: frontend-install

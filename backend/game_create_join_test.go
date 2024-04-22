@@ -120,7 +120,7 @@ func (s *ServerTestSuite) TestJoinGameEndpoint() {
 	defer conn.Close()
 	assert.NotNil(t, conn)
 
-	// First message should be the player join broadcast, which we ignore
+	// First message should be the player join broadcast
 	msgType, msg, err := conn.ReadMessage()
 
 	assert.Nil(t, err, "Should be able to read (the initial game state)")
