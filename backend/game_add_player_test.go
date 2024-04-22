@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
 )
@@ -151,13 +150,14 @@ func (s *ServerTestSuite) TestCreateJoinAndLeaveMessagesAreSent() {
 	resp, err := client.Post(HttpBaseUrl+"/games/join", jsonContentType, bytes.NewReader(createPlayerReqBody))
 	assert.Nil(t, err)
 
-	playerIdBytes, err := io.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	assert.Nil(t, err)
 
-	newPlayerId, err := uuid.ParseBytes(playerIdBytes)
-	assert.Nil(t, err)
+  var create CreatePlayerResponse
+  err = json.Unmarshal(respBytes, &create)
+  assert.Nil(t, err)
 
-	cookies.PlayerId = newPlayerId
+	cookies.PlayerId = create.PlayerId 
 
 	// Read the create message
 	msgType, msg, err = conn.ReadMessage()
@@ -170,7 +170,7 @@ func (s *ServerTestSuite) TestCreateJoinAndLeaveMessagesAreSent() {
 	err = json.Unmarshal(msg, &onCreateMsg)
 	assert.Nil(t, err)
 
-	assert.Equal(t, newPlayerId, onCreateMsg.Data.Id)
+	assert.Equal(t, create.PlayerId, onCreateMsg.Data.Id)
 	assert.Equal(t, createPlayerReq.PlayerName, onCreateMsg.Data.Name)
 
 	// Check that player join is sent
@@ -191,7 +191,7 @@ func (s *ServerTestSuite) TestCreateJoinAndLeaveMessagesAreSent() {
 	err = json.Unmarshal(msg, &onPlayerJoinMsg)
 	assert.Nil(t, err)
 
-	assert.Equal(t, newPlayerId, onPlayerJoinMsg.Data.Id)
+	assert.Equal(t, create.PlayerId, onPlayerJoinMsg.Data.Id)
 	assert.Equal(t, createPlayerReq.PlayerName, onPlayerJoinMsg.Data.Name)
 
 	// Check taht the leave message is sent
@@ -205,5 +205,5 @@ func (s *ServerTestSuite) TestCreateJoinAndLeaveMessagesAreSent() {
 	err = json.Unmarshal(msg, &onDisconnectMsg)
 	assert.Nil(t, err)
 
-	assert.Equal(t, newPlayerId, onDisconnectMsg.Data.Id)
+	assert.Equal(t, create.PlayerId, onDisconnectMsg.Data.Id)
 }

@@ -1,5 +1,6 @@
-import { Api, HttpClient } from "./api";
 import { CookieOptions } from "@solid-primitives/storage";
+
+import { Api, HttpClient } from "./api";
 
 const defaultBaseUrl = new HttpClient().baseUrl;
 
@@ -8,6 +9,14 @@ const defaultBaseUrl = new HttpClient().baseUrl;
  */
 export const apiClient = new Api({
   baseUrl: import.meta.env.VITE_API_BASE_URL ?? defaultBaseUrl,
+  customFetch: async (url, init) => {
+    const resp = await fetch(url, {
+      credentials: "include",
+      mode: "cors",
+      ...init,
+    });
+    return resp;
+  },
 });
 
 /**

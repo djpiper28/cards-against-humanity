@@ -19,7 +19,7 @@ const (
 	JoinGameGameIdParam   = "gameId"
 	JoinGamePlayerIdParam = "playerId"
 	PasswordParam         = "password"
-	AuthorizationCookie   = "Authorization"
+	AuthorizationCookie   = "authentication"
 )
 
 // @Summary		Gets all of the games that are not full
@@ -59,6 +59,7 @@ type GameCreateRequest struct {
 type GameCreatedResp struct {
 	GameId   uuid.UUID `json:"gameId"`
 	PlayerId uuid.UUID `json:"playerId"`
+  AuthorisationCookie string `json:"authentication"`
 }
 
 // @Summary		Creates a new game
@@ -116,7 +117,7 @@ func createGame(c *gin.Context) {
 	}
 
 	c.SetCookie(AuthorizationCookie, token, -1, "/", "", true, true)
-	resp := GameCreatedResp{GameId: gameId, PlayerId: playerId}
+  resp := GameCreatedResp{GameId: gameId, PlayerId: playerId, AuthorisationCookie: token}
 	c.JSON(http.StatusCreated, resp)
 }
 
@@ -126,13 +127,18 @@ type CreatePlayerRequest struct {
 	Password   string    `json:"password"`
 }
 
+type CreatePlayerResponse struct {
+	PlayerId uuid.UUID `json:"playerId"`
+  AuthorisationCookie string `json:"authentication"`
+}
+
 // @Summary		Creates a player to allow you to join a game (first step of game joining, followed by /join ing)
 // @Description	Validates the player information, then tries to add them to a game and returns their ID.
 // @Tags			games
 // @Accept			json
 // @Produce		json
 // @Param			request	body		CreatePlayerRequest	true	"Player information"
-// @Success		200		{string}	uuid				"Player ID"
+// @Success		204		{CreatePlayerResponse}	uuid				"Player ID and auth token"
 // @Failure		500		{object}	ApiError
 // @Failure		400		{object}	ApiError
 // @Router			/games/join [post]
@@ -172,8 +178,7 @@ func createPlayerForJoining(c *gin.Context) {
 	}
 
 	c.SetCookie(AuthorizationCookie, token, -1, "/", "", true, true)
-
-	c.JSON(http.StatusCreated, playerId)
+	c.JSON(http.StatusCreated, CreatePlayerResponse{PlayerId: playerId, AuthorisationCookie: token})
 
 	// Transmit to the other players
 	msg, err := network.EncodeRpcMessage(onCreateMessage)

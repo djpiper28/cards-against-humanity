@@ -198,7 +198,7 @@ func (s *ServerTestSuite) CreateDefaultGame() TestGameInfo {
 	return TestGameInfo{gameId: gameIds.GameId, playerId: gameIds.PlayerId, maxPlayers: gs.MaxPlayers, password: gs.Password}
 }
 
-func (s *ServerTestSuite) CreatePlayer(gameId uuid.UUID, name, password string) uuid.UUID {
+func (s *ServerTestSuite) CreatePlayer(gameId uuid.UUID, name, password string) GameData {
 	t := s.T()
 
 	jsonBody := CreatePlayerRequest{
@@ -217,12 +217,13 @@ func (s *ServerTestSuite) CreatePlayer(gameId uuid.UUID, name, password string) 
 
 	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 
-	playerId, err := io.ReadAll(resp.Body)
+	respBody, err := io.ReadAll(resp.Body)
 	assert.Nil(t, err)
 
-	assert.NotEmpty(t, playerId)
-
-	playerIdAsUUID, err := uuid.Parse(string(playerId))
+	var create CreatePlayerResponse
+	err = json.Unmarshal(respBody, &create)
 	assert.Nil(t, err)
-	return playerIdAsUUID
+
+	assert.NotEmpty(t, create.PlayerId)
+	return GameData{Ids: GameCreatedResp{GameId: gameId, PlayerId: create.PlayerId}, Jar: &GameJoinCookieJar{GameId: gameId, PlayerId: create.PlayerId, Password: password}}
 }

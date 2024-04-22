@@ -27,6 +27,7 @@ export const playerIdCookie = "playerId";
  */
 export const gameIdParamCookie = "gameId";
 export const gamePasswordCookie = "password";
+export const authenticationCookie = "authentication";
 
 class GameState {
   private gameId: string = "";

@@ -40,9 +40,16 @@ func Start() {
 
 	// Add CORS middleware, this also allows for other clients to use this server
 	router.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"*"},
-		AllowHeaders: []string{"*"},
+    AllowOrigins: []string{"http://localhost:3000", "https://cards.djpiper28.co.uk"},
+		AllowHeaders: []string{"Content-Type",
+      "Set-Cookie",
+      "Cookie",
+			"Origin",
+			"Accept",
+			"X-Requested-With"},
 		AllowMethods: []string{"PUT", "PATCH", "DELETE", "GET"},
+    AllowCredentials: true,
+    AllowWebSockets: true,
 	}))
 
 	// Setup all endpoints

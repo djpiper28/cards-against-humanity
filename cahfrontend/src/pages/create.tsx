@@ -5,6 +5,7 @@ import Input, { InputType } from "../components/inputs/Input";
 import { useNavigate } from "@solidjs/router";
 import { MaxPlayerNameLength, MinPlayerNameLength } from "../gameLogicTypes";
 import {
+    authenticationCookie,
   gameIdParamCookie,
   gamePasswordCookie,
   playerIdCookie,
@@ -146,6 +147,11 @@ export default function Create() {
                 cookieStorage.setItem(
                   gamePasswordCookie,
                   gameSettings().gamePassword,
+                  cookieOptions,
+                );
+                cookieStorage.setItem(
+                  authenticationCookie,
+                  newGame.data.authentication,
                   cookieOptions,
                 );
                 navigate(

@@ -6,6 +6,7 @@ import { validatePlayerName } from "../components/gameControls/GameSettingsInput
 import { apiClient, cookieOptions } from "../apiClient";
 import { indexUrl, joinGameUrl } from "../routes";
 import {
+    authenticationCookie,
   gameIdParamCookie,
   gamePasswordCookie,
   playerIdCookie,
@@ -70,8 +71,9 @@ export default function PlayerJoin() {
                 password(),
                 cookieOptions,
               );
-              cookieStorage.setItem(playerIdCookie, res.data, cookieOptions);
+              cookieStorage.setItem(playerIdCookie, res.data.playerId, cookieOptions);
               cookieStorage.setItem(gameIdParamCookie, gameId, cookieOptions);
+              cookieStorage.setItem(authenticationCookie, res.data.authentication, cookieOptions);
 
               naviagte(
                 `${joinGameUrl}?${gameIdParamCookie}=${encodeURIComponent(gameId)}`,
