@@ -3,7 +3,7 @@ module github.com/djpiper28/cards-against-humanity/e2e
 go 1.21
 
 require (
-	github.com/go-rod/rod v0.114.6
+	github.com/go-rod/rod v0.115.0
 	github.com/stretchr/testify v1.8.4
 )
 
