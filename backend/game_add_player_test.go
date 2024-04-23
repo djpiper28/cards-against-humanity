@@ -153,11 +153,11 @@ func (s *ServerTestSuite) TestCreateJoinAndLeaveMessagesAreSent() {
 	respBytes, err := io.ReadAll(resp.Body)
 	assert.Nil(t, err)
 
-  var create CreatePlayerResponse
-  err = json.Unmarshal(respBytes, &create)
-  assert.Nil(t, err)
+	var create CreatePlayerResponse
+	err = json.Unmarshal(respBytes, &create)
+	assert.Nil(t, err)
 
-	cookies.PlayerId = create.PlayerId 
+	cookies.PlayerId = create.PlayerId
 
 	// Read the create message
 	msgType, msg, err = conn.ReadMessage()

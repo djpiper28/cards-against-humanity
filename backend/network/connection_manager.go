@@ -63,6 +63,11 @@ func (g *IntegratedConnectionManager) RegisterConnection(gameId, playerId uuid.U
 
 	game.playerConnectionMap[playerId] = connection
 
+	err := GameRepo.ConnectPlayer(gameId, playerId)
+	if err != nil {
+		log.Printf("Cannot tag player %s as connected to game %s", playerId, gameId)
+	}
+
 	go connection.ListenAndHandle(g)
 
 	name, err := GameRepo.GetPlayerName(gameId, playerId)
@@ -95,6 +100,11 @@ func (g *IntegratedConnectionManager) UnregisterConnection(gameId, playerId uuid
 		delete(game.playerConnectionMap, playerId)
 	} else {
 		log.Printf("Cannot unregister game %s as it cannot be found", gameId)
+	}
+
+	err := GameRepo.DisconnectPlayer(gameId, playerId)
+	if err != nil {
+		log.Printf("Cannot tag player %s as disconnected from game %s", playerId, gameId)
 	}
 
 	onPlayerDisconnectMsg := RpcOnPlayerDisconnectMsg{

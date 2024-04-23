@@ -57,9 +57,9 @@ type GameCreateRequest struct {
 }
 
 type GameCreatedResp struct {
-	GameId   uuid.UUID `json:"gameId"`
-	PlayerId uuid.UUID `json:"playerId"`
-  AuthorisationCookie string `json:"authentication"`
+	GameId              uuid.UUID `json:"gameId"`
+	PlayerId            uuid.UUID `json:"playerId"`
+	AuthorisationCookie string    `json:"authentication"`
 }
 
 // @Summary		Creates a new game
@@ -117,7 +117,7 @@ func createGame(c *gin.Context) {
 	}
 
 	c.SetCookie(AuthorizationCookie, token, -1, "/", "", true, true)
-  resp := GameCreatedResp{GameId: gameId, PlayerId: playerId, AuthorisationCookie: token}
+	resp := GameCreatedResp{GameId: gameId, PlayerId: playerId, AuthorisationCookie: token}
 	c.JSON(http.StatusCreated, resp)
 }
 
@@ -128,8 +128,8 @@ type CreatePlayerRequest struct {
 }
 
 type CreatePlayerResponse struct {
-	PlayerId uuid.UUID `json:"playerId"`
-  AuthorisationCookie string `json:"authentication"`
+	PlayerId            uuid.UUID `json:"playerId"`
+	AuthorisationCookie string    `json:"authentication"`
 }
 
 // @Summary		Creates a player to allow you to join a game (first step of game joining, followed by /join ing)

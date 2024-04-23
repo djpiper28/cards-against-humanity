@@ -1,7 +1,6 @@
 package gameRepo
 
 import (
-	"container/list"
 	"errors"
 	"fmt"
 	"log"
@@ -18,20 +17,14 @@ const (
 	MaxGameWithNoPlayersAge = time.Second * 2
 )
 
-type GameListPtr *gameLogic.Game
-
 type GameRepo struct {
-	// A sorted list of games, where the first game is the oldest, when a game starts it is sent to the end
-	// When a game ends it is put back to the front. This is used for O(k) lookup of games to kill
-	GamesByAge *list.List
 	GameMap    map[uuid.UUID]*gameLogic.Game
 	GameAgeMap map[uuid.UUID]time.Time
 	lock       sync.RWMutex
 }
 
 func New() *GameRepo {
-	return &GameRepo{GamesByAge: list.New(),
-		GameMap:    make(map[uuid.UUID]*gameLogic.Game),
+	return &GameRepo{GameMap: make(map[uuid.UUID]*gameLogic.Game),
 		GameAgeMap: make(map[uuid.UUID]time.Time)}
 }
 
@@ -47,7 +40,6 @@ func (gr *GameRepo) CreateGame(gameSettings *gameLogic.GameSettings, playerName 
 	}
 
 	gid := game.Id
-	gr.GamesByAge.PushBack(GameListPtr(game))
 	gr.GameMap[gid] = game
 	gr.GameAgeMap[gid] = game.CreationTime
 
@@ -55,17 +47,73 @@ func (gr *GameRepo) CreateGame(gameSettings *gameLogic.GameSettings, playerName 
 	return gid, game.GameOwnerId, nil
 }
 
+func (gr *GameRepo) RemoveGame(gameID uuid.UUID) error {
+	gr.lock.Lock()
+	defer gr.lock.Unlock()
+
+	_, found := gr.GameMap[gameID]
+	if !found {
+		return errors.New("Cannot find game")
+	}
+
+	delete(gr.GameMap, gameID)
+	delete(gr.GameAgeMap, gameID)
+	return nil
+}
+
+func (gr *GameRepo) DisconnectPlayer(gameId, playerId uuid.UUID) error {
+	gr.lock.Lock()
+	defer gr.lock.Unlock()
+
+	game, found := gr.GameMap[gameId]
+	if !found {
+		return errors.New("Cannot find game")
+	}
+
+	game.Lock.Lock()
+	defer game.Lock.Unlock()
+
+	player, found := game.PlayersMap[playerId]
+	if !found {
+		return errors.New("Cannot find player")
+	}
+
+	player.Connected = false
+	return nil
+}
+
+func (gr *GameRepo) ConnectPlayer(gameId, playerId uuid.UUID) error {
+	gr.lock.Lock()
+	defer gr.lock.Unlock()
+
+	game, found := gr.GameMap[gameId]
+	if !found {
+		return errors.New("Cannot find game")
+	}
+
+	game.Lock.Lock()
+	defer game.Lock.Unlock()
+
+	player, found := game.PlayersMap[playerId]
+	if !found {
+		return errors.New("Cannot find player")
+	}
+
+	player.Connected = true
+	return nil
+}
+
 func (gr *GameRepo) GetGames() []*gameLogic.Game {
 	gr.lock.RLock()
 	defer gr.lock.RUnlock()
 
-	length := gr.GamesByAge.Len()
+	length := len(gr.GameMap)
 	games := make([]*gameLogic.Game, length)
 
-	current := gr.GamesByAge.Front()
-	for i := 0; i < length; i++ {
-		games[i] = current.Value.(GameListPtr)
-		current = current.Next()
+	i := 0
+	for _, game := range gr.GameMap {
+		games[i] = game
+		i++
 	}
 
 	return games

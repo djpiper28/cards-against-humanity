@@ -10,6 +10,8 @@ import (
 )
 
 func TestPacksAreLaoded(t *testing.T) {
+	t.Parallel()
+
 	if len(gameLogic.AllPacks) == 0 {
 		err := gameLogic.LoadPacks()
 		assert.NoError(t, err)
@@ -17,6 +19,8 @@ func TestPacksAreLaoded(t *testing.T) {
 }
 
 func TestNew(t *testing.T) {
+	t.Parallel()
+
 	repo := gameRepo.New()
 	if repo.GameAgeMap == nil {
 		t.Log("The game age map is nil")
@@ -27,14 +31,11 @@ func TestNew(t *testing.T) {
 		t.Log("The game map is nil")
 		t.FailNow()
 	}
-
-	if repo.GamesByAge == nil {
-		t.Log("Games by age is nil")
-		t.FailNow()
-	}
 }
 
 func TestCreateGameFail(t *testing.T) {
+	t.Parallel()
+
 	repo := gameRepo.New()
 	id, _, err := repo.CreateGame(gameLogic.DefaultGameSettings(), "")
 	if err == nil {
@@ -51,11 +52,6 @@ func TestCreateGameFail(t *testing.T) {
 	_, found = repo.GameAgeMap[id]
 	if found {
 		t.Log("The game should not be in the age map")
-		t.FailNow()
-	}
-
-	if repo.GamesByAge.Len() > 0 {
-		t.Log("The game should not be in the game by age list")
 		t.FailNow()
 	}
 }
@@ -84,19 +80,11 @@ func TestCreateGame(t *testing.T) {
 		t.Log("The age map does not have the game in it")
 		t.FailNow()
 	}
-
-	if repo.GamesByAge.Front().Value.(gameRepo.GameListPtr) != game {
-		t.Log("The games by age list does not contain the game")
-		t.FailNow()
-	}
-
-	if repo.GamesByAge.Len() != 1 {
-		t.Log("The games by age should have length 1")
-		t.FailNow()
-	}
 }
 
 func TestGetGames(t *testing.T) {
+	t.Parallel()
+
 	repo := gameRepo.New()
 
 	assert.Equal(t, repo.GetGames(), []*gameLogic.Game{}, "There should be no games in the repo yet")
@@ -123,6 +111,8 @@ func TestGameChangeSettingsCannotFindGame(t *testing.T) {
 }
 
 func TestGameChangeSettings(t *testing.T) {
+	t.Parallel()
+
 	repo := gameRepo.New()
 	gameSettings := *gameLogic.DefaultGameSettings()
 	name := "Dave"
@@ -145,6 +135,8 @@ func TestGameChangeSettings(t *testing.T) {
 }
 
 func TestGameChangeSettingsInvalidSettings(t *testing.T) {
+	t.Parallel()
+
 	repo := gameRepo.New()
 	gameSettings := gameLogic.DefaultGameSettings()
 	name := "Dave"
@@ -162,4 +154,45 @@ func TestGameChangeSettingsInvalidSettings(t *testing.T) {
 	game, err := repo.GetGame(gid)
 	assert.NoError(t, err)
 	assert.Equal(t, *gameSettings, *game.Settings, "The game settings should not have changed")
+}
+
+func TestPlayerConnect(t *testing.T) {
+	t.Parallel()
+
+	repo := gameRepo.New()
+	gameSettings := gameLogic.DefaultGameSettings()
+	name := "Dave"
+	gid, pid, err := repo.CreateGame(gameSettings, name)
+	assert.NoError(t, err)
+
+	err = repo.ConnectPlayer(gid, pid)
+	assert.NoError(t, err, "The player should have been connected")
+
+	game, err := repo.GetGame(gid)
+	assert.NoError(t, err)
+	assert.True(t, game.PlayersMap[pid].Connected)
+}
+
+func TestPlayerDisconnect(t *testing.T) {
+	t.Parallel()
+
+	repo := gameRepo.New()
+	gameSettings := gameLogic.DefaultGameSettings()
+	name := "Dave"
+	gid, pid, err := repo.CreateGame(gameSettings, name)
+	assert.NoError(t, err)
+
+	err = repo.ConnectPlayer(gid, pid)
+	assert.NoError(t, err, "The player should have been connected")
+
+	game, err := repo.GetGame(gid)
+	assert.NoError(t, err)
+	assert.True(t, game.PlayersMap[pid].Connected)
+
+	err = repo.DisconnectPlayer(gid, pid)
+	assert.NoError(t, err, "The player should have been disconnected")
+
+	game, err = repo.GetGame(gid)
+	assert.NoError(t, err)
+	assert.False(t, game.PlayersMap[pid].Connected)
 }
