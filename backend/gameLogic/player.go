@@ -30,7 +30,7 @@ func NewPlayer(Name string) (*Player, error) {
 	return &Player{Id: uuid.New(),
 		Name:      Name,
 		Hand:      make(map[int]*WhiteCard),
-		Connected: true}, nil
+		Connected: false}, nil
 }
 
 func (p *Player) hasCard(card *WhiteCard) bool {

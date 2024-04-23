@@ -81,6 +81,10 @@ func createTestGame(t *testing.T) GameData {
 	err = json.Unmarshal(body, &gameIds)
 	assert.Nil(t, err, "There should not be an error reading the game ids")
 
+	assert.NotEmpty(t, gameIds.PlayerId, "Player ID should be set")
+	assert.NotEmpty(t, gameIds.GameId, "Game ID should be set")
+	assert.NotEmpty(t, jar.Token, "Authorisation cookie was not set")
+
 	jar.GameId = gameIds.GameId
 	jar.PlayerId = gameIds.PlayerId
 	jar.Password = gs.Password

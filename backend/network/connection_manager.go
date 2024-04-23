@@ -69,25 +69,6 @@ func (g *IntegratedConnectionManager) RegisterConnection(gameId, playerId uuid.U
 	}
 
 	go connection.ListenAndHandle(g)
-
-	name, err := GameRepo.GetPlayerName(gameId, playerId)
-	if err != nil {
-		log.Printf("Cannot get the player's name: %s", err)
-		name = "Error"
-	}
-
-	onPlayerJoinmsg := RpcOnPlayerJoinMsg{
-		Id:   playerId,
-		Name: name,
-	}
-
-	message, err := EncodeRpcMessage(onPlayerJoinmsg)
-	if err != nil {
-		log.Printf("Cannot encode the message: %s", err)
-		return
-	}
-
-	go g.Broadcast(gameId, message)
 }
 
 func (g *IntegratedConnectionManager) UnregisterConnection(gameId, playerId uuid.UUID) {

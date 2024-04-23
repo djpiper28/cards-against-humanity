@@ -46,8 +46,8 @@ func TestPlayerInit(t *testing.T) {
 		t.FailNow()
 	}
 
-	if !player.Connected {
-		t.Log("Player is not connected")
+	if player.Connected {
+		t.Log("Player is connected")
 		t.FailNow()
 	}
 

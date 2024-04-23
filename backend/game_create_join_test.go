@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
+	"github.com/djpiper28/cards-against-humanity/backend/network"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
 )
@@ -44,6 +45,10 @@ func (s *ServerTestSuite) TestCreateGameEndpoint() {
 	assert.NotEmpty(t, gameIds.GameId, "Game ID should be set")
 	assert.NotEmpty(t, gameIds.PlayerId, "Player ID should be set")
 	assert.NotEmpty(t, jar, "Token should be set")
+
+	game, err := network.GameRepo.GetGame(gameIds.GameId)
+	assert.NoError(t, err)
+	assert.False(t, game.PlayersMap[gameIds.PlayerId].Connected)
 }
 
 func (s *ServerTestSuite) TestCommandError() {
@@ -126,6 +131,10 @@ func (s *ServerTestSuite) TestJoinGameEndpoint() {
 	assert.Nil(t, err, "Should be able to read (the initial game state)")
 	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
 	assert.Equal(t, msgType, websocket.TextMessage)
+
+	gameRepoGame, err := network.GameRepo.GetGame(game.Ids.GameId)
+	assert.NoError(t, err)
+	assert.True(t, gameRepoGame.PlayersMap[game.Ids.PlayerId].Connected)
 
 	var onPlayerJoinMsg onPlayerJoinMsg
 	err = json.Unmarshal(msg, &onPlayerJoinMsg)
