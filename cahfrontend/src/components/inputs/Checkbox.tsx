@@ -8,7 +8,7 @@ interface Props {
 export default function Checkbox(props: Readonly<Props>) {
   return (
     <label
-      class={`flex flex-row gap-3 rounded-xl border-2 w-fit p-1 px-2 ${
+      class={`select-none flex flex-row gap-3 rounded-xl border-2 w-fit p-1 px-2 ${
         props.checked ? "!bg-blue-300" : "bg-white"
       } ${props.secondary ? "bg-yellow-100" : ""}`}
     >
