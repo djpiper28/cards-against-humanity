@@ -487,3 +487,47 @@ func TestStartGameSuccess(t *testing.T) {
 		}
 	}
 }
+
+func TestRemovePlayerFromGameThatIsNotInThere(t *testing.T) {
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	_, err = game.RemovePlayer(uuid.New())
+	assert.Error(t, err, "Should not be able to remove a player that does not exist")
+
+	assert.Len(t, game.Players, 1)
+	assert.Len(t, game.PlayersMap, 1)
+}
+
+func TestRemovingLastPlayer(t *testing.T) {
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	res, err := game.RemovePlayer(game.Players[0])
+	assert.NoError(t, err)
+	assert.Equal(t, res.PlayersLeft, 0)
+
+	assert.Len(t, game.Players, 0)
+	assert.Len(t, game.PlayersMap, 0)
+}
+
+func TestRemovingGameOwnerReassignsIt(t *testing.T) {
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	pid, err := game.AddPlayer("John")
+  assert.NoError(t, err)
+
+  res, err := game.RemovePlayer(game.GameOwnerId)
+  assert.NoError(t, err)
+
+  assert.Equal(t, game.GameOwnerId, res.NewGameOwner)
+  assert.Equal(t, pid, game.GameOwnerId)
+  assert.Equal(t, res.PlayersLeft, 1)
+
+	assert.Len(t, game.Players, 1)
+	assert.Len(t, game.PlayersMap, 1)
+}

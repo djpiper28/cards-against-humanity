@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math/rand"
 	"sync"
 	"time"
 
@@ -253,6 +254,41 @@ func (g *Game) AddPlayer(playerName string) (uuid.UUID, error) {
 	g.Players = append(g.Players, player.Id)
 	g.PlayersMap[player.Id] = player
 	return player.Id, nil
+}
+
+type PlayerRemovalResult struct {
+	NewGameOwner uuid.UUID
+	PlayersLeft  int
+}
+
+func (g *Game) RemovePlayer(playerToRemoveId uuid.UUID) (PlayerRemovalResult, error) {
+	g.Lock.Lock()
+	defer g.Lock.Unlock()
+
+	_, found := g.PlayersMap[playerToRemoveId]
+	if !found {
+		return PlayerRemovalResult{}, errors.New("Player is not in the game")
+	}
+
+	delete(g.PlayersMap, playerToRemoveId)
+
+	players := make([]uuid.UUID, 0)
+	for _, pid := range g.Players {
+		if pid != playerToRemoveId {
+			players = append(players, pid)
+		}
+	}
+	g.Players = players
+
+	// If the game owner has left, then a random player should be assigned
+  res := PlayerRemovalResult{PlayersLeft: len(g.Players)}
+	playersLeft := len(g.Players)
+	if playerToRemoveId == g.GameOwnerId && playersLeft > 0 {
+		i := rand.Intn(playersLeft)
+		g.GameOwnerId = g.Players[i]
+    res.NewGameOwner = g.GameOwnerId
+	}
+  return res, nil
 }
 
 func (g *Game) StartGame() error {

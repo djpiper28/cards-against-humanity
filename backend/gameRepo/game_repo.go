@@ -61,6 +61,20 @@ func (gr *GameRepo) RemoveGame(gameID uuid.UUID) error {
 	return nil
 }
 
+// func (gr *GameRepo) PlayerLeaveGame(gameId, playerId uuid.UUID) error {
+//   gr.lock.Lock()
+//   defer gr.lock.Unlock()
+//
+//   game, found := gr.GameMap[gameId]
+//   if !found {
+//     return errors.New("Cannot find game")
+//   }
+//
+//   res, err := game.RemovePlayer(playerId)
+//
+//   return nil
+// }
+
 func (gr *GameRepo) DisconnectPlayer(gameId, playerId uuid.UUID) error {
 	gr.lock.Lock()
 	defer gr.lock.Unlock()
