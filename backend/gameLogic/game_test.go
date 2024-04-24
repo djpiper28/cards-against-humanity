@@ -12,6 +12,8 @@ import (
 )
 
 func TestDefaultGameSettings(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 
 	if settings == nil {
@@ -26,6 +28,8 @@ func TestDefaultGameSettings(t *testing.T) {
 }
 
 func TestGameSettingsValidateMinRounds(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	settings.MaxRounds = gameLogic.MinRounds - 1
 	if settings.Validate() {
@@ -35,6 +39,8 @@ func TestGameSettingsValidateMinRounds(t *testing.T) {
 }
 
 func TestGameSettingsValidateMaxRounds(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	settings.MaxRounds = gameLogic.MaxRounds + 1
 	if settings.Validate() {
@@ -44,6 +50,8 @@ func TestGameSettingsValidateMaxRounds(t *testing.T) {
 }
 
 func TestGameSettingsValidateMinPlayingToPoints(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	settings.PlayingToPoints = gameLogic.MinPlayingToPoints - 1
 	if settings.Validate() {
@@ -53,6 +61,8 @@ func TestGameSettingsValidateMinPlayingToPoints(t *testing.T) {
 }
 
 func TestGameSettingsValidateMaxPlayingToPoints(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	settings.PlayingToPoints = gameLogic.MaxPlayingToPoints + 1
 	if settings.Validate() {
@@ -62,6 +72,8 @@ func TestGameSettingsValidateMaxPlayingToPoints(t *testing.T) {
 }
 
 func TestGameSettingsMaximumPasswordLength(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	settings.Password = strings.Repeat("a", gameLogic.MaxPasswordLength+1)
 	if settings.Validate() {
@@ -71,6 +83,8 @@ func TestGameSettingsMaximumPasswordLength(t *testing.T) {
 }
 
 func TestNewGameInvalidSettings(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	settings.MaxPlayers = gameLogic.MinPlayers - 1
 	if settings.Validate() {
@@ -87,6 +101,8 @@ func TestNewGameInvalidSettings(t *testing.T) {
 }
 
 func TestNewGameInvalidPlayer(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	if !settings.Validate() {
 		t.Log("The valid settings are invalid")
@@ -102,6 +118,8 @@ func TestNewGameInvalidPlayer(t *testing.T) {
 }
 
 func TestNewGame(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	if !settings.Validate() {
 		t.Log("The settings should be valid")
@@ -175,6 +193,8 @@ func TestNewGame(t *testing.T) {
 }
 
 func TestGameInfo(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	game, err := gameLogic.NewGame(settings, "Dave")
 	assert.Nil(t, err, "There should not be an error with making the game", err)
@@ -193,6 +213,8 @@ func TestGameInfo(t *testing.T) {
 }
 
 func TestGameStateInfo(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	game, err := gameLogic.NewGame(settings, "Dave")
 	assert.Nil(t, err, "There should not be an error with making the game", err)
@@ -221,6 +243,8 @@ func TestGameStateInfo(t *testing.T) {
 }
 
 func TestAddInvalidPlayer(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	game, err := gameLogic.NewGame(settings, "Dave")
 	if err != nil {
@@ -236,6 +260,8 @@ func TestAddInvalidPlayer(t *testing.T) {
 }
 
 func TestAddingDuplicatePlayer(t *testing.T) {
+	t.Parallel()
+
 	name := "Dave"
 	settings := gameLogic.DefaultGameSettings()
 	game, err := gameLogic.NewGame(settings, name)
@@ -252,6 +278,8 @@ func TestAddingDuplicatePlayer(t *testing.T) {
 }
 
 func TestAddPlayer(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	game, err := gameLogic.NewGame(settings, "Dave")
 	if err != nil {
@@ -294,6 +322,8 @@ func TestAddPlayer(t *testing.T) {
 }
 
 func TestAddingPlayers(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	game, err := gameLogic.NewGame(settings, "Dave")
 	if err != nil {
@@ -338,6 +368,8 @@ func TestAddingPlayers(t *testing.T) {
 }
 
 func TestAddingMaxPlayers(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	game, err := gameLogic.NewGame(settings, "Dave")
 	if err != nil {
@@ -388,6 +420,8 @@ func TestAddingMaxPlayers(t *testing.T) {
 }
 
 func TestStartGameOnePlayerFails(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	game, err := gameLogic.NewGame(settings, "Dave")
 	if err != nil {
@@ -403,6 +437,8 @@ func TestStartGameOnePlayerFails(t *testing.T) {
 }
 
 func TestStartGameLessThanMinPlayerFails(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	game, err := gameLogic.NewGame(settings, "Dave")
 	if err != nil {
@@ -426,6 +462,8 @@ func TestStartGameLessThanMinPlayerFails(t *testing.T) {
 }
 
 func TestStartGameNotInLobbyFails(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	game, err := gameLogic.NewGame(settings, "Dave")
 	if err != nil {
@@ -443,6 +481,8 @@ func TestStartGameNotInLobbyFails(t *testing.T) {
 }
 
 func TestStartGameNoCardsInDeckFails(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	settings.CardPacks = []*gameLogic.CardPack{{}}
 	game, err := gameLogic.NewGame(settings, "Dave")
@@ -461,6 +501,8 @@ func TestStartGameNoCardsInDeckFails(t *testing.T) {
 }
 
 func TestStartGameSuccess(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	game, err := gameLogic.NewGame(settings, "Dave")
 	if err != nil {
@@ -489,6 +531,8 @@ func TestStartGameSuccess(t *testing.T) {
 }
 
 func TestRemovePlayerFromGameThatIsNotInThere(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	game, err := gameLogic.NewGame(settings, "Dave")
 	assert.NoError(t, err)
@@ -501,6 +545,8 @@ func TestRemovePlayerFromGameThatIsNotInThere(t *testing.T) {
 }
 
 func TestRemovingLastPlayer(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	game, err := gameLogic.NewGame(settings, "Dave")
 	assert.NoError(t, err)
@@ -514,6 +560,8 @@ func TestRemovingLastPlayer(t *testing.T) {
 }
 
 func TestRemovingGameOwnerReassignsIt(t *testing.T) {
+	t.Parallel()
+
 	settings := gameLogic.DefaultGameSettings()
 	game, err := gameLogic.NewGame(settings, "Dave")
 	assert.NoError(t, err)
