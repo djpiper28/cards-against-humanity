@@ -27,6 +27,8 @@ type ConnectionManager interface {
 	RegisterConnection(gameId, playerId uuid.UUID, connection *WsConnection)
 	NewConnection(conn *websocket.Conn, gameId, playerId uuid.UUID) *WsConnection
 	Close(gameId, playerId uuid.UUID) error
+	RemovePlayer(gameId, playerId uuid.UUID) error
+	RemoveGame(gameId uuid.UUID) error
 }
 
 func (g *IntegratedConnectionManager) Close(gameId, playerId uuid.UUID) error {
@@ -132,4 +134,51 @@ func (g *IntegratedConnectionManager) Broadcast(gameId uuid.UUID, message []byte
 	if overallError {
 		log.Print("There was an error sending a message to a player during a broadcast operation")
 	}
+}
+
+func (g *IntegratedConnectionManager) RemoveGame(gameId uuid.UUID) error {
+	g.lock.Lock()
+	defer g.lock.Unlock()
+
+	connections, found := g.GameConnectionMap[gameId]
+	if !found {
+		return errors.New("Cannot find the game")
+	}
+
+	var wg sync.WaitGroup
+	log.Printf("Removing players from game %s", gameId)
+	for id, conn := range connections.playerConnectionMap {
+		wg.Add(1)
+
+		go func(id uuid.UUID, conn *WsConnection) {
+			defer wg.Done()
+			log.Printf("Removing player %s from game %s", id, gameId)
+			conn.Close()
+		}(id, conn)
+	}
+	wg.Wait()
+
+	delete(g.GameConnectionMap, gameId)
+	return nil
+}
+
+func (g *IntegratedConnectionManager) RemovePlayer(gameId, playerId uuid.UUID) error {
+	res, err := GameRepo.PlayerLeaveGame(gameId, playerId)
+	if err != nil {
+		return err
+	}
+
+	g.UnregisterConnection(gameId, playerId)
+
+	if res.PlayersLeft == 0 {
+		g.RemoveGame(gameId)
+	}
+
+	var nilUuid uuid.UUID
+	if res.NewGameOwner != nilUuid {
+		panic("REMIND ME TO FIX THIS")
+	}
+
+	panic("PLAYER LEAVE LOl")
+	return nil
 }

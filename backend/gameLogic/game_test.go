@@ -567,14 +567,14 @@ func TestRemovingGameOwnerReassignsIt(t *testing.T) {
 	assert.NoError(t, err)
 
 	pid, err := game.AddPlayer("John")
-  assert.NoError(t, err)
+	assert.NoError(t, err)
 
-  res, err := game.RemovePlayer(game.GameOwnerId)
-  assert.NoError(t, err)
+	res, err := game.RemovePlayer(game.GameOwnerId)
+	assert.NoError(t, err)
 
-  assert.Equal(t, game.GameOwnerId, res.NewGameOwner)
-  assert.Equal(t, pid, game.GameOwnerId)
-  assert.Equal(t, res.PlayersLeft, 1)
+	assert.Equal(t, game.GameOwnerId, res.NewGameOwner)
+	assert.Equal(t, pid, game.GameOwnerId)
+	assert.Equal(t, res.PlayersLeft, 1)
 
 	assert.Len(t, game.Players, 1)
 	assert.Len(t, game.PlayersMap, 1)

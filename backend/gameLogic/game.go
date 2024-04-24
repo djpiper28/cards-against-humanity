@@ -281,14 +281,14 @@ func (g *Game) RemovePlayer(playerToRemoveId uuid.UUID) (PlayerRemovalResult, er
 	g.Players = players
 
 	// If the game owner has left, then a random player should be assigned
-  res := PlayerRemovalResult{PlayersLeft: len(g.Players)}
+	res := PlayerRemovalResult{PlayersLeft: len(g.Players)}
 	playersLeft := len(g.Players)
 	if playerToRemoveId == g.GameOwnerId && playersLeft > 0 {
 		i := rand.Intn(playersLeft)
 		g.GameOwnerId = g.Players[i]
-    res.NewGameOwner = g.GameOwnerId
+		res.NewGameOwner = g.GameOwnerId
 	}
-  return res, nil
+	return res, nil
 }
 
 func (g *Game) StartGame() error {

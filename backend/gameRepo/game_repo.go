@@ -62,27 +62,27 @@ func (gr *GameRepo) RemoveGame(gameID uuid.UUID) error {
 }
 
 func (gr *GameRepo) PlayerLeaveGame(gameId, playerId uuid.UUID) (gameLogic.PlayerRemovalResult, error) {
-  gr.lock.Lock()
-  defer gr.lock.Unlock()
+	gr.lock.Lock()
+	defer gr.lock.Unlock()
 
-  game, found := gr.GameMap[gameId]
-  if !found {
-    return gameLogic.PlayerRemovalResult{}, errors.New("Cannot find game")
-  }
+	game, found := gr.GameMap[gameId]
+	if !found {
+		return gameLogic.PlayerRemovalResult{}, errors.New("Cannot find game")
+	}
 
-  res, err := game.RemovePlayer(playerId)
-  if err != nil {
-    log.Printf("Cannot remove player %s from game %s: %s", playerId, gameId, err)
-    return gameLogic.PlayerRemovalResult{}, err
-  }
+	res, err := game.RemovePlayer(playerId)
+	if err != nil {
+		log.Printf("Cannot remove player %s from game %s: %s", playerId, gameId, err)
+		return gameLogic.PlayerRemovalResult{}, err
+	}
 
-  if res.PlayersLeft == 0 {
-    log.Printf("Game %s has no players left, deleting it", gameId)
-    delete(gr.GameMap, gameId)
-    delete(gr.GameAgeMap, gameId)
-  }
+	if res.PlayersLeft == 0 {
+		log.Printf("Game %s has no players left, deleting it", gameId)
+		delete(gr.GameMap, gameId)
+		delete(gr.GameAgeMap, gameId)
+	}
 
-  return res, nil
+	return res, nil
 }
 
 func (gr *GameRepo) DisconnectPlayer(gameId, playerId uuid.UUID) error {

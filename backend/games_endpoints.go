@@ -262,6 +262,72 @@ func joinGame(c *gin.Context) {
 	network.WsUpgrade(c.Writer, c.Request, gameId, playerId, network.GlobalConnectionManager)
 }
 
+// @Summary	Allows the player to leave a game
+// @Description	Leaves the current game that a player is in
+// @Tags			games
+// @Accept			json
+// @Produce		json
+// @Success		200
+// @Failure		500	{object}	ApiError
+// @Failure		404	{object}	ApiError
+// @Failure		400	{object}	ApiError
+// @Router			/games/leave [delete]
+func leaveGame(c *gin.Context) {
+	// Validate input
+	rawGameId, err := c.Cookie(JoinGameGameIdParam)
+	if err != nil {
+		errMsg := fmt.Sprintf("Cannot find cookie %s", JoinGameGameIdParam)
+		log.Print(errMsg)
+		c.JSON(http.StatusBadRequest, NewApiError(errors.New(errMsg)))
+		return
+	}
+
+	gameId, err := uuid.Parse(rawGameId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, NewApiError(err))
+		return
+	}
+
+	rawPlayerId, err := c.Cookie(JoinGamePlayerIdParam)
+	if err != nil {
+		errMsg := fmt.Sprintf("Cannot find cookie %s", JoinGamePlayerIdParam)
+		log.Print(errMsg)
+		c.JSON(http.StatusBadRequest, NewApiError(errors.New(errMsg)))
+		return
+	}
+
+	playerId, err := uuid.Parse(rawPlayerId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, NewApiError(err))
+		return
+	}
+
+	token, err := c.Cookie(AuthorizationCookie)
+	if err != nil {
+		c.JSON(http.StatusForbidden, NewApiError(errors.New("No authorization token provided")))
+		return
+	}
+
+	err = security.CheckToken(gameId, playerId, token)
+	if err != nil {
+		log.Printf("Player %s in game %s tried to to join a game with invalid authorisation: %s",
+			playerId,
+			gameId,
+			err)
+		c.JSON(http.StatusForbidden, NewApiError(errors.New("Not authorized")))
+		return
+	}
+
+	err = network.GlobalConnectionManager.RemovePlayer(gameId, playerId)
+	if err != nil {
+		log.Printf("Player %s in game %s was unable to leave the game: %s", playerId, gameId, err)
+		c.JSON(http.StatusInternalServerError, NewApiError(errors.New("Cannot leave the game")))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"ok": true})
+}
+
 func SetupGamesEndpoints(r *gin.Engine) {
 	gamesRoute := r.Group("/games")
 	{
@@ -269,5 +335,6 @@ func SetupGamesEndpoints(r *gin.Engine) {
 		gamesRoute.POST("/create", createGame)
 		gamesRoute.GET("/join", joinGame)
 		gamesRoute.POST("/join", createPlayerForJoining)
+		gamesRoute.DELETE("/leava", leaveGame)
 	}
 }
