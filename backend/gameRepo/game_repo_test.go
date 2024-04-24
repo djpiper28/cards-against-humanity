@@ -196,3 +196,45 @@ func TestPlayerDisconnect(t *testing.T) {
 	assert.NoError(t, err)
 	assert.False(t, game.PlayersMap[pid].Connected)
 }
+
+func TestPlayerLeaveGameNoGame(t *testing.T) {
+	t.Parallel()
+
+	repo := gameRepo.New()
+	_, err := repo.PlayerLeaveGame(uuid.New(), uuid.New())
+
+	assert.Error(t, err)
+}
+
+func TestPlayerLeave(t *testing.T) {
+	t.Parallel()
+
+	repo := gameRepo.New()
+	settings := gameLogic.DefaultGameSettings()
+	gid, _, err := repo.CreateGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	newPid, err := repo.CreatePlayer(gid, "Bill", settings.Password)
+	assert.NoError(t, err)
+
+	res, err := repo.PlayerLeaveGame(gid, newPid)
+	assert.NoError(t, err)
+
+	assert.Equal(t, 1, res.PlayersLeft)
+}
+
+func TestPlayerLeaveLastPlayer(t *testing.T) {
+	t.Parallel()
+
+	repo := gameRepo.New()
+	settings := gameLogic.DefaultGameSettings()
+	gid, pid, err := repo.CreateGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	res, err := repo.PlayerLeaveGame(gid, pid)
+	assert.NoError(t, err)
+	assert.Equal(t, 0, res.PlayersLeft)
+
+	_, err = repo.GetGame(gid)
+	assert.Error(t, err)
+}
