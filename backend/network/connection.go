@@ -82,17 +82,6 @@ func (c *WsConnection) listenAndHandle() error {
 		return err
 	}
 
-	state := RpcOnJoinMsg(RpcOnJoinMsg{State: game.StateInfo()})
-	initialState, err := EncodeRpcMessage(state)
-	if err != nil {
-		return err
-	}
-
-	err = c.Send(initialState)
-	if err != nil {
-		return err
-	}
-
 	name, err := GameRepo.GetPlayerName(gid, c.PlayerId)
 	if err != nil {
 		log.Printf("Cannot get the player's name: %s", err)
@@ -109,7 +98,18 @@ func (c *WsConnection) listenAndHandle() error {
 		log.Printf("Cannot encode the message: %s", err)
 	}
 
-	go GlobalConnectionManager.Broadcast(gid, message)
+	GlobalConnectionManager.Broadcast(gid, message)
+
+	state := RpcOnJoinMsg(RpcOnJoinMsg{State: game.StateInfo()})
+	initialState, err := EncodeRpcMessage(state)
+	if err != nil {
+		return err
+	}
+
+	err = c.Send(initialState)
+	if err != nil {
+		return err
+	}
 
 	// Start listening and handling
 	for {

@@ -61,7 +61,6 @@ func (s *ServerTestSuite) TestCommandError() {
 	dialer := websocket.DefaultDialer
 	dialer.HandshakeTimeout = time.Millisecond * 100
 
-	log.Print("Dialing server")
 	conn, _, err := dialer.Dial(url, game.Jar.Headers())
 	assert.Nil(t, err, "Should have connected to the ws server successfully")
 	defer conn.Close()
