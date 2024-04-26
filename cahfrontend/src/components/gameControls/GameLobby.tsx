@@ -18,6 +18,8 @@ import {
 } from "../../rpcTypes";
 import Button from "../buttons/Button";
 import { cookieStorage } from "@solid-primitives/storage";
+import { useNavigate } from "@solidjs/router";
+import { indexUrl } from "../../routes";
 
 interface LobbyLoadedProps {
   setSettings: (settings: Settings) => void;
@@ -46,6 +48,7 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
   const isGameOwner = () => state().gameOwnerId === gameState.getPlayerId();
   const settings = () => state().settings;
   const dirtyState = () => props.dirtyState;
+  const navigate = useNavigate();
 
   createEffect(() => {
     cookieStorage.setItem(gamePasswordCookie, settings().gamePassword);
@@ -53,11 +56,25 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
 
   return (
     <RoundedWhite>
-      <Header
-        text={`${
-          props.players.find((x) => x.id === props.state.gameOwnerId)?.name
-        }'s Game`}
-      />
+      <div class="flex flex-row justify-between flex-wrap">
+        <Header
+          text={`${
+            props.players.find((x) => x.id === props.state.gameOwnerId)?.name
+          }'s Game`}
+        />
+        <Button
+          id="leave-game"
+          onClick={() => {
+            gameState
+              .leaveGame()
+              .then(() => console.log("Left game successfully"))
+              .catch(console.error);
+            navigate(indexUrl);
+          }}
+        >
+          Leave Game
+        </Button>
+      </div>
       <Show when={isGameOwner()}>
         <Header text="Change your game's settings" />
         <CardsSelector
@@ -181,7 +198,7 @@ export default function GameLobby() {
         cardPacksList.sort((a, b) => {
           if (!a.name || !b.name) return 0;
           return a.name.localeCompare(b.name);
-        }),
+        })
       );
     } catch (err) {
       console.error(err);
@@ -209,7 +226,7 @@ export default function GameLobby() {
           setSelectedPackIds={(ids) => {
             const newState = state();
             newState.settings.cardPacks = ids.map((id) =>
-              packs().find((x) => x.id === id),
+              packs().find((x) => x.id === id)
             );
             setState(newState);
           }}

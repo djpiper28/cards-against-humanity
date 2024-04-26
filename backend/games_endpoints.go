@@ -335,6 +335,6 @@ func SetupGamesEndpoints(r *gin.Engine) {
 		gamesRoute.POST("/create", createGame)
 		gamesRoute.GET("/join", joinGame)
 		gamesRoute.POST("/join", createPlayerForJoining)
-		gamesRoute.DELETE("/leava", leaveGame)
+		gamesRoute.DELETE("/leave", leaveGame)
 	}
 }

@@ -8,6 +8,7 @@ export interface WebSocketClientCallbacks {
 
 interface WebSocketSend {
   readonly sendMessage: (msg: string) => void;
+  readonly disconnect: () => void;
 }
 
 export type WebSocketClient = WebSocketSend & WebSocketClientCallbacks;
@@ -22,6 +23,9 @@ export function toWebSocketClient(
         console.error(`Cannot send message ${err}`);
         ws.close();
       });
+    },
+    disconnect: () => {
+      ws.close();
     },
     ...callbacks,
   };

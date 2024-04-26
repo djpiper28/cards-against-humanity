@@ -17,7 +17,7 @@ import {
   RpcOnPlayerJoinMsg,
 } from "../rpcTypes";
 import { WebSocketClient, toWebSocketClient } from "./websocketClient";
-import { wsBaseUrl } from "../apiClient";
+import { apiClient, wsBaseUrl } from "../apiClient";
 import WebSocket from "isomorphic-ws";
 import { GamePlayerList } from "./gamePlayersList";
 
@@ -223,6 +223,16 @@ class GameState {
       reason: "",
     });
     this.wsClient.sendMessage(JSON.stringify(this.encodeMessage(type, data)));
+  }
+
+  public async leaveGame() {
+    console.log("Leaving game: ", this.gameId);
+    if (!this.wsClient) {
+      throw new Error("Cannot leave game as websocket is not connected");
+    }
+
+    this.wsClient.disconnect();
+    return apiClient.games.leaveDelete();
   }
 }
 

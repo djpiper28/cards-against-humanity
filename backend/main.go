@@ -47,7 +47,11 @@ func Start() {
 			"Origin",
 			"Accept",
 			"X-Requested-With"},
-		AllowMethods:     []string{"PUT", "PATCH", "DELETE", "GET"},
+		AllowMethods: []string{http.MethodPost,
+			http.MethodGet,
+			http.MethodDelete,
+			http.MethodPatch,
+			http.MethodPut},
 		AllowCredentials: true,
 		AllowWebSockets:  true,
 	}))
