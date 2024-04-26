@@ -1,6 +1,6 @@
 import { Show, createEffect, createSignal, onMount } from "solid-js";
 import LoadingSlug from "../loading/LoadingSlug";
-import { gamePasswordCookie, gameState } from "../../gameState/gameState";
+import { gameIdParamCookie, gamePasswordCookie, gameState, playerIdCookie } from "../../gameState/gameState";
 import { GameSettings, GameStateInfo } from "../../gameLogicTypes";
 import GameSettingsInput, { Settings } from "./GameSettingsInput";
 import GameSettingsView from "./GameSettingsView";
@@ -70,6 +70,9 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
               .then(() => console.log("Left game successfully"))
               .catch(console.error);
             navigate(indexUrl);
+            cookieStorage.removeItem(gamePasswordCookie);
+            cookieStorage.removeItem(gameIdParamCookie);
+            cookieStorage.removeItem(playerIdCookie);
           }}
         >
           Leave Game
