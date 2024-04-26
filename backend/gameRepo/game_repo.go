@@ -93,7 +93,6 @@ func (gr *GameRepo) PlayerLeaveGame(gameId, playerId uuid.UUID) (gameLogic.Playe
 		gr.removeGame(gameId)
 	}
 
-	go metrics.RemoveUserConnected()
 	go metrics.RemoveUserInGame()
 	return res, nil
 }
