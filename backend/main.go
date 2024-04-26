@@ -32,7 +32,7 @@ func Start() {
 
 	// Add metrics for the amount of games and users
 	router.GET("/game-metrics", func(c *gin.Context) {
-		c.TOML(http.StatusOK, metrics.GetMetrics())
+		c.Data(http.StatusOK, "", []byte(metrics.GetMetrics()))
 	})
 
 	// Add metrics for the performance of Gin
