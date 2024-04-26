@@ -1,6 +1,6 @@
 import { Show, createEffect, createSignal, onMount } from "solid-js";
 import LoadingSlug from "../loading/LoadingSlug";
-import { gameIdParamCookie, gamePasswordCookie, gameState, playerIdCookie } from "../../gameState/gameState";
+import { gamePasswordCookie, gameState } from "../../gameState/gameState";
 import { GameSettings, GameStateInfo } from "../../gameLogicTypes";
 import GameSettingsInput, { Settings } from "./GameSettingsInput";
 import GameSettingsView from "./GameSettingsView";
@@ -20,6 +20,7 @@ import Button from "../buttons/Button";
 import { cookieStorage } from "@solid-primitives/storage";
 import { useNavigate } from "@solidjs/router";
 import { indexUrl } from "../../routes";
+import clearGameCookies from "../../gameState/clearGameCookies";
 
 interface LobbyLoadedProps {
   setSettings: (settings: Settings) => void;
@@ -70,9 +71,7 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
               .then(() => console.log("Left game successfully"))
               .catch(console.error);
             navigate(indexUrl);
-            cookieStorage.removeItem(gamePasswordCookie);
-            cookieStorage.removeItem(gameIdParamCookie);
-            cookieStorage.removeItem(playerIdCookie);
+            clearGameCookies();
           }}
         >
           Leave Game
@@ -201,7 +200,7 @@ export default function GameLobby() {
         cardPacksList.sort((a, b) => {
           if (!a.name || !b.name) return 0;
           return a.name.localeCompare(b.name);
-        })
+        }),
       );
     } catch (err) {
       console.error(err);
@@ -229,7 +228,7 @@ export default function GameLobby() {
           setSelectedPackIds={(ids) => {
             const newState = state();
             newState.settings.cardPacks = ids.map((id) =>
-              packs().find((x) => x.id === id)
+              packs().find((x) => x.id === id),
             );
             setState(newState);
           }}

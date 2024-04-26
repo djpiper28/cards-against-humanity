@@ -6,15 +6,17 @@ import { validatePlayerName } from "../components/gameControls/GameSettingsInput
 import { apiClient, cookieOptions } from "../apiClient";
 import { indexUrl, joinGameUrl } from "../routes";
 import {
-    authenticationCookie,
+  authenticationCookie,
   gameIdParamCookie,
   gamePasswordCookie,
+  gameState,
   playerIdCookie,
 } from "../gameState/gameState";
 import { MaxPasswordLength } from "../gameLogicTypes";
 import RoundedWhite from "../components/containers/RoundedWhite";
 import Header from "../components/typography/Header";
 import Button from "../components/buttons/Button";
+import clearGameCookies from "../gameState/clearGameCookies";
 
 export default function PlayerJoin() {
   const [searchParams] = useSearchParams();
@@ -65,15 +67,30 @@ export default function PlayerJoin() {
               playerName: playerName(),
               password: password(),
             })
-            .then((res) => {
+            .then(async (res) => {
+              try {
+                await gameState.leaveGame();
+              } catch (e) {
+                console.log(e);
+              }
+              clearGameCookies();
+
               cookieStorage.setItem(
                 gamePasswordCookie,
                 password(),
                 cookieOptions,
               );
-              cookieStorage.setItem(playerIdCookie, res.data.playerId, cookieOptions);
+              cookieStorage.setItem(
+                playerIdCookie,
+                res.data.playerId,
+                cookieOptions,
+              );
               cookieStorage.setItem(gameIdParamCookie, gameId, cookieOptions);
-              cookieStorage.setItem(authenticationCookie, res.data.authentication, cookieOptions);
+              cookieStorage.setItem(
+                authenticationCookie,
+                res.data.authentication,
+                cookieOptions,
+              );
 
               naviagte(
                 `${joinGameUrl}?${gameIdParamCookie}=${encodeURIComponent(gameId)}`,
