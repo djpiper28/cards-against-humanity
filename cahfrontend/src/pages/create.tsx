@@ -1,13 +1,13 @@
 import { GameLogicCardPack } from "../api";
-import { For, createSignal, onMount } from "solid-js";
-import Checkbox from "../components/inputs/Checkbox";
+import { createSignal, onMount } from "solid-js";
 import Input, { InputType } from "../components/inputs/Input";
 import { useNavigate } from "@solidjs/router";
 import { MaxPlayerNameLength, MinPlayerNameLength } from "../gameLogicTypes";
 import {
-    authenticationCookie,
+  authenticationCookie,
   gameIdParamCookie,
   gamePasswordCookie,
+  gameState,
   playerIdCookie,
 } from "../gameState/gameState";
 import { cookieStorage } from "@solid-primitives/storage";
@@ -21,6 +21,7 @@ import RoundedWhite from "../components/containers/RoundedWhite";
 import Header from "../components/typography/Header";
 import Button from "../components/buttons/Button";
 import CardsSelector from "../components/gameControls/CardsSelector";
+import clearGameCookies from "../gameState/clearGameCookies";
 
 export default function Create() {
   const navigate = useNavigate();
@@ -115,11 +116,18 @@ export default function Create() {
         />
 
         <Button
-          onClick={() => {
+          onClick={async () => {
             if (!validateGameSettings(settings)) {
               console.error("The game settings are invalid");
               return;
             }
+
+            try {
+              await gameState.leaveGame();
+            } catch (e) {
+              console.log(e);
+            }
+            clearGameCookies();
 
             apiClient.games
               .createCreate({
