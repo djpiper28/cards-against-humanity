@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/djpiper28/cards-against-humanity/backend/metrics"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
@@ -30,6 +31,8 @@ func WsUpgrade(w http.ResponseWriter, r *http.Request, gameId, playerId uuid.UUI
 		return nil, err
 	}
 
+	go metrics.AddWsConnection()
+
 	conn := cm.NewConnection(c, gameId, playerId)
 	return conn, nil
 }
@@ -52,6 +55,7 @@ type WsConnection struct {
 func (wsconn *WsConnection) Send(msg []byte) error {
 	wsconn.lock.Lock()
 	defer wsconn.lock.Unlock()
+	go metrics.AddMessageSent()
 	return wsconn.conn.Send(msg)
 }
 
@@ -71,6 +75,8 @@ func (gcm *IntegratedConnectionManager) NewConnection(conn *websocket.Conn, game
 	gcm.RegisterConnection(gameId, playerId, c)
 	return c
 }
+
+const UnknownCommand = "Unknown Command"
 
 // To be called after registering the connection, this will listen to the
 // websocket traffic on a loop and handle it
@@ -119,7 +125,9 @@ func (c *WsConnection) listenAndHandle() error {
 			return errors.New("Cannot read from websocket")
 		}
 
-		handler := "Unknown"
+		go metrics.AddCommandExecuted()
+
+		handler := UnknownCommand
 		startTime := time.Now()
 		err = DecodeRpcMessage(msg, RpcCommandHandlers{
 			ChangeSettingsHandler: func(msg RpcChangeSettingsMsg) error {
@@ -153,8 +161,13 @@ func (c *WsConnection) listenAndHandle() error {
 
 		log.Printf("Command Handler \"%s\" | %s | %dµs", handler, gid, microSeconds)
 
+		if handler == UnknownCommand {
+			go metrics.AddUnknownCommand()
+		}
+
 		if err != nil {
 			log.Printf("Error processing message: %s; for gid %s pid %s", err, c.GameId, c.PlayerId)
+			go metrics.AddCommandFailed()
 
 			var message RpcCommandErrorMsg
 			message.Reason = err.Error()
@@ -173,6 +186,8 @@ func (c *WsConnection) ListenAndHandle(g *IntegratedConnectionManager) {
 	err := c.listenAndHandle()
 	if err != nil {
 		log.Printf("Error whilst handling websocket connection %s", err)
+		go metrics.AddWsError()
+		go metrics.RemoveWsConnection()
 		c.Close()
 		g.UnregisterConnection(c.GameId, c.PlayerId)
 	}

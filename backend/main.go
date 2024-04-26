@@ -5,7 +5,8 @@ import (
 	"net/http"
 
 	gpmiddleware "github.com/carousell/gin-prometheus-middleware"
-	docs "github.com/djpiper28/cards-against-humanity/backend/docs"
+	"github.com/djpiper28/cards-against-humanity/backend/docs"
+	"github.com/djpiper28/cards-against-humanity/backend/metrics"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
@@ -31,7 +32,7 @@ func Start() {
 
 	// Add metrics for the amount of games and users
 	router.GET("/game-metrics", func(c *gin.Context) {
-		c.TOML(http.StatusOK, GetMetrics())
+		c.TOML(http.StatusOK, metrics.GetMetrics())
 	})
 
 	// Add metrics for the performance of Gin

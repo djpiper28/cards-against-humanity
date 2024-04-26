@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
+	"github.com/djpiper28/cards-against-humanity/backend/metrics"
 	"github.com/google/uuid"
 )
 
@@ -43,21 +44,32 @@ func (gr *GameRepo) CreateGame(gameSettings *gameLogic.GameSettings, playerName 
 	gr.GameMap[gid] = game
 	gr.GameAgeMap[gid] = game.CreationTime
 
+	go metrics.AddGame()
+	go metrics.AddUser()
+	go metrics.AddUserInGame()
+
 	log.Println("Created game for", playerName)
 	return gid, game.GameOwnerId, nil
 }
 
-func (gr *GameRepo) RemoveGame(gameID uuid.UUID) error {
+func (gr *GameRepo) RemoveGame(gameId uuid.UUID) error {
 	gr.lock.Lock()
 	defer gr.lock.Unlock()
 
-	_, found := gr.GameMap[gameID]
+	return gr.RemoveGame(gameId)
+}
+
+// Not thread safe, to be used internally
+func (gr *GameRepo) removeGame(gameId uuid.UUID) error {
+	_, found := gr.GameMap[gameId]
 	if !found {
 		return errors.New("Cannot find game")
 	}
 
-	delete(gr.GameMap, gameID)
-	delete(gr.GameAgeMap, gameID)
+	go metrics.RemoveGameInProgress()
+
+	delete(gr.GameMap, gameId)
+	delete(gr.GameAgeMap, gameId)
 	return nil
 }
 
@@ -78,10 +90,11 @@ func (gr *GameRepo) PlayerLeaveGame(gameId, playerId uuid.UUID) (gameLogic.Playe
 
 	if res.PlayersLeft == 0 {
 		log.Printf("Game %s has no players left, deleting it", gameId)
-		delete(gr.GameMap, gameId)
-		delete(gr.GameAgeMap, gameId)
+		gr.removeGame(gameId)
 	}
 
+	go metrics.RemoveUserConnected()
+	go metrics.RemoveUserInGame()
 	return res, nil
 }
 
@@ -103,6 +116,7 @@ func (gr *GameRepo) DisconnectPlayer(gameId, playerId uuid.UUID) error {
 	}
 
 	player.Connected = false
+	go metrics.RemoveUserConnected()
 	return nil
 }
 
@@ -124,6 +138,7 @@ func (gr *GameRepo) ConnectPlayer(gameId, playerId uuid.UUID) error {
 	}
 
 	player.Connected = true
+	go metrics.AddUserConnected()
 	return nil
 }
 
@@ -196,6 +211,8 @@ func (gr *GameRepo) CreatePlayer(gameId uuid.UUID, playerName, password string) 
 		return uuid.UUID{}, err
 	}
 
+	go metrics.AddUserInGame()
+	go metrics.AddUser()
 	return playerId, nil
 }
 
