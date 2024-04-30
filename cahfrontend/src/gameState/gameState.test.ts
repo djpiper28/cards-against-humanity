@@ -17,7 +17,6 @@ import {
 } from "../rpcTypes";
 
 import { gameState } from "./gameState";
-import { i } from "vitest/dist/reporters-LqC_WI4d";
 
 describe("Game state tests", () => {
   vi.mock("isomorphic-ws", () => {
