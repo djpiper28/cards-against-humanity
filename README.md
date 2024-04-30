@@ -46,7 +46,7 @@ game stats on `/game-metrics`. This setup is jank lol, don't question it though.
 
 #### Debugging
 
-To debug you can use `gdb` (of lldb if you are on mac), the debug-xxx targets in the Makefile will build end exec the debugger, mac and windows people need to use their debugger I guess.
+To debug you can use `gdb` (of lldb if you are on mac), mac and windows people need to use their debugger I guess.
 
 ### Frontend
 
@@ -55,3 +55,9 @@ Makefile for building `make -j`, and `pnpm dev` for a dev server.
 
 The server will start on `http://localhost:3000`, currently the backend is set to
 `http://localhost:8080`
+
+### Local Development
+
+Due to CORS errors, you need to setup a proxy, see [devProxy](./devProxy/README.md) for a local development proxy server.
+
+Following this you need to run the proxy, backend, and the frontend dev server, then go to the proxies: [`http://localhost:3255`](http://localhost:3255).
