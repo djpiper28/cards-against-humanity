@@ -188,6 +188,69 @@ func createPlayerForJoining(c *gin.Context) {
 	go network.GlobalConnectionManager.Broadcast(createReq.GameId, msg)
 }
 
+type authenticationData struct {
+	GameId   uuid.UUID
+	PlayerId uuid.UUID
+	Token    string
+	Password string
+}
+
+// Tries to read the authentication data from the cookies of the request,
+// it will also verify the token, the password is not checked
+func attemptAuthentication(c *gin.Context) (authenticationData, error) {
+	// Validate input
+	rawGameId, err := c.Cookie(JoinGameGameIdParam)
+	if err != nil {
+		errMsg := fmt.Sprintf("Cannot find cookie %s", JoinGameGameIdParam)
+		log.Print(errMsg)
+		c.JSON(http.StatusBadRequest, NewApiError(errors.New(errMsg)))
+		return authenticationData{}, err
+	}
+
+	gameId, err := uuid.Parse(rawGameId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, NewApiError(err))
+		return authenticationData{}, err
+	}
+
+	rawPlayerId, err := c.Cookie(JoinGamePlayerIdParam)
+	if err != nil {
+		errMsg := fmt.Sprintf("Cannot find cookie %s", JoinGamePlayerIdParam)
+		log.Print(errMsg)
+		c.JSON(http.StatusBadRequest, NewApiError(errors.New(errMsg)))
+		return authenticationData{}, err
+	}
+
+	playerId, err := uuid.Parse(rawPlayerId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, NewApiError(err))
+		return authenticationData{}, err
+	}
+
+	token, err := c.Cookie(AuthorizationCookie)
+	if err != nil {
+		c.JSON(http.StatusForbidden, NewApiError(errors.New("No authorization token provided")))
+		return authenticationData{}, err
+	}
+
+	err = security.CheckToken(gameId, playerId, token)
+	if err != nil {
+		log.Printf("Player %s in game %s tried to to join a game with invalid authorisation: %s",
+			playerId,
+			gameId,
+			err)
+		c.JSON(http.StatusForbidden, NewApiError(errors.New("Not authorized")))
+		return authenticationData{}, err
+	}
+
+	password, err := c.Cookie(PasswordParam)
+	if err != nil {
+		log.Print("There is no password provided")
+	}
+
+	return authenticationData{GameId: gameId, PlayerId: playerId, Token: token, Password: password}, nil
+}
+
 // @Summary		Joins a game and upgrades the connection to a websocket if all is well
 // @Description	Validates the input, checks the game exists then tries to upgrade the socket and register the connection. See the RPC docs for what to expect on the websocket. Use playerId, password and gameId cookies to authenticate.
 // @Tags			games
@@ -199,67 +262,26 @@ func createPlayerForJoining(c *gin.Context) {
 // @Failure		400	{object}	ApiError
 // @Router			/games/join [get]
 func joinGame(c *gin.Context) {
-	// Validate input
-	rawGameId, err := c.Cookie(JoinGameGameIdParam)
+	authData, err := attemptAuthentication(c)
 	if err != nil {
-		errMsg := fmt.Sprintf("Cannot find cookie %s", JoinGameGameIdParam)
-		log.Print(errMsg)
-		c.JSON(http.StatusBadRequest, NewApiError(errors.New(errMsg)))
 		return
-	}
-
-	gameId, err := uuid.Parse(rawGameId)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, NewApiError(err))
-		return
-	}
-
-	rawPlayerId, err := c.Cookie(JoinGamePlayerIdParam)
-	if err != nil {
-		errMsg := fmt.Sprintf("Cannot find cookie %s", JoinGamePlayerIdParam)
-		log.Print(errMsg)
-		c.JSON(http.StatusBadRequest, NewApiError(errors.New(errMsg)))
-		return
-	}
-
-	playerId, err := uuid.Parse(rawPlayerId)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, NewApiError(err))
-		return
-	}
-
-	token, err := c.Cookie(AuthorizationCookie)
-	if err != nil {
-		c.JSON(http.StatusForbidden, NewApiError(errors.New("No authorization token provided")))
-		return
-	}
-
-	err = security.CheckToken(gameId, playerId, token)
-	if err != nil {
-		log.Printf("Player %s in game %s tried to to join a game with invalid authorisation: %s",
-			playerId,
-			gameId,
-			err)
-		c.JSON(http.StatusForbidden, NewApiError(errors.New("Not authorized")))
-		return
-	}
-
-	password, err := c.Cookie(PasswordParam)
-	if err != nil {
-		log.Print("There is no password provided")
 	}
 
 	// Join the game
-	err = network.GameRepo.JoinGame(gameId, playerId, password)
+	err = network.GameRepo.JoinGame(authData.GameId,
+		authData.PlayerId,
+		authData.Password)
 	if err != nil {
-		log.Printf("Cannot join game (%s): %s", gameId, err)
+		log.Printf("Cannot join game (%s): %s", authData.GameId, err)
 		c.JSON(http.StatusNotFound, NewApiError(err))
 		return
 	}
 
 	// Attempt to upgrade the websocket
-	log.Printf("Upgrading connection for game %s and player %s", gameId, playerId)
-	network.WsUpgrade(c.Writer, c.Request, gameId, playerId, network.GlobalConnectionManager)
+	log.Printf("Upgrading connection for game %s and player %s",
+		authData.GameId,
+		authData.PlayerId)
+	network.WsUpgrade(c.Writer, c.Request, authData.GameId, authData.PlayerId, network.GlobalConnectionManager)
 }
 
 // @Summary	Allows the player to leave a game
@@ -273,54 +295,18 @@ func joinGame(c *gin.Context) {
 // @Failure		400	{object}	ApiError
 // @Router			/games/leave [delete]
 func leaveGame(c *gin.Context) {
-	// Validate input
-	rawGameId, err := c.Cookie(JoinGameGameIdParam)
+	authData, err := attemptAuthentication(c)
 	if err != nil {
-		errMsg := fmt.Sprintf("Cannot find cookie %s", JoinGameGameIdParam)
-		log.Print(errMsg)
-		c.JSON(http.StatusBadRequest, NewApiError(errors.New(errMsg)))
 		return
 	}
 
-	gameId, err := uuid.Parse(rawGameId)
+	err = network.GlobalConnectionManager.RemovePlayer(authData.GameId,
+		authData.PlayerId)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, NewApiError(err))
-		return
-	}
-
-	rawPlayerId, err := c.Cookie(JoinGamePlayerIdParam)
-	if err != nil {
-		errMsg := fmt.Sprintf("Cannot find cookie %s", JoinGamePlayerIdParam)
-		log.Print(errMsg)
-		c.JSON(http.StatusBadRequest, NewApiError(errors.New(errMsg)))
-		return
-	}
-
-	playerId, err := uuid.Parse(rawPlayerId)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, NewApiError(err))
-		return
-	}
-
-	token, err := c.Cookie(AuthorizationCookie)
-	if err != nil {
-		c.JSON(http.StatusForbidden, NewApiError(errors.New("No authorization token provided")))
-		return
-	}
-
-	err = security.CheckToken(gameId, playerId, token)
-	if err != nil {
-		log.Printf("Player %s in game %s tried to to join a game with invalid authorisation: %s",
-			playerId,
-			gameId,
+		log.Printf("Player %s in game %s was unable to leave the game: %s",
+			authData.PlayerId,
+			authData.GameId,
 			err)
-		c.JSON(http.StatusForbidden, NewApiError(errors.New("Not authorized")))
-		return
-	}
-
-	err = network.GlobalConnectionManager.RemovePlayer(gameId, playerId)
-	if err != nil {
-		log.Printf("Player %s in game %s was unable to leave the game: %s", playerId, gameId, err)
 		c.JSON(http.StatusInternalServerError, NewApiError(errors.New("Cannot leave the game")))
 		return
 	}
