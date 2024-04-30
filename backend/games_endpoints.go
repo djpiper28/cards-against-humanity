@@ -137,10 +137,10 @@ type CreatePlayerResponse struct {
 // @Tags			games
 // @Accept			json
 // @Produce		json
-// @Param			request	body		CreatePlayerRequest	true	"Player information"
+// @Param			request	body					CreatePlayerRequest	true	"Player information"
 // @Success		204		{CreatePlayerResponse}	uuid				"Player ID and auth token"
-// @Failure		500		{object}	ApiError
-// @Failure		400		{object}	ApiError
+// @Failure		500		{object}				ApiError
+// @Failure		400		{object}				ApiError
 // @Router			/games/join [post]
 func createPlayerForJoining(c *gin.Context) {
 	req, err := io.ReadAll(c.Request.Body)
@@ -284,7 +284,7 @@ func joinGame(c *gin.Context) {
 	network.WsUpgrade(c.Writer, c.Request, authData.GameId, authData.PlayerId, network.GlobalConnectionManager)
 }
 
-// @Summary	Allows the player to leave a game
+// @Summary		Allows the player to leave a game
 // @Description	Leaves the current game that a player is in
 // @Tags			games
 // @Accept			json
