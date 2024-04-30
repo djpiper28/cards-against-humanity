@@ -12,7 +12,8 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-const frontendUrl = "http://localhost:3000/"
+// You must have the dev porxy set up
+const frontendUrl = "http://localhost:3255/"
 const Timeout = time.Millisecond * 200
 
 func testFrontend() error {
