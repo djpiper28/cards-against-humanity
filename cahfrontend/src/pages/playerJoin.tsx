@@ -70,10 +70,10 @@ export default function PlayerJoin() {
             .then(async (res) => {
               try {
                 await gameState.leaveGame();
+                clearGameCookies();
               } catch (e) {
                 console.log(e);
               }
-              clearGameCookies();
 
               cookieStorage.setItem(
                 gamePasswordCookie,

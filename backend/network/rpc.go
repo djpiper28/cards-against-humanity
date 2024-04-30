@@ -21,6 +21,11 @@ const (
 	MsgOnPlayerCreate
 	// Tx the player's id and reason when they disconnect
 	MsgOnPlayerDisconnect
+  // Tx the player's id and reason when they leave the game
+  MsgOnPlayerLeave
+  // Tx the player's id when a new owner for a game is selected
+  MsgNewOwner
+
 	// Tx when a command cannot be processed
 	MsgCommandError
 
@@ -135,4 +140,21 @@ type RpcChangeSettingsMsg struct {
 
 func (msg RpcChangeSettingsMsg) Type() RpcMessageType {
 	return MsgChangeSettings
+}
+
+type RpcOnPlayerLeaveMsg struct {
+  Id     uuid.UUID `json:"id"`
+  Reason string `json:"reason"`
+}
+
+func (msg RpcOnPlayerLeaveMsg) Type() RpcMessageType {
+  return MsgOnPlayerLeave
+}
+
+type RpcNewOwnerMsg struct {
+  Id     uuid.UUID `json:"id"`
+}
+
+func (msg RpcNewOwnerMsg) Type() RpcMessageType {
+  return MsgNewOwner
 }

@@ -1,5 +1,6 @@
 import { cookieStorage } from "@solid-primitives/storage";
 import {
+    authenticationCookie,
   gameIdParamCookie,
   gamePasswordCookie,
   playerIdCookie,
@@ -9,4 +10,5 @@ export default function clearGameCookies() {
   cookieStorage.removeItem(gamePasswordCookie);
   cookieStorage.removeItem(gameIdParamCookie);
   cookieStorage.removeItem(playerIdCookie);
+  cookieStorage.removeItem(authenticationCookie);
 }

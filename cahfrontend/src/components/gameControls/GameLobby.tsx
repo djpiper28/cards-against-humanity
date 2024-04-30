@@ -68,10 +68,12 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
           onClick={() => {
             gameState
               .leaveGame()
-              .then(() => console.log("Left game successfully"))
+              .then(() => {
+                clearGameCookies();
+                console.log("Left game successfully");
+              })
               .catch(console.error);
             navigate(indexUrl);
-            clearGameCookies();
           }}
         >
           Leave Game

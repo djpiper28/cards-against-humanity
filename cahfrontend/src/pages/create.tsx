@@ -124,10 +124,10 @@ export default function Create() {
 
             try {
               await gameState.leaveGame();
+              clearGameCookies();
             } catch (e) {
               console.log(e);
             }
-            clearGameCookies();
 
             apiClient.games
               .createCreate({

@@ -103,6 +103,7 @@ func (g *IntegratedConnectionManager) UnregisterConnection(gameId, playerId uuid
 	go g.Broadcast(gameId, message)
 }
 
+// Blocking call to send a message to all players in a game using a wait group
 func (g *IntegratedConnectionManager) Broadcast(gameId uuid.UUID, message []byte) {
 	g.lock.Lock()
 	defer g.lock.Unlock()
@@ -165,6 +166,7 @@ func (g *IntegratedConnectionManager) RemoveGame(gameId uuid.UUID) error {
 func (g *IntegratedConnectionManager) RemovePlayer(gameId, playerId uuid.UUID) error {
 	res, err := GameRepo.PlayerLeaveGame(gameId, playerId)
 	if err != nil {
+		log.Printf("Cannot remove player from game: %s", err)
 		return err
 	}
 
@@ -176,9 +178,25 @@ func (g *IntegratedConnectionManager) RemovePlayer(gameId, playerId uuid.UUID) e
 
 	var nilUuid uuid.UUID
 	if res.NewGameOwner != nilUuid {
-		panic("REMIND ME TO FIX THIS")
+		msg := RpcNewOwnerMsg{Id: res.NewGameOwner}
+		message, err := EncodeRpcMessage(msg)
+		if err != nil {
+			log.Printf("Cannot encode the message: %s", err)
+			return err
+		}
+
+		go g.Broadcast(gameId, message)
 	}
 
-	panic("PLAYER LEAVE LOl")
+	msg := RpcOnPlayerLeaveMsg{Id: playerId,
+		Reason: "Player choice",
+	}
+	message, err := EncodeRpcMessage(msg)
+	if err != nil {
+		log.Printf("Cannot encode the message: %s", err)
+		return err
+	}
+
+	go g.Broadcast(gameId, message)
 	return nil
 }
