@@ -1,6 +1,6 @@
 import { cookieStorage } from "@solid-primitives/storage";
 import {
-    authenticationCookie,
+  authenticationCookie,
   gameIdParamCookie,
   gamePasswordCookie,
   playerIdCookie,

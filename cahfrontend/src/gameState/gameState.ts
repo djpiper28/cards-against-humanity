@@ -2,19 +2,23 @@ import { GameStateInfo, Player } from "../gameLogicTypes";
 import {
   MsgChangeSettings,
   MsgCommandError,
+  MsgNewOwner,
   MsgOnJoin,
   MsgOnPlayerCreate,
   MsgOnPlayerDisconnect,
   MsgOnPlayerJoin,
+  MsgOnPlayerLeave,
   RpcChangeSettingsMsg,
   RpcCommandErrorMsg,
   RpcMessage,
   RpcMessageBody,
   RpcMessageType,
+  RpcNewOwnerMsg,
   RpcOnJoinMsg,
   RpcOnPlayerCreateMsg,
   RpcOnPlayerDisconnectMsg,
   RpcOnPlayerJoinMsg,
+  RpcOnPlayerLeaveMsg,
 } from "../rpcTypes";
 import { WebSocketClient, toWebSocketClient } from "./websocketClient";
 import { apiClient, wsBaseUrl } from "../apiClient";
@@ -160,6 +164,16 @@ class GameState {
     this.onPlayerListChange?.(this.playerList());
   }
 
+  private handleOnPlayerLeave(msg: RpcOnPlayerLeaveMsg) {
+    this.players = this.players.filter((x: Player) => x.id !== msg.id);
+    this.onPlayerListChange?.(this.playerList());
+  }
+
+  private handleOnOwnerChange(msg: RpcNewOwnerMsg) {
+    this.ownerId = msg.id;
+    this.emitState();
+  }
+
   /**
    * Handles an RPC message from the server. When testing call the private method and ignore the "error".
    */
@@ -200,6 +214,12 @@ class GameState {
         }
 
         return this.onChangeSettings?.(data);
+      case MsgOnPlayerLeave:
+        console.log("Handling on player leave message");
+        return this.handleOnPlayerLeave(rpcMessage.data as RpcOnPlayerLeaveMsg);
+      case MsgNewOwner:
+        console.log("Handling new owner message");
+        return this.handleOnOwnerChange(rpcMessage.data as RpcNewOwnerMsg);
       default:
         throw new Error(
           `Cannot handle RPC message as type is not valid ${rpcMessage.type}`,

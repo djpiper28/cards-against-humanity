@@ -7,14 +7,17 @@ import { wsBaseUrl } from "../apiClient";
 import {
   MsgChangeSettings,
   MsgCommandError,
+  MsgNewOwner,
   MsgOnPlayerCreate,
   MsgOnPlayerDisconnect,
   MsgOnPlayerJoin,
+  MsgOnPlayerLeave,
   RpcChangeSettingsMsg,
   RpcMessage,
 } from "../rpcTypes";
 
 import { gameState } from "./gameState";
+import { i } from "vitest/dist/reporters-LqC_WI4d";
 
 describe("Game state tests", () => {
   vi.mock("isomorphic-ws", () => {
@@ -298,5 +301,69 @@ describe("Game state tests", () => {
     expect(gameState.wsClient?.sendMessage).toHaveBeenCalledWith(
       JSON.stringify(msg),
     );
+  });
+
+  it("Should remove a player from the player list when they disconnect", () => {
+    const gid = v4();
+    const pid = v4();
+    gameState.setupState(gid, pid, "");
+
+    // Join as the player
+    const joinMsg: RpcMessage = {
+      type: MsgOnPlayerCreate,
+      data: {
+        id: v4(),
+        name: "Player 1",
+      },
+    };
+
+    gameState.handleRpcMessage(JSON.stringify(joinMsg));
+
+    // Disconnect the player
+    const msg: RpcMessage = {
+      type: MsgOnPlayerLeave,
+      data: {
+        id: joinMsg.data.id,
+      },
+    };
+
+    gameState.onPlayerListChange = vi.fn();
+    gameState.handleRpcMessage(JSON.stringify(msg));
+
+    expect(gameState.playerList().length).toBe(0);
+    expect(gameState.onPlayerListChange).toBeCalledWith(gameState.playerList());
+  });
+
+  it("Should emit the state and change the owner id when a new owner is set", () => {
+    const gid = v4();
+    const pid = v4();
+    gameState.setupState(gid, pid, "");
+
+    // Join as the player
+    const joinMsg: RpcMessage = {
+      type: MsgOnPlayerCreate,
+      data: {
+        id: v4(),
+        name: "Player 1",
+      },
+    };
+
+    gameState.handleRpcMessage(JSON.stringify(joinMsg));
+    expect(gameState.ownerId).toBe("");
+
+    const newOwnerMsg: RpcMessage = {
+      type: MsgNewOwner,
+      data: {
+        id: v4(),
+      },
+    };
+    gameState.emitState = vi.fn();
+
+    gameState.handleRpcMessage(JSON.stringify(newOwnerMsg));
+    expect(gameState.ownerId).toBe(newOwnerMsg.data.id);
+    expect(gameState.emitState).toBeCalledTimes(1);
+
+    gameState.playerId = newOwnerMsg.data.id;
+    expect(gameState.isOwner()).toBe(true);
   });
 });

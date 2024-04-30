@@ -23,8 +23,7 @@ export const apiClient = new Api({
  * time game service uses.
  */
 export const wsBaseUrl =
-  import.meta.env.VITE_WS_BASE_URL ??
-  "ws://localhost:3255/ws";
+  import.meta.env.VITE_WS_BASE_URL ?? "ws://localhost:3255/ws";
 
 export const cookieOptions: Readonly<CookieOptions> = {
   path: "/",
