@@ -2,7 +2,8 @@ import { CookieOptions } from "@solid-primitives/storage";
 
 import { Api, HttpClient } from "./api";
 
-const defaultBaseUrl = new HttpClient().baseUrl;
+// const defaultBaseUrl = new HttpClient().baseUrl;
+const defaultBaseUrl = "http://localhost:3255/api";
 
 /**
  * Default API client which loads the base URL from the environment variables.
@@ -25,7 +26,7 @@ export const apiClient = new Api({
  */
 export const wsBaseUrl =
   import.meta.env.VITE_WS_BASE_URL ??
-  "ws://" + defaultBaseUrl.split("://")[1] + "/games/join";
+  "ws://localhost:3255/ws";
 
 export const cookieOptions: Readonly<CookieOptions> = {
   path: "/",
