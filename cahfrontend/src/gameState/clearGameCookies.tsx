@@ -1,14 +1,7 @@
 import { cookieStorage } from "@solid-primitives/storage";
-import {
-  authenticationCookie,
-  gameIdParamCookie,
-  gamePasswordCookie,
-  playerIdCookie,
-} from "./gameState";
+import { cookieOptions } from "../apiClient";
 
 export default function clearGameCookies() {
-  cookieStorage.removeItem(gamePasswordCookie);
-  cookieStorage.removeItem(gameIdParamCookie);
-  cookieStorage.removeItem(playerIdCookie);
-  cookieStorage.removeItem(authenticationCookie);
+  console.log("Deleting game cookies");
+  cookieStorage.clear(cookieOptions);
 }
