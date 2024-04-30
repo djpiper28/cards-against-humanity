@@ -1,8 +1,6 @@
 import { CookieOptions } from "@solid-primitives/storage";
+import { Api } from "./api";
 
-import { Api, HttpClient } from "./api";
-
-// const defaultBaseUrl = new HttpClient().baseUrl;
 const defaultBaseUrl = "http://localhost:3255/api";
 
 /**
