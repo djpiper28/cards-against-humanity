@@ -138,6 +138,16 @@ class GameState {
       gameState: state.gameState,
     };
 
+    this.players = [];
+    for (const player of state.players) {
+      this.players.push({
+        id: player.id,
+        name: player.name,
+        connected: player.connected,
+        points: player.points,
+      })
+    }
+
     this.onLobbyStateChange?.(this.lobbyState);
   }
 
