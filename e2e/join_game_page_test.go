@@ -177,6 +177,7 @@ func (s *WithServicesSuite) TestPlayerDisconnectReConnect() {
 	adminLobbyPage := JoinGamePage{Page: createPage.Page}
 
 	assert.True(s.T(), adminLobbyPage.InLobby())
+
 	assert.True(s.T(),
 		adminLobbyPage.PlayerConnected(adminLobbyPage.PlayerId()))
 
