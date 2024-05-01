@@ -115,7 +115,7 @@ func (j *JoinGamePage) PlayerConnected(playerId string) bool {
 func (j *JoinGamePage) PlayersInGame() []string {
   players := []string{}
   for _, el := range j.Page.MustElements("player-list") {
-    players = append(players, el.MustElement("span").MustText())
+    players = append(players, el.MustElements("p")[0].MustText())
   }
   return players
 }
