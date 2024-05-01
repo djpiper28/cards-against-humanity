@@ -84,7 +84,7 @@ devDependencies:
     version: 1.0.0-beta.2(babel-preset-solid@1.8.17)(solid-js@1.8.17)
   storybook-solidjs-vite:
     specifier: 1.0.0-beta.2
-    version: 1.0.0-beta.2(vite@5.2.10)
+    version: 1.0.0-beta.2(vite@4.5.3)
   tailwindcss:
     specifier: ^3.4.3
     version: 3.4.3
@@ -92,11 +92,11 @@ devDependencies:
     specifier: ^9.0.1
     version: 9.0.1
   vite:
-    specifier: ^5.0.13
-    version: 5.2.10
+    specifier: ^4.5.3
+    version: 4.5.3
   vite-plugin-solid:
     specifier: ^2.10.2
-    version: 2.10.2(solid-js@1.8.17)(vite@5.2.10)
+    version: 2.10.2(solid-js@1.8.17)(vite@4.5.3)
   vitest:
     specifier: ^1.5.3
     version: 1.5.3(jsdom@24.0.0)
@@ -2965,7 +2965,7 @@ packages:
       - supports-color
     dev: true
 
-  /@storybook/builder-vite@8.1.0-alpha.7(vite@5.2.10):
+  /@storybook/builder-vite@8.1.0-alpha.7(vite@4.5.3):
     resolution: {integrity: sha512-0mSna+/8N3FUnG1Meu8ryWjEbEr/xiCGVvsizMYy5SBdSuEVraKNJCavIJ+Z7DQ4bxKUrMdhyET+NUBzK8dPHA==}
     peerDependencies:
       '@preact/preset-vite': '*'
@@ -2997,7 +2997,7 @@ packages:
       fs-extra: 11.2.0
       magic-string: 0.30.10
       ts-dedent: 2.2.0
-      vite: 5.2.10
+      vite: 4.5.3
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -7594,6 +7594,14 @@ packages:
       glob: 7.2.3
     dev: true
 
+  /rollup@3.29.4:
+    resolution: {integrity: sha512-oWzmBZwvYrU0iJHtDmhsm662rC15FRXmcjCk1xD771dFDx5jJ02ufAQQTn0etB2emNk4J9EZg/yWKpsn9BWGRw==}
+    engines: {node: '>=14.18.0', npm: '>=8.0.0'}
+    hasBin: true
+    optionalDependencies:
+      fsevents: 2.3.3
+    dev: true
+
   /rollup@4.17.2:
     resolution: {integrity: sha512-/9ClTJPByC0U4zNLowV1tMBe8yMEAxewtR3cUNX5BoEpGH3dQEWpJLr6CLp0fPdYRF/fzVOgvDb1zXuakwF5kQ==}
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
@@ -7910,11 +7918,11 @@ packages:
     resolution: {integrity: sha512-4QcZ+yx7nzEFiV4BMLnr/pRa5HYzNITX2ri0Zh6sT9EyQHbBHacC6YigllUPU9X3D0f/22QCgfokpKs52YRrUg==}
     dev: true
 
-  /storybook-solidjs-vite@1.0.0-beta.2(vite@5.2.10):
+  /storybook-solidjs-vite@1.0.0-beta.2(vite@4.5.3):
     resolution: {integrity: sha512-dD+VMYC5fBBQNesVb+mjB0LOkZIf100SQFbjAt9/sDstNUvc5ce3yZwLYXzgcOc7jcSMkrBu/cZNRzEM4YIAyw==}
     engines: {node: ^14.18 || >=16}
     dependencies:
-      '@storybook/builder-vite': 8.1.0-alpha.7(vite@5.2.10)
+      '@storybook/builder-vite': 8.1.0-alpha.7(vite@4.5.3)
     transitivePeerDependencies:
       - '@preact/preset-vite'
       - encoding
@@ -8564,7 +8572,7 @@ packages:
       - terser
     dev: true
 
-  /vite-plugin-solid@2.10.2(solid-js@1.8.17)(vite@5.2.10):
+  /vite-plugin-solid@2.10.2(solid-js@1.8.17)(vite@4.5.3):
     resolution: {integrity: sha512-AOEtwMe2baBSXMXdo+BUwECC8IFHcKS6WQV/1NEd+Q7vHPap5fmIhLcAzr+DUJ04/KHx/1UBU0l1/GWP+rMAPQ==}
     peerDependencies:
       '@testing-library/jest-dom': ^5.16.6 || ^5.17.0 || ^6.*
@@ -8580,10 +8588,45 @@ packages:
       merge-anything: 5.1.7
       solid-js: 1.8.17
       solid-refresh: 0.6.3(solid-js@1.8.17)
-      vite: 5.2.10
-      vitefu: 0.2.5(vite@5.2.10)
+      vite: 4.5.3
+      vitefu: 0.2.5(vite@4.5.3)
     transitivePeerDependencies:
       - supports-color
+    dev: true
+
+  /vite@4.5.3:
+    resolution: {integrity: sha512-kQL23kMeX92v3ph7IauVkXkikdDRsYMGTVl5KY2E9OY4ONLvkHf04MDTbnfo6NKxZiDLWzVpP5oTa8hQD8U3dg==}
+    engines: {node: ^14.18.0 || >=16.0.0}
+    hasBin: true
+    peerDependencies:
+      '@types/node': '>= 14'
+      less: '*'
+      lightningcss: ^1.21.0
+      sass: '*'
+      stylus: '*'
+      sugarss: '*'
+      terser: ^5.4.0
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+      less:
+        optional: true
+      lightningcss:
+        optional: true
+      sass:
+        optional: true
+      stylus:
+        optional: true
+      sugarss:
+        optional: true
+      terser:
+        optional: true
+    dependencies:
+      esbuild: 0.18.20
+      postcss: 8.4.38
+      rollup: 3.29.4
+    optionalDependencies:
+      fsevents: 2.3.3
     dev: true
 
   /vite@5.2.10:
@@ -8621,7 +8664,7 @@ packages:
       fsevents: 2.3.3
     dev: true
 
-  /vitefu@0.2.5(vite@5.2.10):
+  /vitefu@0.2.5(vite@4.5.3):
     resolution: {integrity: sha512-SgHtMLoqaeeGnd2evZ849ZbACbnwQCIwRH57t18FxcXoZop0uQu0uzlIhJBlF/eWVzuce0sHeqPcDo+evVcg8Q==}
     peerDependencies:
       vite: ^3.0.0 || ^4.0.0 || ^5.0.0
@@ -8629,7 +8672,7 @@ packages:
       vite:
         optional: true
     dependencies:
-      vite: 5.2.10
+      vite: 4.5.3
     dev: true
 
   /vitest@1.5.3(jsdom@24.0.0):
