@@ -50,6 +50,7 @@ func (s *WithServicesSuite) TestGamesShowTheSameInitialSettings() {
 	adminLobbyPage := JoinGamePage{Page: createPage.Page}
 
 	assert.True(s.T(), adminLobbyPage.InLobby())
+  assert.True(s.T(), adminLobbyPage.IsAdmin())
 	assert.Equal(s.T(), adminLobbyPage.AdminMaxPlayers().MustText(), "6")
 	assert.Equal(s.T(), adminLobbyPage.AdminPointsToPlayTo().MustText(), "10")
 	assert.Equal(s.T(), adminLobbyPage.AdminMaxGameRounds().MustText(), "25")
@@ -253,6 +254,7 @@ func (s *WithServicesSuite) TestPlayerLeavesGame() {
 
 	playerLobbyPage.LeaveGame()
   assert.NotContains(s.T(), adminLobbyPage.PlayersInGame(), playerId)
+  assert.True(s.T(), adminLobbyPage.IsAdmin())
 }
 
 // Test that the owner leaving a game transfers ownership to another player

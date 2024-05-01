@@ -123,3 +123,7 @@ func (j *JoinGamePage) PlayersInGame() []string {
 func (j *JoinGamePage) LeaveGame() {
   j.Page.Timeout(Timeout).MustElementR("button", "/Leave Game/i").MustClick()
 }
+
+func (j *JoinGamePage) IsAdmin() bool {
+  return j.Page.Timeout(Timeout).MustElementR("button", "/Start Game/i") != nil
+}
