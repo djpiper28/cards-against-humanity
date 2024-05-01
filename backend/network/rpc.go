@@ -3,9 +3,9 @@ package network
 import (
 	"encoding/json"
 	"errors"
-	"log"
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
+	"github.com/djpiper28/cards-against-humanity/backend/logger"
 	"github.com/google/uuid"
 )
 
@@ -21,10 +21,10 @@ const (
 	MsgOnPlayerCreate
 	// Tx the player's id and reason when they disconnect
 	MsgOnPlayerDisconnect
-  // Tx the player's id and reason when they leave the game
-  MsgOnPlayerLeave
-  // Tx the player's id when a new owner for a game is selected
-  MsgNewOwner
+	// Tx the player's id and reason when they leave the game
+	MsgOnPlayerLeave
+	// Tx the player's id when a new owner for a game is selected
+	MsgNewOwner
 
 	// Tx when a command cannot be processed
 	MsgCommandError
@@ -86,7 +86,7 @@ func DecodeRpcMessage(data []byte, handlers RpcCommandHandlers) error {
 
 		return handlers.ChangeSettingsHandler(command)
 	default:
-		log.Printf("Unknown command: %d", cmd.Type)
+		logger.Logger.Error("Unknown command", "type", cmd.Type)
 		return errors.New("Unknown command")
 	}
 }
@@ -143,18 +143,18 @@ func (msg RpcChangeSettingsMsg) Type() RpcMessageType {
 }
 
 type RpcOnPlayerLeaveMsg struct {
-  Id     uuid.UUID `json:"id"`
-  Reason string `json:"reason"`
+	Id     uuid.UUID `json:"id"`
+	Reason string    `json:"reason"`
 }
 
 func (msg RpcOnPlayerLeaveMsg) Type() RpcMessageType {
-  return MsgOnPlayerLeave
+	return MsgOnPlayerLeave
 }
 
 type RpcNewOwnerMsg struct {
-  Id     uuid.UUID `json:"id"`
+	Id uuid.UUID `json:"id"`
 }
 
 func (msg RpcNewOwnerMsg) Type() RpcMessageType {
-  return MsgNewOwner
+	return MsgNewOwner
 }

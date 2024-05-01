@@ -3,11 +3,11 @@ package gameRepo
 import (
 	"errors"
 	"fmt"
-	"log"
 	"sync"
 	"time"
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
+	"github.com/djpiper28/cards-against-humanity/backend/logger"
 	"github.com/djpiper28/cards-against-humanity/backend/metrics"
 	"github.com/google/uuid"
 )
@@ -36,7 +36,7 @@ func (gr *GameRepo) CreateGame(gameSettings *gameLogic.GameSettings, playerName 
 
 	game, err := gameLogic.NewGame(gameSettings, playerName)
 	if err != nil {
-		log.Println("Cannot create game", err)
+		logger.Logger.Error("Cannot create game", "err", err)
 		return uuid.UUID{}, uuid.UUID{}, err
 	}
 
@@ -45,11 +45,11 @@ func (gr *GameRepo) CreateGame(gameSettings *gameLogic.GameSettings, playerName 
 	gr.GameAgeMap[gid] = game.CreationTime
 
 	go metrics.AddGame()
-  go metrics.AddGameInProgress()
+	go metrics.AddGameInProgress()
 	go metrics.AddUser()
 	go metrics.AddUserInGame()
 
-	log.Println("Created game for", playerName)
+	logger.Logger.Info("Created game for", playerName)
 	return gid, game.GameOwnerId, nil
 }
 
@@ -85,12 +85,15 @@ func (gr *GameRepo) PlayerLeaveGame(gameId, playerId uuid.UUID) (gameLogic.Playe
 
 	res, err := game.RemovePlayer(playerId)
 	if err != nil {
-		log.Printf("Cannot remove player %s from game %s: %s", playerId, gameId, err)
+		logger.Logger.Error("Cannot remove player from game",
+			"playerId", playerId,
+			"gameId", gameId,
+			"err", err)
 		return gameLogic.PlayerRemovalResult{}, err
 	}
 
 	if res.PlayersLeft == 0 {
-		log.Printf("Game %s has no players left, deleting it", gameId)
+		logger.Logger.Infof("Game %s has no players left, deleting it", gameId)
 		gr.removeGame(gameId)
 	}
 
@@ -165,7 +168,7 @@ func (gr *GameRepo) JoinGame(gameId, playerId uuid.UUID, password string) error 
 	game, found := gr.GameMap[gameId]
 	if !found {
 		msg := fmt.Sprintf("Cannot find game with id %s", gameId)
-		log.Println(msg)
+		logger.Logger.Error(msg)
 		return errors.New(msg)
 	}
 
@@ -175,8 +178,10 @@ func (gr *GameRepo) JoinGame(gameId, playerId uuid.UUID, password string) error 
 
 	_, found = game.PlayersMap[playerId]
 	if !found {
+		logger.Logger.Error("Cannot find player in game",
+			"playerId", playerId,
+			"gameId", gameId)
 		msg := fmt.Sprintf("Cannot find player with id %s in game with id %s", playerId, gameId)
-		log.Println(msg)
 		return errors.New(msg)
 	}
 	return nil

@@ -5,6 +5,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/djpiper28/cards-against-humanity/backend/logger"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
@@ -49,12 +50,14 @@ func (g *IntegratedConnectionManager) RegisterConnection(gameId, playerId uuid.U
 	g.lock.Lock()
 	defer g.lock.Unlock()
 
-	log.Printf("Registering player %s to game %s", playerId, gameId)
+	logger.Logger.Info("Registering player to game",
+		"playerId", playerId,
+		"gameId", gameId)
 	game, found := g.GameConnectionMap[gameId]
 	if !found {
 		game = &GameConnection{make(map[uuid.UUID]*WsConnection)}
 		g.GameConnectionMap[gameId] = game
-		log.Printf("Registered game %s", gameId)
+		logger.Logger.Info("Registered game", "gameId", gameId)
 	}
 
 	playerConnection, foundPlayer := game.playerConnectionMap[playerId]
@@ -77,17 +80,22 @@ func (g *IntegratedConnectionManager) UnregisterConnection(gameId, playerId uuid
 	g.lock.Lock()
 	defer g.lock.Unlock()
 
-	log.Printf("Unregistering player %s to game %s", playerId, gameId)
+	logger.Logger.Info("Unregistering player to game",
+		"playerId", playerId,
+		"gameId", gameId)
 	game, found := g.GameConnectionMap[gameId]
 	if found {
 		delete(game.playerConnectionMap, playerId)
 	} else {
-		log.Printf("Cannot unregister game %s as it cannot be found", gameId)
+		logger.Logger.Error("Cannot unregister game %s as it cannot be found",
+			"gameId", gameId)
 	}
 
 	err := GameRepo.DisconnectPlayer(gameId, playerId)
 	if err != nil {
-		log.Printf("Cannot tag player %s as disconnected from game %s", playerId, gameId)
+		logger.Logger.Error("Cannot tag player as disconnected from game",
+			"playerId", playerId,
+			"gameId", gameId)
 	}
 
 	onPlayerDisconnectMsg := RpcOnPlayerDisconnectMsg{
@@ -96,7 +104,8 @@ func (g *IntegratedConnectionManager) UnregisterConnection(gameId, playerId uuid
 
 	message, err := EncodeRpcMessage(onPlayerDisconnectMsg)
 	if err != nil {
-		log.Printf("Cannot encode the message: %s", err)
+		logger.Logger.Error("Cannot encode the message",
+			"err", err)
 		return
 	}
 
@@ -110,7 +119,8 @@ func (g *IntegratedConnectionManager) Broadcast(gameId uuid.UUID, message []byte
 
 	game, found := g.GameConnectionMap[gameId]
 	if !found {
-		log.Printf("Cannot find game: %s", gameId)
+		logger.Logger.Error("Cannot find game",
+			"gameId", gameId)
 		return
 	}
 
@@ -123,7 +133,8 @@ func (g *IntegratedConnectionManager) Broadcast(gameId uuid.UUID, message []byte
 			defer wg.Done()
 			err := conn.Send(message)
 			if err != nil {
-				log.Printf("Cannot send a message to %s", playerId)
+				logger.Logger.Error("Cannot send a message to a player",
+					"playerId", playerId)
 				overallError = true
 
 				go g.UnregisterConnection(gameId, playerId)
@@ -133,7 +144,7 @@ func (g *IntegratedConnectionManager) Broadcast(gameId uuid.UUID, message []byte
 
 	wg.Wait()
 	if overallError {
-		log.Print("There was an error sending a message to a player during a broadcast operation")
+		logger.Logger.Error("There was an error sending a message to a player during a broadcast operation")
 	}
 }
 
@@ -147,13 +158,15 @@ func (g *IntegratedConnectionManager) RemoveGame(gameId uuid.UUID) error {
 	}
 
 	var wg sync.WaitGroup
-	log.Printf("Removing players from game %s", gameId)
+	logger.Logger.Info("Removing players from game", "gameId", gameId)
 	for id, conn := range connections.playerConnectionMap {
 		wg.Add(1)
 
 		go func(id uuid.UUID, conn *WsConnection) {
 			defer wg.Done()
-			log.Printf("Removing player %s from game %s", id, gameId)
+			logger.Logger.Info("Removing player from game",
+				"playerId", id,
+				"gameId", gameId)
 			conn.Close()
 		}(id, conn)
 	}
@@ -166,7 +179,7 @@ func (g *IntegratedConnectionManager) RemoveGame(gameId uuid.UUID) error {
 func (g *IntegratedConnectionManager) RemovePlayer(gameId, playerId uuid.UUID) error {
 	res, err := GameRepo.PlayerLeaveGame(gameId, playerId)
 	if err != nil {
-		log.Printf("Cannot remove player from game: %s", err)
+		logger.Logger.Error("Cannot remove player from game", "err", err)
 		return err
 	}
 
@@ -181,7 +194,8 @@ func (g *IntegratedConnectionManager) RemovePlayer(gameId, playerId uuid.UUID) e
 		msg := RpcNewOwnerMsg{Id: res.NewGameOwner}
 		message, err := EncodeRpcMessage(msg)
 		if err != nil {
-			log.Printf("Cannot encode the message: %s", err)
+			logger.Logger.Error("Cannot encode the message",
+				"err", err)
 			return err
 		}
 
@@ -193,7 +207,8 @@ func (g *IntegratedConnectionManager) RemovePlayer(gameId, playerId uuid.UUID) e
 	}
 	message, err := EncodeRpcMessage(msg)
 	if err != nil {
-		log.Printf("Cannot encode the message: %s", err)
+		logger.Logger.Error("Cannot encode the message",
+			"err", err)
 		return err
 	}
 

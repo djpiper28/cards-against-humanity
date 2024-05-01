@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
+	"github.com/djpiper28/cards-against-humanity/backend/logger"
 	"github.com/djpiper28/cards-against-humanity/backend/network"
 	"github.com/djpiper28/cards-against-humanity/backend/security"
 	"github.com/gin-gonic/gin"
@@ -145,7 +145,7 @@ type CreatePlayerResponse struct {
 func createPlayerForJoining(c *gin.Context) {
 	req, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		log.Printf("Cannot read body: %s", err)
+		logger.Logger.Error("Cannot read body", "err", err)
 		c.JSON(http.StatusInternalServerError, NewApiError(errors.New("Failed to read request body")))
 		return
 	}
@@ -153,14 +153,14 @@ func createPlayerForJoining(c *gin.Context) {
 	var createReq CreatePlayerRequest
 	err = json.Unmarshal(req, &createReq)
 	if err != nil {
-		log.Printf("Cannot unmarshal request: %s", err)
+		logger.Logger.Error("Cannot unmarshal request", "err", err)
 		c.JSON(http.StatusBadRequest, NewApiError(errors.New("Invalid request")))
 		return
 	}
 
 	playerId, err := network.GameRepo.CreatePlayer(createReq.GameId, createReq.PlayerName, createReq.Password)
 	if err != nil {
-		log.Printf("Cannot create player: %s", err)
+		logger.Logger.Error("Cannot create player", "err", err)
 		c.JSON(http.StatusInternalServerError, NewApiError(err))
 		return
 	}
@@ -183,7 +183,7 @@ func createPlayerForJoining(c *gin.Context) {
 	// Transmit to the other players
 	msg, err := network.EncodeRpcMessage(onCreateMessage)
 	if err != nil {
-		log.Printf("Error encoding message: %s", err)
+		logger.Logger.Error("Error encoding message", "err", err)
 	}
 	go network.GlobalConnectionManager.Broadcast(createReq.GameId, msg)
 }
@@ -202,7 +202,7 @@ func attemptAuthentication(c *gin.Context) (authenticationData, error) {
 	rawGameId, err := c.Cookie(JoinGameGameIdParam)
 	if err != nil {
 		errMsg := fmt.Sprintf("Cannot find cookie %s", JoinGameGameIdParam)
-		log.Print(errMsg)
+		logger.Logger.Error(errMsg)
 		c.JSON(http.StatusBadRequest, NewApiError(errors.New(errMsg)))
 		return authenticationData{}, err
 	}
@@ -216,7 +216,7 @@ func attemptAuthentication(c *gin.Context) (authenticationData, error) {
 	rawPlayerId, err := c.Cookie(JoinGamePlayerIdParam)
 	if err != nil {
 		errMsg := fmt.Sprintf("Cannot find cookie %s", JoinGamePlayerIdParam)
-		log.Print(errMsg)
+		logger.Logger.Error(errMsg)
 		c.JSON(http.StatusBadRequest, NewApiError(errors.New(errMsg)))
 		return authenticationData{}, err
 	}
@@ -235,7 +235,7 @@ func attemptAuthentication(c *gin.Context) (authenticationData, error) {
 
 	err = security.CheckToken(gameId, playerId, token)
 	if err != nil {
-		log.Printf("Player %s in game %s tried to to join a game with invalid authorisation: %s",
+		logger.Logger.Errorf("Player %s in game %s tried to to join a game with invalid authorisation: %s",
 			playerId,
 			gameId,
 			err)
@@ -245,7 +245,7 @@ func attemptAuthentication(c *gin.Context) (authenticationData, error) {
 
 	password, err := c.Cookie(PasswordParam)
 	if err != nil {
-		log.Print("There is no password provided")
+		logger.Logger.Error("There is no password provided")
 	}
 
 	return authenticationData{GameId: gameId, PlayerId: playerId, Token: token, Password: password}, nil
@@ -272,14 +272,16 @@ func joinGame(c *gin.Context) {
 		authData.PlayerId,
 		authData.Password)
 	if err != nil {
-		log.Printf("Cannot join game (%s): %s", authData.GameId, err)
+		logger.Logger.Error("Cannot join game", "gameId", authData.GameId, "err", err)
 		c.JSON(http.StatusNotFound, NewApiError(err))
 		return
 	}
 
 	// Attempt to upgrade the websocket
-	log.Printf("Upgrading connection for game %s and player %s",
+	logger.Logger.Info("Upgrading connection",
+		"gameId",
 		authData.GameId,
+		"playerId",
 		authData.PlayerId)
 	network.WsUpgrade(c.Writer, c.Request, authData.GameId, authData.PlayerId, network.GlobalConnectionManager)
 }
@@ -303,7 +305,7 @@ func leaveGame(c *gin.Context) {
 	err = network.GlobalConnectionManager.RemovePlayer(authData.GameId,
 		authData.PlayerId)
 	if err != nil {
-		log.Printf("Player %s in game %s was unable to leave the game: %s",
+		logger.Logger.Errorf("Player %s in game %s was unable to leave the game: %s",
 			authData.PlayerId,
 			authData.GameId,
 			err)

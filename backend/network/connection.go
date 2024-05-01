@@ -2,11 +2,11 @@ package network
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"sync"
 	"time"
 
+	"github.com/djpiper28/cards-against-humanity/backend/logger"
 	"github.com/djpiper28/cards-against-humanity/backend/metrics"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
@@ -27,7 +27,8 @@ var wsupgrader = websocket.Upgrader{
 func WsUpgrade(w http.ResponseWriter, r *http.Request, gameId, playerId uuid.UUID, cm ConnectionManager) (*WsConnection, error) {
 	c, err := wsupgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Printf("Failed to set websocket upgrade: %s", err)
+		logger.Logger.Error("Failed to set websocket upgrade",
+			"err", err)
 		return nil, err
 	}
 
@@ -90,7 +91,7 @@ func (c *WsConnection) listenAndHandle() error {
 
 	name, err := GameRepo.GetPlayerName(gid, c.PlayerId)
 	if err != nil {
-		log.Printf("Cannot get the player's name: %s", err)
+		logger.Logger.Error("Cannot get the player's name", "err", err)
 		name = "Error"
 	}
 
@@ -101,7 +102,7 @@ func (c *WsConnection) listenAndHandle() error {
 
 	message, err := EncodeRpcMessage(onPlayerJoinmsg)
 	if err != nil {
-		log.Printf("Cannot encode the message: %s", err)
+		logger.Logger.Error("Cannot encode the messages", "err", err)
 	}
 
 	GlobalConnectionManager.Broadcast(gid, message)
@@ -159,21 +160,28 @@ func (c *WsConnection) listenAndHandle() error {
 		endTime := time.Now()
 		microSeconds := endTime.Sub(startTime).Microseconds()
 
-		log.Printf("Command Handler \"%s\" | %s | %dµs", handler, gid, microSeconds)
+		logger.Logger.Infof("Command Handler \"%s\" | %s | %dµs",
+			handler,
+			gid,
+			microSeconds)
 
 		if handler == UnknownCommand {
 			go metrics.AddUnknownCommand()
 		}
 
 		if err != nil {
-			log.Printf("Error processing message: %s; for gid %s pid %s", err, c.GameId, c.PlayerId)
+			logger.Logger.Error("Error processing message",
+				"err", err,
+				"gameId", c.GameId,
+				"playerId", c.PlayerId)
 			go metrics.AddCommandFailed()
 
 			var message RpcCommandErrorMsg
 			message.Reason = err.Error()
 			encodedMessage, err := EncodeRpcMessage(message)
 			if err != nil {
-				log.Printf("Cannot encode the error message: %s", err)
+				logger.Logger.Error("Cannot encode the error message",
+					"err", err)
 				continue
 			}
 
@@ -185,7 +193,8 @@ func (c *WsConnection) listenAndHandle() error {
 func (c *WsConnection) ListenAndHandle(g *IntegratedConnectionManager) {
 	err := c.listenAndHandle()
 	if err != nil {
-		log.Printf("Error whilst handling websocket connection %s", err)
+		logger.Logger.Error("Error whilst handling websocket connection",
+			"err", err)
 		go metrics.AddWsError()
 		go metrics.RemoveWsConnection()
 		c.Close()

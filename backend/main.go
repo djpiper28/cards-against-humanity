@@ -6,6 +6,7 @@ import (
 
 	gpmiddleware "github.com/carousell/gin-prometheus-middleware"
 	"github.com/djpiper28/cards-against-humanity/backend/docs"
+	"github.com/djpiper28/cards-against-humanity/backend/logger"
 	"github.com/djpiper28/cards-against-humanity/backend/metrics"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -16,7 +17,7 @@ import (
 // A function to start for use in e2e testing
 func Start() {
 	log.SetFlags(log.Lshortfile | log.Ltime | log.Ldate)
-	log.Println("Starting up Cards Against Humanity server")
+	logger.Logger.Info("Starting up Cards Against Humanity server")
 	router := gin.Default()
 
 	// Setup swagger

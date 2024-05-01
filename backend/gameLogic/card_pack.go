@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"sync"
 
+	"github.com/djpiper28/cards-against-humanity/backend/logger"
 	"github.com/google/uuid"
 )
 
@@ -54,7 +54,7 @@ func DefaultCardPack() *CardPack {
 		return packValue
 	}
 
-	log.Println("Cannot find any packs for the default settings")
+	logger.Logger.Error("Cannot find any packs for the default settings")
 	return nil
 }
 
@@ -110,24 +110,24 @@ func translateCahCards(data *cahJson) error {
 
 	wg.Wait()
 
-	log.Printf("Found %d white cards and %d black cards", len(AllWhiteCards), len(AllBlackCards))
+	logger.Logger.Infof("Found %d white cards and %d black cards", len(AllWhiteCards), len(AllBlackCards))
 	return nil
 }
 
 func translateCahJson(data *cahJson) error {
-	log.Println("Reading all cards")
+	logger.Logger.Info("Reading all cards")
 	err := translateCahCards(data)
 	if err != nil {
-		log.Println("Cannot read the cards")
+		logger.Logger.Error("Cannot read the cards")
 		return err
 	}
 
-	log.Println("Reading all packs")
+	logger.Logger.Info("Reading all packs")
 	AllPacks = make(map[uuid.UUID]*CardPack)
 
 	var wg sync.WaitGroup
 	var lock sync.Mutex
-	var terr error
+	var threadError error
 
 	packs := 0
 	for _, cahPack := range data.Packs {
@@ -149,11 +149,13 @@ func translateCahJson(data *cahJson) error {
 
 			deck, err := NewCardDeck(whiteCards, blackCards)
 			if err != nil {
-				log.Printf("Pack %s cannot be turned into a deck %s", pack.Name, err)
+				logger.Logger.Error("Pack cannot be turned into a deck",
+					"pack", pack.Name,
+					"err", err)
 				lock.Lock()
 				defer lock.Unlock()
 
-				terr = err
+				threadError = err
 				return
 			}
 
@@ -170,41 +172,43 @@ func translateCahJson(data *cahJson) error {
 
 	wg.Wait()
 
-	if terr != nil {
-		log.Println("An error occurred whilst processing the decks (last error)", terr)
+	if threadError != nil {
+		logger.Logger.Error("An error occurred whilst processing the decks (last error)", "err", threadError)
 		AllPacks, AllWhiteCards, AllBlackCards = nil, nil, nil
 	}
 
-	log.Printf("Created %d packs of cards", packs)
-	return terr
+	logger.Logger.Infof("Created %d packs of cards", packs)
+	return threadError
 }
 
 func LoadPacks() error {
 	if AllPacks != nil {
-		log.Println("Data is already loaded")
+		logger.Logger.Error("Data is already loaded")
 		return nil
 	}
 
-	log.Println("Reading data file", cahJsonFile)
+	logger.Logger.Info("Reading data file", "fileName", cahJsonFile)
 
 	dataFileContents, err := os.ReadFile(cahJsonFile)
 	if err != nil {
-		log.Println("Cannot read data file", cahJsonFile, err)
+		logger.Logger.Error("Cannot read data file",
+			"fileName", cahJsonFile,
+			"err", err)
 		return err
 	}
 
-	log.Println("Parsing data file")
+	logger.Logger.Info("Parsing data file")
 
 	var cahData cahJson
 	err = json.Unmarshal(dataFileContents, &cahData)
 	if err != nil {
-		log.Println("Cannot parse data file", err)
+		logger.Logger.Error("Cannot parse data file", "err", err)
 		return err
 	}
 
 	err = translateCahJson(&cahData)
 	if err != nil {
-		log.Println("Cannot translate the data file to the internal struct")
+		logger.Logger.Info("Cannot translate the data file to the internal struct")
 		return err
 	}
 	return nil

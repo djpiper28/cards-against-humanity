@@ -2,15 +2,13 @@ package main
 
 import (
 	"net/http"
+	"time"
 
+	cache "github.com/chenyahui/gin-cache"
+	"github.com/chenyahui/gin-cache/persist"
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-
-	"time"
-
-	"github.com/chenyahui/gin-cache"
-	"github.com/chenyahui/gin-cache/persist"
 )
 
 type getPacksResp map[uuid.UUID]*gameLogic.CardPack

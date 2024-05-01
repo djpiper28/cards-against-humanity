@@ -3,8 +3,8 @@ package gameLogic
 import (
 	"errors"
 	"fmt"
-	"log"
 
+	"github.com/djpiper28/cards-against-humanity/backend/logger"
 	"github.com/google/uuid"
 )
 
@@ -74,7 +74,7 @@ func (p *Player) PlayCard(cards []*WhiteCard) error {
 func (p *Player) AddCardToHand(card *WhiteCard) error {
 	if p.hasCard(card) {
 		msg := "Cannot add duplicate cards to the hand"
-		log.Println(msg)
+		logger.Logger.Error(msg)
 		return errors.New(msg)
 	}
 

@@ -4,9 +4,9 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
+	"github.com/djpiper28/cards-against-humanity/backend/logger"
 	jwt "github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
@@ -16,11 +16,11 @@ var serverId = uuid.New()
 const secretLength = 1024
 
 func generateKey() []byte {
-	log.Print("Generating key for signing tokens")
+	logger.Logger.Info("Generating key for signing tokens")
 	ret := make([]byte, secretLength)
 	_, err := rand.Read(ret)
 	if err != nil {
-		log.Fatal("Failed to generate key for signing tokens")
+		logger.Logger.Fatal("Failed to generate key for signing tokens")
 	}
 
 	// Self check the token
@@ -32,7 +32,7 @@ func generateKey() []byte {
 	}
 
 	if zeros > secretLength/2 {
-		log.Fatal("Generated key has too many zeros, it cannot be guaremteed that it is secure")
+		logger.Logger.Fatal("Generated key has too many zeros, it cannot be guaremteed that it is secure")
 	}
 	return ret
 }
@@ -128,7 +128,7 @@ func ParseToken(token string) (*Claims, error) {
 func CheckToken(gameId, playerId uuid.UUID, token string) error {
 	claims, err := ParseToken(token)
 	if err != nil {
-		log.Printf("Error parsing authorisation token: %s", err)
+		logger.Logger.Error("Error parsing authorisation token", "err", err)
 		return errors.New("Error parsing authorisation token")
 	}
 

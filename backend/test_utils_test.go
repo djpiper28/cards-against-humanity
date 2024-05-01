@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"testing"
 	"time"
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
+	"github.com/djpiper28/cards-against-humanity/backend/logger"
 	"github.com/djpiper28/cards-against-humanity/backend/network"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -148,7 +148,7 @@ func (jar *GameJoinCookieJar) SetCookies(_ *url.URL, cookies []*http.Cookie) {
 		if c.Name == AuthorizationCookie {
 			jar.Token = c.Value
 		} else {
-			log.Printf("Ignoring cookie %s", c.Name)
+			logger.Logger.Info("Ignoring", "cookie", c.Name)
 		}
 	}
 }
