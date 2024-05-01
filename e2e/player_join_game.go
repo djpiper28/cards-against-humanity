@@ -49,5 +49,6 @@ func (p *PlayerJoinGame) Password(password string) {
 
 func (p *PlayerJoinGame) Join() {
 	p.Page.Timeout(Timeout).MustElementR("button", "/Join Game/i").MustClick()
+	p.Page.MustWaitStable()
 	return
 }

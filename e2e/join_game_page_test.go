@@ -68,7 +68,6 @@ func (s *WithServicesSuite) TestGamesShowTheSameInitialSettings() {
 
 	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
 
-	playerPage.Page.MustScreenshotFullPage("error.png")
 	assert.True(s.T(), playerLobbyPage.InLobby())
 
 	assert.Equal(s.T(),
@@ -118,7 +117,6 @@ func (s *WithServicesSuite) TestChangingSettingsSyncsBetweenClients() {
 
 	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
 
-	playerPage.Page.MustScreenshotFullPage("error.png")
 	assert.True(s.T(), playerLobbyPage.InLobby())
 
 	adminLobbyPage.AdminGamePasssowrd().MustInput("Password 123")
@@ -160,4 +158,58 @@ func (s *WithServicesSuite) TestChangingSettingsSyncsBetweenClients() {
 		playerLobbyPage.UserGamePassword().MustText())
 
 	playerLobbyPage.Page.MustScreenshotFullPage("../wiki/player_lobby_page.png")
+}
+
+func (s *WithServicesSuite) TestPlayerDisconnectReConnect() {
+	browser := GetBrowser()
+	defer browser.Close()
+
+	createPage := NewCreateGamePage(browser)
+	assert.NotNil(s.T(), createPage, "Page should render and not be nil")
+	createPage.InsertDefaultValidSettings()
+
+	log.Print("Creating game")
+	createPage.CreateGame()
+
+	time.Sleep(Timeout)
+	assert.True(s.T(), strings.Contains(createPage.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
+
+	adminLobbyPage := JoinGamePage{Page: createPage.Page}
+
+	assert.True(s.T(), adminLobbyPage.InLobby())
+	assert.True(s.T(),
+		adminLobbyPage.PlayerConnected(adminLobbyPage.PlayerId()))
+
+	// Connect with another client then assert that the settings remain equal
+	browser2 := GetBrowser()
+	defer browser2.Close()
+	playerPage := NewPlayerGamePage(browser2, adminLobbyPage)
+
+	assert.True(s.T(), playerPage.InPlayerJoinPage())
+	playerPage.Password(DefaultPassword)
+	playerPage.PlayerName("Geoff")
+
+	playerPage.Join()
+
+	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
+	assert.True(s.T(), playerLobbyPage.InLobby())
+
+	playerId := playerLobbyPage.PlayerId()
+
+	time.Sleep(Timeout)
+	assert.True(s.T(), adminLobbyPage.PlayerConnected(playerId))
+
+	// Disconnect and make sure the UI updates
+	playerPage.Page.MustNavigate("https://google.com").MustActivate()
+
+	time.Sleep(Timeout)
+	assert.False(s.T(), adminLobbyPage.PlayerConnected(playerId))
+
+	// Reconnect and make sure the UI updates
+	playerPage.Page.MustNavigateBack().MustActivate()
+	time.Sleep(Timeout)
+	assert.True(s.T(), playerLobbyPage.InLobby())
+
+	time.Sleep(Timeout)
+	assert.True(s.T(), adminLobbyPage.PlayerConnected(playerId))
 }

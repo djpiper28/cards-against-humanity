@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/go-rod/rod"
 )
@@ -85,4 +86,28 @@ func (j *JoinGamePage) UserMaxGameRounds() *rod.Element {
 
 func (j *JoinGamePage) HasCardPack(packId string) bool {
 	return j.Page.Timeout(Timeout).MustElement("#"+packId) != nil
+}
+
+func (j *JoinGamePage) PlayerId() string {
+	for _, cookie := range j.Page.MustCookies() {
+		if cookie.Name == PlayerIdCookie {
+			return cookie.Value
+		}
+	}
+	log.Println("The player has no id, this is probably bad")
+	return ""
+}
+
+func (j *JoinGamePage) PlayerConnected(playerId string) bool {
+	defer func() {
+		if pan := recover(); pan != nil {
+			log.Printf("Error checking if player %s is connected, %s was saved", playerId, ErrorScreenshot)
+			j.Page.MustScreenshot(ErrorScreenshot)
+			panic(pan)
+		}
+	}()
+
+	domId := fmt.Sprintf("p#%s-player-status", playerId)
+	el := j.Page.Timeout(Timeout).MustElement(domId)
+	return strings.ToLower(el.MustText()) == "connected"
 }
