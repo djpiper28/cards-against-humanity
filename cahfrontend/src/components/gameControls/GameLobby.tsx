@@ -21,6 +21,7 @@ import { cookieStorage } from "@solid-primitives/storage";
 import { useNavigate } from "@solidjs/router";
 import { indexUrl } from "../../routes";
 import clearGameCookies from "../../gameState/clearGameCookies";
+import SubHeader from "../typography/SubHeader";
 
 interface LobbyLoadedProps {
   setSettings: (settings: Settings) => void;
@@ -57,12 +58,17 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
 
   return (
     <RoundedWhite>
-      <div class="flex flex-row justify-between flex-wrap">
-        <Header
-          text={`${
-            props.players.find((x) => x.id === props.state.gameOwnerId)?.name
-          }'s Game`}
-        />
+      <div class="flex flex-row gap-3 justify-between flex-wrap">
+        <div class="flex flex-row flex-wrap gap-5 w-fit">
+          <Header
+            text={`${
+              props.players.find((x) => x.id === props.state.gameOwnerId)?.name
+            }'s Game`}
+          />
+          <Show when={isGameOwner()}>
+            <SubHeader text="Change your game's settings" />
+          </Show>
+        </div>
         <Button
           id="leave-game"
           onClick={() => {
@@ -80,7 +86,6 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
         </Button>
       </div>
       <Show when={isGameOwner()}>
-        <Header text="Change your game's settings" />
         <CardsSelector
           cards={props.cardPacks}
           selectedPackIds={settings().cardPacks.map((x) => x?.id ?? "no-id")}

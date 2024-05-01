@@ -214,3 +214,8 @@ func (s *WithServicesSuite) TestPlayerDisconnectReConnect() {
 	time.Sleep(Timeout)
 	assert.True(s.T(), adminLobbyPage.PlayerConnected(playerId))
 }
+
+// Test that leaving a game removes the player from the lobby
+// 2 players in the lobby, one leaves and is seen removed from the list
+
+// Test that the owner leaving a game transfers ownership to another player

@@ -22,6 +22,7 @@ import Header from "../components/typography/Header";
 import Button from "../components/buttons/Button";
 import CardsSelector from "../components/gameControls/CardsSelector";
 import clearGameCookies from "../gameState/clearGameCookies";
+import SubHeader from "../components/typography/SubHeader";
 
 export default function Create() {
   const navigate = useNavigate();
@@ -57,45 +58,24 @@ export default function Create() {
   const [playerName, setPlayerName] = createSignal("");
   const [gameSettings, setGameSettings] = createSignal(settings);
 
-  const whiteCards = (): number => {
-    return selectedPacks()
-      .map((x) => packs().find((y) => y.id === x))
-      .filter((x) => !!x)
-      .map((x) => x?.whiteCards ?? 0)
-      .reduce((a, b) => a + b, 0);
-  };
-  const blackCards = (): number => {
-    return selectedPacks()
-      .map((x) => packs().find((y) => y.id === x))
-      .filter((x) => !!x)
-      .map((x) => x?.blackCards ?? 0)
-      .reduce((a, b) => a + b, 0);
-  };
-
-  const panelTitleCss = () =>
-    `text-xl ${blackCards() + whiteCards() === 0 ? "text-error-colour font-bold" : "text-black"}`;
   return (
     <>
       <Header text="Create a game" />
       <RoundedWhite>
-        <h2 class={`${panelTitleCss()}`}>
-          {`Choose Some Card Packs ${
+        <SubHeader
+          text={`Choose Some Card Packs ${
             selectedPacks().length === 0 ? "(No Packs Selected)" : ""
           }`}
-        </h2>
+        />
         <CardsSelector
           setSelectedPackIds={setSelectedPacks}
           selectedPackIds={selectedPacks()}
           cards={packs()}
         />
-
-        <p class={panelTitleCss()}>
-          {`You have added ${whiteCards()} white cards and ${blackCards()} black cards.`}
-        </p>
       </RoundedWhite>
 
       <RoundedWhite>
-        <h2 class={panelTitleCss()}>Other Game Settings</h2>
+        <SubHeader text="Other Game Settings" />
         <Input
           inputType={InputType.Text}
           placeHolder="John Smith"
