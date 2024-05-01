@@ -170,7 +170,22 @@ class GameState {
   }
 
   private handleOnOwnerChange(msg: RpcNewOwnerMsg) {
-    var state = structuredClone(this.state);
+    var state: GameStateInfo = structuredClone(this.state ?? {
+      id: '',
+      gameOwnerId: '',
+      players: [],
+      currentRound: 0,
+      creationTime: '',
+      gameState: 0,
+      currentCardCzarId: '',
+      settings: {
+        maxRounds: 0,
+        maxPlayers: 0,
+        playingToPoints: 0,
+        gamePassword: '',
+        cardPacks: [],
+      },
+    });
     state.gameOwnerId = msg.id;
     this.setState(state);
   }
