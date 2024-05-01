@@ -138,17 +138,19 @@ class GameState {
       gameState: state.gameState,
     };
 
-    this.players = [];
     for (const player of state.players) {
-      this.players.push({
-        id: player.id,
-        name: player.name,
-        connected: player.connected,
-        points: player.points,
-      })
+      if (!this.players.find((x) => x.id === player.id)) {
+        this.players.push({
+          id: player.id,
+          name: player.name,
+          connected: player.connected,
+          points: player.points,
+        });
+      }
     }
 
     this.onLobbyStateChange?.(this.lobbyState);
+    this.onPlayerListChange?.(this.playerList());
   }
 
   public playerList(): GamePlayerList {

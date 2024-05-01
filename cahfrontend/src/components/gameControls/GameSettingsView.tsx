@@ -1,3 +1,4 @@
+import { For } from "solid-js";
 import { GameSettings } from "../../gameLogicTypes";
 
 interface Props {
@@ -26,22 +27,22 @@ export default function GameSettingsView(props: Readonly<Props>) {
         </p>
       </div>
       <h3>Card Packs</h3>
-      <p>
-        {props.settings.cardPacks
-          .map((pack) => (
-            <span id={pack?.id} class="font-bold">
-              {pack?.name}
-            </span>
-          ))
-          .reduce(
-            (a, b) => (
-              <>
-                {a}, {b}
-              </>
-            ),
-            <></>,
+      <span>
+        <For each={props.settings.cardPacks}>
+          {(pack, i) => (
+            <>
+              <span id={pack?.id} class="font-bold">
+                {pack?.name}
+              </span>
+              {i() == props.settings.cardPacks.length - 1 ? (
+                ""
+              ) : (
+                <span class="pr-2">,</span>
+              )}
+            </>
           )}
-      </p>
+        </For>
+      </span>
     </div>
   );
 }
