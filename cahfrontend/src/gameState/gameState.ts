@@ -24,6 +24,7 @@ import { WebSocketClient, toWebSocketClient } from "./websocketClient";
 import { apiClient, wsBaseUrl } from "../apiClient";
 import WebSocket from "isomorphic-ws";
 import { GamePlayerList } from "./gamePlayersList";
+import { GameLobbyState } from "./gameLobbyState";
 
 export const playerIdCookie = "playerId";
 /**
@@ -36,15 +37,26 @@ export const authenticationCookie = "authentication";
 class GameState {
   private gameId: string = "";
   private playerId: string = "";
-  private ownerId: string = "";
   private password: string = "";
   private setup: boolean = false;
   private wsClient?: WebSocketClient;
-  private state?: GameStateInfo;
+
   private players: GamePlayerList = [];
+  private lobbyState: GameLobbyState = {
+    ownerId: "",
+    settings: {
+      gamePassword: "",
+      maxPlayers: 0,
+      cardPacks: [],
+      maxRounds: 0,
+      playingToPoints: 0,
+    },
+    creationTime: new Date(),
+    gameState: 0,
+  };
 
   // Events
-  public onStateChange?: (state?: GameStateInfo) => void;
+  public onLobbyStateChange?: (state?: GameLobbyState) => void;
   public onPlayerListChange?: (players: GamePlayerList) => void;
   public onCommandError?: (error: RpcCommandErrorMsg) => void;
   public onChangeSettings?: (settings: RpcChangeSettingsMsg) => void;
@@ -58,7 +70,20 @@ class GameState {
     this.password = password;
     this.players = [];
 
-    this.onStateChange = undefined;
+    this.lobbyState = {
+      ownerId: "",
+      settings: {
+        gamePassword: "",
+        maxPlayers: 0,
+        cardPacks: [],
+        maxRounds: 0,
+        playingToPoints: 0,
+      },
+      creationTime: new Date(),
+      gameState: 0,
+    };
+
+    this.onLobbyStateChange = undefined;
     this.onPlayerListChange = undefined;
 
     const url = wsBaseUrl;
@@ -95,29 +120,25 @@ class GameState {
     return this.playerId;
   }
 
-  private setState(state: GameStateInfo) {
-    this.state = state;
-    this.ownerId = state.gameOwnerId;
-    this.players = state.players.map((x) => ({
-      id: x.id,
-      name: x.name,
-      connected: true,
-      points: x.points,
-    }));
-    this.emitState();
-  }
-
   public emitState() {
-    this.onStateChange?.(structuredClone(this.state));
+    this.onLobbyStateChange?.(structuredClone(this.lobbyState));
     this.onPlayerListChange?.(this.playerList());
   }
 
   public isOwner(): boolean {
-    return this.playerId === this.ownerId;
+    return this.playerId === this.lobbyState.ownerId;
   }
 
   private handleOnJoin(msg: RpcOnJoinMsg) {
-    this.setState(msg.state as GameStateInfo);
+    const state = msg.state as GameStateInfo;
+    this.lobbyState = {
+      ownerId: state.gameOwnerId,
+      settings: state.settings,
+      creationTime: new Date(state.creationTime),
+      gameState: state.gameState,
+    };
+
+    this.onLobbyStateChange?.(this.lobbyState);
   }
 
   public playerList(): GamePlayerList {
@@ -170,24 +191,8 @@ class GameState {
   }
 
   private handleOnOwnerChange(msg: RpcNewOwnerMsg) {
-    var state: GameStateInfo = structuredClone(this.state ?? {
-      id: '',
-      gameOwnerId: '',
-      players: [],
-      currentRound: 0,
-      creationTime: '',
-      gameState: 0,
-      currentCardCzarId: '',
-      settings: {
-        maxRounds: 0,
-        maxPlayers: 0,
-        playingToPoints: 0,
-        gamePassword: '',
-        cardPacks: [],
-      },
-    });
-    state.gameOwnerId = msg.id;
-    this.setState(state);
+    this.lobbyState.ownerId = msg.id;
+    this.onLobbyStateChange?.(this.lobbyState);
   }
 
   /**
@@ -218,17 +223,8 @@ class GameState {
       case MsgChangeSettings:
         console.log("Handling change settings message");
         const data = rpcMessage.data as RpcChangeSettingsMsg;
-
-        if (this.state) {
-          const newState: GameStateInfo = this.state;
-          newState.settings.maxRounds = data.settings.maxRounds;
-          newState.settings.maxPlayers = data.settings.maxPlayers;
-          newState.settings.playingToPoints = data.settings.playingToPoints;
-          newState.settings.gamePassword = data.settings.gamePassword;
-          newState.settings.cardPacks = data.settings.cardPacks;
-          this.setState(newState);
-        }
-
+        this.lobbyState.settings = data.settings;
+        this.onLobbyStateChange?.(this.lobbyState);
         return this.onChangeSettings?.(data);
       case MsgOnPlayerLeave:
         console.log("Handling on player leave message");

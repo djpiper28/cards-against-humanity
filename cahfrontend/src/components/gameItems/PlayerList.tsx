@@ -1,7 +1,7 @@
 import { GamePlayerList } from "../../gameState/gamePlayersList";
 import RoundedWhite from "../containers/RoundedWhite";
-import Header from "../typography/Header.tsx";
 import { For } from "solid-js";
+import SubHeader from "../typography/SubHeader";
 
 interface Props {
   players: GamePlayerList;
@@ -10,10 +10,10 @@ interface Props {
 export default function PlayerList(props: Readonly<Props>) {
   return (
     <RoundedWhite>
-      <Header text="Players" />
+      <SubHeader text="Players" />
       <For each={props.players} fallback={<p>No players</p>}>
         {(player) => (
-          <div class="flex flex-row gap-2">
+          <div class="flex flex-row gap-3 ease-in ease-out duration-700 opacity-100">
             <p class="font-bold" id={`${player.id}-player-name`}>
               {player.name}
             </p>

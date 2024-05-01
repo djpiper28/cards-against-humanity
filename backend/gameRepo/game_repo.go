@@ -105,6 +105,7 @@ func (gr *GameRepo) DisconnectPlayer(gameId, playerId uuid.UUID) error {
 	gr.lock.Lock()
 	defer gr.lock.Unlock()
 
+	go metrics.RemoveUserConnected()
 	game, found := gr.GameMap[gameId]
 	if !found {
 		return errors.New("Cannot find game")
@@ -119,7 +120,6 @@ func (gr *GameRepo) DisconnectPlayer(gameId, playerId uuid.UUID) error {
 	}
 
 	player.Connected = false
-	go metrics.RemoveUserConnected()
 	return nil
 }
 

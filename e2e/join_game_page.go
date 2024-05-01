@@ -111,3 +111,7 @@ func (j *JoinGamePage) PlayerConnected(playerId string) bool {
 	el := j.Page.Timeout(Timeout).MustElement(domId)
 	return strings.ToLower(el.MustText()) == "connected"
 }
+
+func (j *JoinGamePage) LeaveGame() {
+  j.Page.Timeout(Timeout).MustElementR("button", "/Leave Game/i").MustClick()
+}

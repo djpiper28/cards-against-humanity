@@ -21,6 +21,8 @@ import { cookieStorage } from "@solid-primitives/storage";
 import { useNavigate } from "@solidjs/router";
 import { indexUrl } from "../../routes";
 import clearGameCookies from "../../gameState/clearGameCookies";
+import SubHeader from "../typography/SubHeader";
+import { GameLobbyState } from "../../gameState/gameLobbyState";
 
 interface LobbyLoadedProps {
   setSettings: (settings: Settings) => void;
@@ -30,7 +32,7 @@ interface LobbyLoadedProps {
   setCommandError: (error: string) => void;
   dirtyState: boolean;
   cardPacks: GameLogicCardPack[];
-  state: GameStateInfo;
+  state: GameLobbyState;
   setStateAsDirty: () => void;
 }
 
@@ -46,7 +48,7 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
   };
 
   const state = () => props.state;
-  const isGameOwner = () => state().gameOwnerId === gameState.getPlayerId();
+  const isGameOwner = () => state().ownerId === gameState.getPlayerId();
   const settings = () => state().settings;
   const dirtyState = () => props.dirtyState;
   const navigate = useNavigate();
@@ -57,12 +59,17 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
 
   return (
     <RoundedWhite>
-      <div class="flex flex-row justify-between flex-wrap">
-        <Header
-          text={`${
-            props.players.find((x) => x.id === props.state.gameOwnerId)?.name
-          }'s Game`}
-        />
+      <div class="flex flex-row gap-3 justify-between flex-wrap">
+        <div class="flex flex-row flex-wrap gap-5 w-fit">
+          <Header
+            text={`${
+              props.players.find((x) => x.id === props.state.ownerId)?.name
+            }'s Game`}
+          />
+          <Show when={isGameOwner()}>
+            <SubHeader text="Change your game's settings" />
+          </Show>
+        </div>
         <Button
           id="leave-game"
           onClick={() => {
@@ -80,7 +87,6 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
         </Button>
       </div>
       <Show when={isGameOwner()}>
-        <Header text="Change your game's settings" />
         <CardsSelector
           cards={props.cardPacks}
           selectedPackIds={settings().cardPacks.map((x) => x?.id ?? "no-id")}
@@ -134,25 +140,21 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
   );
 }
 
-const emptyState: GameStateInfo = {
-  id: "",
-  gameOwnerId: "",
+const emptyState: GameLobbyState = {
+  ownerId: "",
   settings: {
-    cardPacks: [],
+    gamePassword: "",
     maxPlayers: 0,
+    cardPacks: [],
     maxRounds: 0,
     playingToPoints: 0,
-    gamePassword: "",
   },
-  currentRound: 0,
-  creationTime: "",
+  creationTime: new Date(),
   gameState: 0,
-  players: [],
-  currentCardCzarId: "",
 };
 
 export default function GameLobby() {
-  const [state, setState] = createSignal<GameStateInfo>(emptyState);
+  const [state, setState] = createSignal<GameLobbyState>(emptyState);
   const [players, setPlayers] = createSignal<GamePlayerList>([]);
 
   const [packs, setPacks] = createSignal<GameLogicCardPack[]>([]);
@@ -166,7 +168,7 @@ export default function GameLobby() {
     gameState.onPlayerListChange = (players: GamePlayerList) => {
       setPlayers(players);
     };
-    gameState.onStateChange = (state?: GameStateInfo) => {
+    gameState.onLobbyStateChange = (state?: GameLobbyState) => {
       console.log("State change detected");
       setDirtyState(false);
       setState(state ?? emptyState);
@@ -174,7 +176,7 @@ export default function GameLobby() {
     gameState.onChangeSettings = (settings: RpcChangeSettingsMsg) => {
       setDirtyState(false);
 
-      const newState = state() ?? emptyState;
+      const newState = structuredClone(state());
       const data = settings.settings as GameSettings;
 
       newState.settings.maxRounds = data.maxRounds;
