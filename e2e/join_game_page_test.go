@@ -249,10 +249,10 @@ func (s *WithServicesSuite) TestPlayerLeavesGame() {
 	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
 	assert.True(s.T(), playerLobbyPage.InLobby())
 
-	playerLobbyPage.LeaveGame()
+  playerId := playerLobbyPage.PlayerId()
 
-  time.Sleep(Timeout)
-	assert.Equal(s.T(), "", playerLobbyPage.PlayerId())
+	playerLobbyPage.LeaveGame()
+  assert.NotContains(s.T(), adminLobbyPage.PlayersInGame(), playerId)
 }
 
 // Test that the owner leaving a game transfers ownership to another player

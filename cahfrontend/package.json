@@ -2,6 +2,7 @@
   "name": "cards-against-humanity",
   "version": "0.1.0",
   "description": "Danny's Cards Against Humanity clone.",
+  "type": "module",
   "scripts": {
     "start": "vite",
     "dev": "vite",

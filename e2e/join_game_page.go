@@ -107,9 +107,17 @@ func (j *JoinGamePage) PlayerConnected(playerId string) bool {
 		}
 	}()
 
-	domId := fmt.Sprintf("p#%s-player-status", playerId)
+	domId := fmt.Sprintf("#%s-player-status", playerId)
 	el := j.Page.Timeout(Timeout).MustElement(domId)
 	return strings.ToLower(el.MustText()) == "connected"
+}
+
+func (j *JoinGamePage) PlayersInGame() []string {
+  players := []string{}
+  for _, el := range j.Page.MustElements("player-list") {
+    players = append(players, el.MustElement("span").MustText())
+  }
+  return players
 }
 
 func (j *JoinGamePage) LeaveGame() {
