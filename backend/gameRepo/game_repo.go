@@ -45,6 +45,7 @@ func (gr *GameRepo) CreateGame(gameSettings *gameLogic.GameSettings, playerName 
 	gr.GameAgeMap[gid] = game.CreationTime
 
 	go metrics.AddGame()
+  go metrics.AddGameInProgress()
 	go metrics.AddUser()
 	go metrics.AddUserInGame()
 
