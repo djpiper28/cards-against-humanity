@@ -348,7 +348,6 @@ describe("Game state tests", () => {
     };
 
     gameState.handleRpcMessage(JSON.stringify(joinMsg));
-    expect(gameState.ownerId).toBe("");
 
     const newOwnerMsg: RpcMessage = {
       type: MsgNewOwner,
@@ -356,11 +355,11 @@ describe("Game state tests", () => {
         id: v4(),
       },
     };
-    gameState.emitState = vi.fn();
+    gameState.onLobbyStateChange = vi.fn();
 
     gameState.handleRpcMessage(JSON.stringify(newOwnerMsg));
-    expect(gameState.ownerId).toBe(newOwnerMsg.data.id);
-    expect(gameState.emitState).toBeCalledTimes(1);
+    expect(gameState.isOwner()).toBe(false);
+    expect(gameState.onLobbyStateChange).toBeCalledTimes(1);
 
     gameState.playerId = newOwnerMsg.data.id;
     expect(gameState.isOwner()).toBe(true);
