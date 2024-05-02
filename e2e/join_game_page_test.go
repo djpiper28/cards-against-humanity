@@ -50,7 +50,7 @@ func (s *WithServicesSuite) TestGamesShowTheSameInitialSettings() {
 	adminLobbyPage := JoinGamePage{Page: createPage.Page}
 
 	assert.True(s.T(), adminLobbyPage.InLobby())
-  assert.True(s.T(), adminLobbyPage.IsAdmin())
+	assert.True(s.T(), adminLobbyPage.IsAdmin())
 	assert.Equal(s.T(), adminLobbyPage.AdminMaxPlayers().MustText(), "6")
 	assert.Equal(s.T(), adminLobbyPage.AdminPointsToPlayTo().MustText(), "10")
 	assert.Equal(s.T(), adminLobbyPage.AdminMaxGameRounds().MustText(), "25")
@@ -179,8 +179,9 @@ func (s *WithServicesSuite) TestPlayerDisconnectReConnect() {
 
 	assert.True(s.T(), adminLobbyPage.InLobby())
 
+	adminPlayerId := adminLobbyPage.PlayerId()
 	assert.True(s.T(),
-		adminLobbyPage.PlayerConnected(adminLobbyPage.PlayerId()))
+		adminLobbyPage.PlayerConnected(adminPlayerId))
 
 	// Connect with another client then assert that the settings remain equal
 	browser2 := GetBrowser()
@@ -206,6 +207,7 @@ func (s *WithServicesSuite) TestPlayerDisconnectReConnect() {
 
 	time.Sleep(Timeout)
 	assert.False(s.T(), adminLobbyPage.PlayerConnected(playerId))
+	assert.True(s.T(), playerLobbyPage.PlayerConnected(adminPlayerId))
 
 	adminLobbyPage.Page.MustScreenshot("../wiki/assets/player_disconnected.png")
 
@@ -216,6 +218,7 @@ func (s *WithServicesSuite) TestPlayerDisconnectReConnect() {
 
 	time.Sleep(Timeout)
 	assert.True(s.T(), adminLobbyPage.PlayerConnected(playerId))
+	assert.True(s.T(), playerLobbyPage.PlayerConnected(adminPlayerId))
 }
 
 func (s *WithServicesSuite) TestPlayerLeavesGame() {
@@ -250,11 +253,11 @@ func (s *WithServicesSuite) TestPlayerLeavesGame() {
 	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
 	assert.True(s.T(), playerLobbyPage.InLobby())
 
-  playerId := playerLobbyPage.PlayerId()
+	playerId := playerLobbyPage.PlayerId()
 
 	playerLobbyPage.LeaveGame()
-  assert.NotContains(s.T(), adminLobbyPage.PlayersInGame(), playerId)
-  assert.True(s.T(), adminLobbyPage.IsAdmin())
+	assert.NotContains(s.T(), adminLobbyPage.PlayersInGame(), playerId)
+	assert.True(s.T(), adminLobbyPage.IsAdmin())
 }
 
 // Test that the owner leaving a game transfers ownership to another player

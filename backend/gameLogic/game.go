@@ -213,6 +213,8 @@ func (g *Game) StateInfo() GameStateInfo {
 		players[i] = Player{
 			Id:   playerId,
 			Name: g.PlayersMap[playerId].Name,
+      Points: g.PlayersMap[playerId].Points,
+      Connected: g.PlayersMap[playerId].Connected,
 		}
 	}
 
