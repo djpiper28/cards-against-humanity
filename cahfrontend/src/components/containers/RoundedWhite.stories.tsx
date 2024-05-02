@@ -1,4 +1,4 @@
-import { Meta } from "@storybook/react";
+import { Meta } from "storybook-solidjs";
 import RoundedWhite from "./RoundedWhite";
 
 export default {

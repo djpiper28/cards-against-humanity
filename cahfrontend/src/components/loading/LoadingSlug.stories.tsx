@@ -1,4 +1,4 @@
-import { Meta } from "@storybook/react";
+import { Meta } from "storybook-solidjs";
 import LoadingSlug from "./LoadingSlug";
 
 export default {

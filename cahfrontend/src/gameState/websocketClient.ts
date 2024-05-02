@@ -3,6 +3,7 @@ import WebSocket from "isomorphic-ws";
 export interface WebSocketClientCallbacks {
   readonly onReceive: (msg: string) => void;
   readonly onDisconnect: () => void;
+  readonly onError: (msg: string) => void;
   readonly onConnect: () => void;
 }
 
@@ -41,6 +42,7 @@ export function toWebSocketClient(
   };
   ws.onerror = (event) => {
     console.error(event);
+    ret.onError(event.message);
     ret.onDisconnect();
     ws.close();
   };

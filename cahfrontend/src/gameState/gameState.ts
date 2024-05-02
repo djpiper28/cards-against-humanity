@@ -103,6 +103,9 @@ class GameState {
       onReceive: (msg: string) => {
         this.handleRpcMessage(msg);
       },
+      onError: (msg: string) => {
+        console.error(`An error ${msg} occurred`);
+      },
     });
 
     console.log("State Setup");

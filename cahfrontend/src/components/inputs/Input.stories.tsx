@@ -1,4 +1,4 @@
-import { Meta } from "@storybook/react";
+import { Meta } from "storybook-solidjs";
 import Input, { InputType } from "./Input";
 
 export default {

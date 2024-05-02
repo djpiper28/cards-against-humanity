@@ -1,4 +1,4 @@
-import { Meta } from "@storybook/react";
+import { Meta } from "storybook-solidjs";
 import GameSettingsInput from "./GameSettingsInput";
 
 export default {
