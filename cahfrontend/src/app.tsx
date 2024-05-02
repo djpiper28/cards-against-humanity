@@ -1,14 +1,9 @@
 import type { Component } from "solid-js";
 import { Link, useRoutes } from "@solidjs/router";
 import { aboutUrl, indexUrl, routes } from "./routes";
-import "@solid-devtools/debugger/setup";
-import { useDebugger } from "@solid-devtools/debugger/bundled";
-import { useLocator } from "@solid-devtools/debugger/setup";
 
 const App: Component = () => {
   const Route = useRoutes(routes);
-  useDebugger();
-  useLocator({});
 
   return (
     <div class="flex flex-col min-h-screen bg-gray-50">
