@@ -154,7 +154,7 @@ const emptyState: GameLobbyState = {
 };
 
 export default function GameLobby() {
-  const [state, setState] = createSignal<GameLobbyState>(emptyState);
+  const [state, setState] = createSignal<GameLobbyState | undefined>(undefined);
   const [players, setPlayers] = createSignal<GamePlayerList>([]);
 
   const [packs, setPacks] = createSignal<GameLogicCardPack[]>([]);
