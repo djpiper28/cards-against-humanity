@@ -1,4 +1,4 @@
-package metrics
+package gameRepo
 
 import (
 	"fmt"
@@ -9,20 +9,20 @@ import (
 type Metrics struct {
 	// Handled by the network layer
 
-	TotalWsConnections    int64 `metrics:"total_ws_connections"`
-	TotalWsErrors         int64 `metrics:"total_ws_errors"`
-	TotalMessagesSent     int64 `metrics:"total_messages_sent"`
-	TotalUnknownCommands  int64 `metrics:"total_unknown_commands"`
-	TotalCommandsExecuted int64 `metrics:"total_commands_executed"`
-	TotalCommandsFailed   int64 `metrics:"total_commands_failed"`
+	TotalWsConnections    int `metrics:"total_ws_connections"`
+	TotalWsErrors         int `metrics:"total_ws_errors"`
+	TotalMessagesSent     int `metrics:"total_messages_sent"`
+	TotalUnknownCommands  int `metrics:"total_unknown_commands"`
+	TotalCommandsExecuted int `metrics:"total_commands_executed"`
+	TotalCommandsFailed   int `metrics:"total_commands_failed"`
 
 	// Handled by the game repo layer
 
-	TotalGames      int64 `metrics:"total_games"`
-	TotalUsers      int64 `metrics:"total_users"`
-	UsersInGames    int64 `metrics:"users_in_games"`
-	UsersConnected  int64 `metrics:"users_connected"`
-	GamesInProgress int64 `metrics:"games_in_progress"`
+	TotalGames      int `metrics:"total_games"`
+	TotalUsers      int `metrics:"total_users"`
+	UsersInGames    int `metrics:"users_in_games"`
+	UsersConnected  int `metrics:"users_connected"`
+	GamesInProgress int `metrics:"games_in_progress"`
 
 	lock sync.Mutex
 }
@@ -83,46 +83,24 @@ func AddCommandFailed() {
 	metrics.TotalCommandsFailed++
 }
 
-func AddUserInGame() {
-	metrics.lock.Lock()
-	defer metrics.lock.Unlock()
-	metrics.UsersInGames++
-}
-
-func RemoveUserInGame() {
-	metrics.lock.Lock()
-	defer metrics.lock.Unlock()
-	metrics.UsersInGames--
-}
-
-func AddUserConnected() {
-	metrics.lock.Lock()
-	defer metrics.lock.Unlock()
-	metrics.UsersConnected++
-}
-
-func RemoveUserConnected() {
-	metrics.lock.Lock()
-	defer metrics.lock.Unlock()
-	metrics.UsersConnected--
-}
-
-func AddGameInProgress() {
-	metrics.lock.Lock()
-	defer metrics.lock.Unlock()
-	metrics.GamesInProgress++
-}
-
-func RemoveGameInProgress() {
-	metrics.lock.Lock()
-	defer metrics.lock.Unlock()
-	metrics.GamesInProgress--
-}
-
 func getMetrics() Metrics {
+	// safe copy of the metrics
 	metrics.lock.Lock()
-	defer metrics.lock.Unlock()
-	return metrics
+	ret := metrics
+	metrics.lock.Unlock()
+
+	games := Repo.GetGames()
+	metrics.GamesInProgress = len(games)
+	metrics.UsersInGames = 0
+	metrics.UsersConnected = 0
+
+	for _, game := range games {
+		gameMetrics := game.Metrics()
+		metrics.UsersConnected += gameMetrics.PlayersConnected
+		metrics.UsersInGames += gameMetrics.Players
+	}
+
+	return ret
 }
 
 func GetMetrics() string {

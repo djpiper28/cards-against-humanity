@@ -5,6 +5,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/djpiper28/cards-against-humanity/backend/gameRepo"
 	"github.com/djpiper28/cards-against-humanity/backend/logger"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
@@ -68,7 +69,7 @@ func (g *IntegratedConnectionManager) RegisterConnection(gameId, playerId uuid.U
 
 	game.playerConnectionMap[playerId] = connection
 
-	err := GameRepo.ConnectPlayer(gameId, playerId)
+	err := gameRepo.Repo.ConnectPlayer(gameId, playerId)
 	if err != nil {
 		log.Printf("Cannot tag player %s as connected to game %s", playerId, gameId)
 	}
@@ -91,7 +92,7 @@ func (g *IntegratedConnectionManager) UnregisterConnection(gameId, playerId uuid
 			"gameId", gameId)
 	}
 
-	err := GameRepo.DisconnectPlayer(gameId, playerId)
+	err := gameRepo.Repo.DisconnectPlayer(gameId, playerId)
 	if err != nil {
 		logger.Logger.Error("Cannot tag player as disconnected from game",
 			"playerId", playerId,
@@ -177,7 +178,7 @@ func (g *IntegratedConnectionManager) RemoveGame(gameId uuid.UUID) error {
 }
 
 func (g *IntegratedConnectionManager) RemovePlayer(gameId, playerId uuid.UUID) error {
-	res, err := GameRepo.PlayerLeaveGame(gameId, playerId)
+	res, err := gameRepo.Repo.PlayerLeaveGame(gameId, playerId)
 	if err != nil {
 		logger.Logger.Error("Cannot remove player from game", "err", err)
 		return err

@@ -8,7 +8,6 @@ import (
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/djpiper28/cards-against-humanity/backend/logger"
-	"github.com/djpiper28/cards-against-humanity/backend/metrics"
 	"github.com/google/uuid"
 )
 
@@ -44,10 +43,8 @@ func (gr *GameRepo) CreateGame(gameSettings *gameLogic.GameSettings, playerName 
 	gr.GameMap[gid] = game
 	gr.GameAgeMap[gid] = game.CreationTime
 
-	go metrics.AddGame()
-	go metrics.AddGameInProgress()
-	go metrics.AddUser()
-	go metrics.AddUserInGame()
+	go AddGame()
+	go AddUser()
 
 	logger.Logger.Info("Created game for", playerName)
 	return gid, game.GameOwnerId, nil
@@ -66,8 +63,6 @@ func (gr *GameRepo) removeGame(gameId uuid.UUID) error {
 	if !found {
 		return errors.New("Cannot find game")
 	}
-
-	go metrics.RemoveGameInProgress()
 
 	delete(gr.GameMap, gameId)
 	delete(gr.GameAgeMap, gameId)
@@ -97,7 +92,6 @@ func (gr *GameRepo) PlayerLeaveGame(gameId, playerId uuid.UUID) (gameLogic.Playe
 		gr.removeGame(gameId)
 	}
 
-	go metrics.RemoveUserInGame()
 	return res, nil
 }
 
@@ -105,7 +99,6 @@ func (gr *GameRepo) DisconnectPlayer(gameId, playerId uuid.UUID) error {
 	gr.lock.Lock()
 	defer gr.lock.Unlock()
 
-	go metrics.RemoveUserConnected()
 	game, found := gr.GameMap[gameId]
 	if !found {
 		return errors.New("Cannot find game")
@@ -141,7 +134,6 @@ func (gr *GameRepo) ConnectPlayer(gameId, playerId uuid.UUID) error {
 	}
 
 	player.Connected = true
-	go metrics.AddUserConnected()
 	return nil
 }
 
@@ -216,8 +208,7 @@ func (gr *GameRepo) CreatePlayer(gameId uuid.UUID, playerName, password string) 
 		return uuid.UUID{}, err
 	}
 
-	go metrics.AddUserInGame()
-	go metrics.AddUser()
+	go AddUser()
 	return playerId, nil
 }
 

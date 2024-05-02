@@ -1,19 +1,18 @@
-package network
+package gameRepo
 
 import (
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
-	"github.com/djpiper28/cards-against-humanity/backend/gameRepo"
 	"github.com/djpiper28/cards-against-humanity/backend/logger"
 )
 
-var GameRepo *gameRepo.GameRepo = initGlobals()
+var Repo *GameRepo = initGlobals()
 
-func initGlobals() *gameRepo.GameRepo {
+func initGlobals() *GameRepo {
 	err := gameLogic.LoadPacks()
 	if err != nil {
 		logger.Logger.Fatal("Cannot create the card packs", "err", err)
 	}
 
 	logger.Logger.Info("Initialising Game Repo")
-	return gameRepo.New()
+	return New()
 }

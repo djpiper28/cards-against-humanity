@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/djpiper28/cards-against-humanity/backend/gameRepo"
 	"github.com/djpiper28/cards-against-humanity/backend/logger"
-	"github.com/djpiper28/cards-against-humanity/backend/metrics"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
@@ -32,7 +32,7 @@ func WsUpgrade(w http.ResponseWriter, r *http.Request, gameId, playerId uuid.UUI
 		return nil, err
 	}
 
-	go metrics.AddWsConnection()
+	go gameRepo.AddWsConnection()
 
 	conn := cm.NewConnection(c, gameId, playerId)
 	return conn, nil
@@ -56,7 +56,7 @@ type WsConnection struct {
 func (wsconn *WsConnection) Send(msg []byte) error {
 	wsconn.lock.Lock()
 	defer wsconn.lock.Unlock()
-	go metrics.AddMessageSent()
+	go gameRepo.AddMessageSent()
 	return wsconn.conn.Send(msg)
 }
 
@@ -84,12 +84,12 @@ const UnknownCommand = "Unknown Command"
 func (c *WsConnection) listenAndHandle() error {
 	gid := c.GameId
 	// pid := c.PlayerId
-	game, err := GameRepo.GetGame(gid)
+	game, err := gameRepo.Repo.GetGame(gid)
 	if err != nil {
 		return err
 	}
 
-	name, err := GameRepo.GetPlayerName(gid, c.PlayerId)
+	name, err := gameRepo.Repo.GetPlayerName(gid, c.PlayerId)
 	if err != nil {
 		logger.Logger.Error("Cannot get the player's name", "err", err)
 		name = "Error"
@@ -126,14 +126,14 @@ func (c *WsConnection) listenAndHandle() error {
 			return errors.New("Cannot read from websocket")
 		}
 
-		go metrics.AddCommandExecuted()
+		go gameRepo.AddCommandExecuted()
 
 		handler := UnknownCommand
 		startTime := time.Now()
 		err = DecodeRpcMessage(msg, RpcCommandHandlers{
 			ChangeSettingsHandler: func(msg RpcChangeSettingsMsg) error {
 				handler = "Change Settings"
-				game, err := GameRepo.GetGame(gid)
+				game, err := gameRepo.Repo.GetGame(gid)
 				if err != nil {
 					return errors.New("Cannot find the game")
 				}
@@ -142,7 +142,7 @@ func (c *WsConnection) listenAndHandle() error {
 					return errors.New("You cannot change the settings as you are not the game owner")
 				}
 
-				err = GameRepo.ChangeSettings(gid, msg.Settings)
+				err = gameRepo.Repo.ChangeSettings(gid, msg.Settings)
 				if err != nil {
 					return err
 				}
@@ -166,7 +166,7 @@ func (c *WsConnection) listenAndHandle() error {
 			microSeconds)
 
 		if handler == UnknownCommand {
-			go metrics.AddUnknownCommand()
+			go gameRepo.AddUnknownCommand()
 		}
 
 		if err != nil {
@@ -174,7 +174,7 @@ func (c *WsConnection) listenAndHandle() error {
 				"err", err,
 				"gameId", c.GameId,
 				"playerId", c.PlayerId)
-			go metrics.AddCommandFailed()
+			go gameRepo.AddCommandFailed()
 
 			var message RpcCommandErrorMsg
 			message.Reason = err.Error()
@@ -195,8 +195,8 @@ func (c *WsConnection) ListenAndHandle(g *IntegratedConnectionManager) {
 	if err != nil {
 		logger.Logger.Error("Error whilst handling websocket connection",
 			"err", err)
-		go metrics.AddWsError()
-		go metrics.RemoveWsConnection()
+		go gameRepo.AddWsError()
+		go gameRepo.RemoveWsConnection()
 		c.Close()
 		g.UnregisterConnection(c.GameId, c.PlayerId)
 	}

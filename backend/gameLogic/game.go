@@ -211,10 +211,10 @@ func (g *Game) StateInfo() GameStateInfo {
 	players := make([]Player, len(g.Players))
 	for i, playerId := range g.Players {
 		players[i] = Player{
-			Id:   playerId,
-			Name: g.PlayersMap[playerId].Name,
-      Points: g.PlayersMap[playerId].Points,
-      Connected: g.PlayersMap[playerId].Connected,
+			Id:        playerId,
+			Name:      g.PlayersMap[playerId].Name,
+			Points:    g.PlayersMap[playerId].Points,
+			Connected: g.PlayersMap[playerId].Connected,
 		}
 	}
 
@@ -335,4 +335,25 @@ func (g *Game) StartGame() error {
 		player.Hand = cardIndexSlice
 	}
 	return nil
+}
+
+type GameMetrics struct {
+	PlayersConnected int
+	Players          int
+}
+
+func (g *Game) Metrics() GameMetrics {
+	g.Lock.Lock()
+	defer g.Lock.Unlock()
+
+	metrics := GameMetrics{}
+
+	for _, player := range g.PlayersMap {
+		metrics.Players++
+		if player.Connected {
+			metrics.PlayersConnected++
+		}
+	}
+
+	return metrics
 }

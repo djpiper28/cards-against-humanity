@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
+	"github.com/djpiper28/cards-against-humanity/backend/gameRepo"
 	"github.com/djpiper28/cards-against-humanity/backend/logger"
 	"github.com/djpiper28/cards-against-humanity/backend/network"
 	"github.com/djpiper28/cards-against-humanity/backend/security"
@@ -30,7 +31,7 @@ const (
 // @Success		200	{object}	[]gameLogic.GameInfo
 // @Router			/games/notFull [get]
 func getGames(c *gin.Context) {
-	games := network.GameRepo.GetGames()
+	games := gameRepo.Repo.GetGames()
 	info := make([]gameLogic.GameInfo, 0, len(games))
 
 	for _, game := range games {
@@ -102,7 +103,7 @@ func createGame(c *gin.Context) {
 		CardPacks:       packs,
 	}
 
-	gameId, playerId, err := network.GameRepo.CreateGame(&settings, createReq.PlayerName)
+	gameId, playerId, err := gameRepo.Repo.CreateGame(&settings, createReq.PlayerName)
 	if err != nil {
 		c.Error(err)
 		c.JSON(http.StatusInternalServerError, NewApiError(err))
@@ -158,7 +159,7 @@ func createPlayerForJoining(c *gin.Context) {
 		return
 	}
 
-	playerId, err := network.GameRepo.CreatePlayer(createReq.GameId, createReq.PlayerName, createReq.Password)
+	playerId, err := gameRepo.Repo.CreatePlayer(createReq.GameId, createReq.PlayerName, createReq.Password)
 	if err != nil {
 		logger.Logger.Error("Cannot create player", "err", err)
 		c.JSON(http.StatusInternalServerError, NewApiError(err))
@@ -268,7 +269,7 @@ func joinGame(c *gin.Context) {
 	}
 
 	// Join the game
-	err = network.GameRepo.JoinGame(authData.GameId,
+	err = gameRepo.Repo.JoinGame(authData.GameId,
 		authData.PlayerId,
 		authData.Password)
 	if err != nil {
