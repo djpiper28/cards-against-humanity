@@ -93,8 +93,10 @@ func (s *ServerTestSuite) TestCommandError() {
 	assert.Equal(t, game.Ids.GameId, onJoinMsg.Data.State.Id)
 	assert.Len(t, onJoinMsg.Data.State.Players, 1)
 	assert.Contains(t, onJoinMsg.Data.State.Players, gameLogic.Player{
-		Id:   game.Ids.PlayerId,
-		Name: "Dave"})
+		Id:        game.Ids.PlayerId,
+		Name:      "Dave",
+		Points:    0,
+		Connected: true})
 
 	conn.WriteMessage(websocket.TextMessage, []byte(`{"type":1,"data":{"command":"start"}}`))
 	_, msg, err = conn.ReadMessage()
@@ -155,6 +157,8 @@ func (s *ServerTestSuite) TestJoinGameEndpoint() {
 	assert.Equal(t, game.Ids.GameId, onJoinMsg.Data.State.Id)
 	assert.Len(t, onJoinMsg.Data.State.Players, 1)
 	assert.Contains(t, onJoinMsg.Data.State.Players, gameLogic.Player{
-		Id:   game.Ids.PlayerId,
-		Name: "Dave"})
+		Id:        game.Ids.PlayerId,
+		Name:      "Dave",
+		Points:    0,
+		Connected: true})
 }

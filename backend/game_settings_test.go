@@ -54,8 +54,10 @@ func (s *ServerTestSuite) TestChangeSettings() {
 	assert.Equal(t, game.Ids.GameId, onJoinMsg.Data.State.Id)
 	assert.Len(t, onJoinMsg.Data.State.Players, 1)
 	assert.Contains(t, onJoinMsg.Data.State.Players, gameLogic.Player{
-		Id:   game.Ids.PlayerId,
-		Name: "Dave"})
+		Id:        game.Ids.PlayerId,
+		Name:      "Dave",
+		Points:    0,
+		Connected: true})
 
 	// Change the settings
 	newSettings := gameLogic.DefaultGameSettings()
