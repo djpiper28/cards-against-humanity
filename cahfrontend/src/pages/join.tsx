@@ -10,10 +10,12 @@ import { cookieStorage } from "@solid-primitives/storage";
 import LoadingSlug from "../components/loading/LoadingSlug";
 import GameLobby from "../components/gameControls/GameLobby";
 import {
-  gmaeJoinErrorUrl as joinErrorUrl,
+  gameErrorUrl as joinErrorUrl,
   indexUrl,
   playerJoinUrl,
+  gameErrorUrl,
 } from "../routes";
+import { errorMessageParam } from "./gameError";
 
 export default function Join() {
   const [searchParams] = useSearchParams();
@@ -53,6 +55,11 @@ export default function Join() {
 
     try {
       gameState.setupState(gameId, playerId, password);
+      gameState.onError = (msg: string) => {
+        navigate(
+          `${gameErrorUrl}?${errorMessageParam}=${encodeURIComponent(msg)}`,
+        );
+      };
       setConnected(true);
     } catch (e) {
       console.error(`Cannot setup the connection ${e}`);

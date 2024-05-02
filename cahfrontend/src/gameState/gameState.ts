@@ -60,6 +60,7 @@ class GameState {
   public onPlayerListChange?: (players: GamePlayerList) => void;
   public onCommandError?: (error: RpcCommandErrorMsg) => void;
   public onChangeSettings?: (settings: RpcChangeSettingsMsg) => void;
+  public onError?: (error: string) => void;
 
   // Logic lmao
   constructor() {}
@@ -96,6 +97,7 @@ class GameState {
     this.wsClient = toWebSocketClient(ws, {
       onDisconnect: () => {
         console.error("Disconnected from the game server");
+        this.onError?.("Disconnected from the server");
       },
       onConnect: () => {
         console.log("Connected to the game server");
@@ -105,6 +107,7 @@ class GameState {
       },
       onError: (msg: string) => {
         console.error(`An error ${msg} occurred`);
+        this.onError?.(msg);
       },
     });
 
@@ -278,6 +281,7 @@ class GameState {
       throw new Error("Cannot leave game as websocket is not connected");
     }
 
+    this.onError = undefined;
     this.wsClient.disconnect();
     return apiClient.games.leaveDelete();
   }
