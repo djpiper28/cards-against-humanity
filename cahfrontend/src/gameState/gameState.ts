@@ -9,6 +9,7 @@ import {
   MsgOnPlayerJoin,
   MsgOnPlayerLeave,
   MsgPing,
+  MsgStartGame,
   RpcChangeSettingsMsg,
   RpcCommandErrorMsg,
   RpcMessage,
@@ -234,12 +235,12 @@ class GameState {
       case MsgOnPlayerCreate:
         console.log("Handling on player create message");
         return this.handleOnPlayerCreate(
-          rpcMessage.data as RpcOnPlayerCreateMsg,
+          rpcMessage.data as RpcOnPlayerCreateMsg
         );
       case MsgOnPlayerDisconnect:
         console.log("Handling on player disconnect message");
         return this.handleOnPlayerDisconnect(
-          rpcMessage.data as RpcOnPlayerDisconnectMsg,
+          rpcMessage.data as RpcOnPlayerDisconnectMsg
         );
       case MsgCommandError:
         console.log("Handling command error message");
@@ -261,7 +262,7 @@ class GameState {
         return this.handlePing();
       default:
         throw new Error(
-          `Cannot handle RPC message as type is not valid ${rpcMessage.type}`,
+          `Cannot handle RPC message as type is not valid ${rpcMessage.type}`
         );
     }
   }
@@ -293,6 +294,17 @@ class GameState {
     this.onError = undefined;
     this.wsClient.disconnect();
     return apiClient.games.leaveDelete();
+  }
+
+  public async startGame() {
+    console.log("Starting game: ", this.gameId);
+    if (!this.wsClient) {
+      throw new Error("Cannot start game as websocket is not connected");
+    }
+
+    this.wsClient.sendMessage(
+      JSON.stringify(this.encodeMessage(MsgStartGame, {}))
+    );
   }
 }
 

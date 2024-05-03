@@ -214,6 +214,23 @@ func (c *WsConnection) listenAndHandle() error {
 				c.PingFlag = false
 				return nil
 			},
+			StartGameHandler: func() error {
+				handler = "Start Game"
+				game, err := gameRepo.Repo.GetGame(gid)
+				if err != nil {
+					return errors.New("Cannot find the game")
+				}
+
+				if game.GameOwnerId != c.PlayerId {
+					return errors.New("Only the game owner can start the game")
+				}
+
+        err = gameRepo.Repo.StartGame(gid)
+        if err != nil {
+          return err
+        }
+				return nil
+			},
 		})
 
 		endTime := time.Now()

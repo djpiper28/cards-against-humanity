@@ -33,6 +33,12 @@ const (
 	MsgChangeSettings
 	// Rx & Tx for pinging and "ponging" between the server and client
 	MsgPing
+
+	// Rx when the owner starts the game
+	MsgStartGame
+
+	// Tx the current round info
+	MsgRoundInformation
 )
 
 type RpcMessageBody struct {
@@ -56,6 +62,7 @@ func EncodeRpcMessage(msg RpcMessage) ([]byte, error) {
 type RpcCommandHandlers struct {
 	ChangeSettingsHandler func(msg RpcChangeSettingsMsg) error
 	PingHandler           func() error
+	StartGameHandler      func() error
 }
 
 func decodeAs[T any](data []byte) (T, error) {
@@ -169,4 +176,20 @@ type RpcPingMsg struct{}
 
 func (msg RpcPingMsg) Type() RpcMessageType {
 	return MsgPing
+}
+
+type RpcStartGameMsg struct{}
+
+func (msg RpcStartGameMsg) Type() RpcMessageType {
+	return MsgStartGame
+}
+
+type RpcRoundInformationMsg struct {
+	RoundNumber uint                  `json:"roundNumber"`
+	BlackCard   gameLogic.BlackCard   `json:"blackCard"`
+	YourHand    []gameLogic.WhiteCard `json:"yourHand"`
+}
+
+func (msg RpcRoundInformationMsg) Type() RpcMessageType {
+	return MsgRoundInformation
 }

@@ -132,7 +132,19 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
           when={!dirtyState()}
           fallback={"Cannot start a game with unsaved changes."}
         >
-          <Button onClick={() => {}}>Start Game</Button>
+          <Button
+            onClick={async () => {
+              try {
+                await gameState.startGame();
+              } catch (e) {
+                props.setCommandError(
+                  "Unable to start game. Please try again."
+                );
+              }
+            }}
+          >
+            Start Game
+          </Button>
         </Show>
       </Show>
       <PlayerList players={props.players} />
@@ -204,7 +216,7 @@ export default function GameLobby() {
         cardPacksList.sort((a, b) => {
           if (!a.name || !b.name) return 0;
           return a.name.localeCompare(b.name);
-        }),
+        })
       );
     } catch (err) {
       console.error(err);
@@ -232,7 +244,7 @@ export default function GameLobby() {
           setSelectedPackIds={(ids) => {
             const newState = state();
             newState.settings.cardPacks = ids.map((id) =>
-              packs().find((x) => x.id === id),
+              packs().find((x) => x.id === id)
             );
             setState(newState);
           }}
