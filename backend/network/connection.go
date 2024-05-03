@@ -50,6 +50,8 @@ type WsConnection struct {
 	PlayerId     uuid.UUID
 	JoinTime     time.Time
 	LastPingTime time.Time
+	// Used to know if a ping has been sent
+	PingFlag bool
 	// Used to terminate the ping thread
 	Connected bool
 	lock      sync.Mutex
@@ -66,6 +68,7 @@ func (wsconn *WsConnection) Close() {
 	wsconn.lock.Lock()
 	defer wsconn.lock.Unlock()
 	wsconn.conn.Close()
+	wsconn.Connected = false
 }
 
 const pingTimeout = 10 * time.Second
@@ -76,6 +79,7 @@ func (gcm *IntegratedConnectionManager) NewConnection(conn *websocket.Conn, game
 		PlayerId:     playerId,
 		GameId:       gameId,
 		JoinTime:     time.Now(),
+		PingFlag:     true,
 		Connected:    true,
 		LastPingTime: time.Now(),
 	}
@@ -92,11 +96,12 @@ func (gcm *IntegratedConnectionManager) NewConnection(conn *websocket.Conn, game
 					return errors.New("Connection is not connected")
 				}
 
-				if time.Since(c.LastPingTime) > pingInterval {
+				if time.Since(c.LastPingTime) > pingInterval && !c.PingFlag {
 					pingMessage, err := EncodeRpcMessage(RpcPingMsg{})
 					if err != nil {
 						return err
 					}
+					c.PingFlag = true
 
 					go c.Send(pingMessage)
 					return nil
@@ -121,6 +126,7 @@ func (gcm *IntegratedConnectionManager) NewConnection(conn *websocket.Conn, game
 }
 
 const UnknownCommand = "Unknown Command"
+const PingCommand = "Ping"
 
 // To be called after registering the connection, this will listen to the
 // websocket traffic on a loop and handle it
@@ -199,11 +205,12 @@ func (c *WsConnection) listenAndHandle() error {
 				return nil
 			},
 			PingHandler: func() error {
-        handler = "Ping"
+				handler = PingCommand
 				c.lock.Lock()
 				defer c.lock.Unlock()
 
 				c.LastPingTime = time.Now()
+				c.PingFlag = false
 				return nil
 			},
 		})
@@ -211,10 +218,12 @@ func (c *WsConnection) listenAndHandle() error {
 		endTime := time.Now()
 		microSeconds := endTime.Sub(startTime).Microseconds()
 
-		logger.Logger.Infof("Command Handler \"%s\" | %s | %dµs",
-			handler,
-			gid,
-			microSeconds)
+		if handler != PingCommand {
+			logger.Logger.Infof("Command Handler \"%s\" | %s | %dµs",
+				handler,
+				gid,
+				microSeconds)
+		}
 
 		if handler == UnknownCommand {
 			go gameRepo.AddUnknownCommand()
