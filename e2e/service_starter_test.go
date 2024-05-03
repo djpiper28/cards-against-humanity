@@ -119,7 +119,7 @@ func (s *WithServicesSuite) TearDownSuite() {
 }
 
 func TestWithServicesSuite(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 	suite.Run(t, new(WithServicesSuite))
 }
 

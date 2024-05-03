@@ -31,6 +31,8 @@ const (
 
 	// Rx change the settings of the game
 	MsgChangeSettings
+	// Rx & Tx for pinging and "ponging" between the server and client
+	MsgPing
 )
 
 type RpcMessageBody struct {
@@ -53,6 +55,7 @@ func EncodeRpcMessage(msg RpcMessage) ([]byte, error) {
 
 type RpcCommandHandlers struct {
 	ChangeSettingsHandler func(msg RpcChangeSettingsMsg) error
+	PingHandler           func() error
 }
 
 func decodeAs[T any](data []byte) (T, error) {
@@ -85,6 +88,9 @@ func DecodeRpcMessage(data []byte, handlers RpcCommandHandlers) error {
 		}
 
 		return handlers.ChangeSettingsHandler(command)
+	case MsgPing:
+		// The ping has no body so we don't bother to check it
+		return handlers.PingHandler()
 	default:
 		logger.Logger.Error("Unknown command", "type", cmd.Type)
 		return errors.New("Unknown command")
@@ -157,4 +163,10 @@ type RpcNewOwnerMsg struct {
 
 func (msg RpcNewOwnerMsg) Type() RpcMessageType {
 	return MsgNewOwner
+}
+
+type RpcPingMsg struct{}
+
+func (msg RpcPingMsg) Type() RpcMessageType {
+	return MsgPing
 }

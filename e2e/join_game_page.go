@@ -113,17 +113,17 @@ func (j *JoinGamePage) PlayerConnected(playerId string) bool {
 }
 
 func (j *JoinGamePage) PlayersInGame() []string {
-  players := []string{}
-  for _, el := range j.Page.MustElements("player-list") {
-    players = append(players, el.MustElements("p")[0].MustText())
-  }
-  return players
+	players := []string{}
+	for _, el := range j.Page.MustElements("player-list") {
+		players = append(players, el.MustElements("p")[0].MustText())
+	}
+	return players
 }
 
 func (j *JoinGamePage) LeaveGame() {
-  j.Page.Timeout(Timeout).MustElementR("button", "/Leave Game/i").MustClick()
+	j.Page.Timeout(Timeout).MustElementR("button", "/Leave Game/i").MustClick()
 }
 
 func (j *JoinGamePage) IsAdmin() bool {
-  return j.Page.Timeout(Timeout).MustElementR("button", "/Start Game/i") != nil
+	return j.Page.Timeout(Timeout).MustElementR("button", "/Start Game/i") != nil
 }

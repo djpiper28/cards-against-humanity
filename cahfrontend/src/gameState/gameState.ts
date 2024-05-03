@@ -8,6 +8,7 @@ import {
   MsgOnPlayerDisconnect,
   MsgOnPlayerJoin,
   MsgOnPlayerLeave,
+  MsgPing,
   RpcChangeSettingsMsg,
   RpcCommandErrorMsg,
   RpcMessage,
@@ -107,6 +108,7 @@ class GameState {
       },
       onError: (msg: string) => {
         console.error(`An error ${msg} occurred`);
+        // The ping has no body so we don't bother to check it
         this.onError?.(msg);
       },
     });
@@ -213,6 +215,10 @@ class GameState {
     this.onLobbyStateChange?.(this.lobbyState);
   }
 
+  private handlePing() {
+    this.wsClient?.sendMessage(JSON.stringify(this.encodeMessage(MsgPing, {})));
+  }
+
   /**
    * Handles an RPC message from the server. When testing call the private method and ignore the "error".
    */
@@ -250,6 +256,9 @@ class GameState {
       case MsgNewOwner:
         console.log("Handling new owner message");
         return this.handleOnOwnerChange(rpcMessage.data as RpcNewOwnerMsg);
+      case MsgPing:
+        console.log("Handling ping message");
+        return this.handlePing();
       default:
         throw new Error(
           `Cannot handle RPC message as type is not valid ${rpcMessage.type}`,

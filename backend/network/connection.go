@@ -50,7 +50,9 @@ type WsConnection struct {
 	PlayerId     uuid.UUID
 	JoinTime     time.Time
 	LastPingTime time.Time
-	lock         sync.Mutex
+	// Used to terminate the ping thread
+	Connected bool
+	lock      sync.Mutex
 }
 
 func (wsconn *WsConnection) Send(msg []byte) error {
@@ -66,14 +68,55 @@ func (wsconn *WsConnection) Close() {
 	wsconn.conn.Close()
 }
 
+const pingTimeout = 10 * time.Second
+const pingInterval = 5 * time.Second
+
 func (gcm *IntegratedConnectionManager) NewConnection(conn *websocket.Conn, gameId, playerId uuid.UUID) *WsConnection {
 	c := &WsConnection{conn: &WebsocketConnection{Conn: conn},
 		PlayerId:     playerId,
 		GameId:       gameId,
 		JoinTime:     time.Now(),
+		Connected:    true,
 		LastPingTime: time.Now(),
 	}
 	gcm.RegisterConnection(gameId, playerId, c)
+
+	// Ping timeout handler
+	go func() {
+		for {
+			err := func() error {
+				c.lock.Lock()
+				defer c.lock.Unlock()
+
+				if !c.Connected {
+					return errors.New("Connection is not connected")
+				}
+
+				if time.Since(c.LastPingTime) > pingInterval {
+					pingMessage, err := EncodeRpcMessage(RpcPingMsg{})
+					if err != nil {
+						return err
+					}
+
+					go c.Send(pingMessage)
+					return nil
+				} else if time.Since(c.LastPingTime) > pingTimeout {
+					logger.Logger.Warn("Player timed out due to no ping response",
+						"playerId", c.PlayerId,
+						"gameId", c.GameId)
+					go c.Close()
+					return errors.New("Ping timeout")
+				}
+				return nil
+			}()
+
+			if err != nil {
+				return
+			}
+
+			time.Sleep(time.Millisecond * 100)
+		}
+	}()
 	return c
 }
 
@@ -153,6 +196,13 @@ func (c *WsConnection) listenAndHandle() error {
 				}
 
 				go GlobalConnectionManager.Broadcast(gid, broadcastMessage)
+				return nil
+			},
+			PingHandler: func() error {
+				c.lock.Lock()
+				defer c.lock.Unlock()
+
+				c.LastPingTime = time.Now()
 				return nil
 			},
 		})
