@@ -199,6 +199,7 @@ func (c *WsConnection) listenAndHandle() error {
 				return nil
 			},
 			PingHandler: func() error {
+        handler = "Ping"
 				c.lock.Lock()
 				defer c.lock.Unlock()
 
