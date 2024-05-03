@@ -357,3 +357,19 @@ func (g *Game) Metrics() GameMetrics {
 
 	return metrics
 }
+
+func (g *Game) ChangeSettings(newSettings GameSettings) error {
+	g.Lock.Lock()
+	defer g.Lock.Unlock()
+
+	if g.GameState != GameStateInLobby {
+		return errors.New("Settings can only be changed in the lobby")
+	}
+
+	if !newSettings.Validate() {
+		return errors.New("Cannot validate the new settings")
+	}
+
+	g.Settings = &newSettings
+	return nil
+}

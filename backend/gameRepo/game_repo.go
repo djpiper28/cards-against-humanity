@@ -233,10 +233,6 @@ func (gr *GameRepo) GetPlayerName(gameId, playerId uuid.UUID) (string, error) {
 }
 
 func (gr *GameRepo) ChangeSettings(gameId uuid.UUID, settings gameLogic.GameSettings) error {
-	if !settings.Validate() {
-		return errors.New("Invalid settings")
-	}
-
 	gr.lock.RLock()
 	defer gr.lock.RUnlock()
 
@@ -245,9 +241,9 @@ func (gr *GameRepo) ChangeSettings(gameId uuid.UUID, settings gameLogic.GameSett
 		return errors.New("Cannot find game")
 	}
 
-	game.Lock.Lock()
-	defer game.Lock.Unlock()
-
-	game.Settings = &settings
+	err := game.ChangeSettings(settings)
+	if err != nil {
+		return err
+	}
 	return nil
 }

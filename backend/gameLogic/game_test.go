@@ -579,3 +579,46 @@ func TestRemovingGameOwnerReassignsIt(t *testing.T) {
 	assert.Len(t, game.Players, 1)
 	assert.Len(t, game.PlayersMap, 1)
 }
+
+func TestChangeSettingsValid(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	newSettings := gameLogic.DefaultGameSettings()
+	newSettings.MaxPlayers = 10
+
+	err = game.ChangeSettings(*newSettings)
+	assert.NoError(t, err)
+}
+
+func TestCannotChangeSettingsInLobby(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	game.GameState = gameLogic.GameStateWhiteCardsBeingSelected
+	newSettings := gameLogic.DefaultGameSettings()
+	newSettings.MaxPlayers = 10
+
+	err = game.ChangeSettings(*newSettings)
+	assert.Error(t, err)
+}
+
+func TestCannotChangeSettingsToInvalidSettings(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	newSettings := gameLogic.DefaultGameSettings()
+	newSettings.MaxPlayers = 0
+
+	err = game.ChangeSettings(*newSettings)
+	assert.Error(t, err)
+}

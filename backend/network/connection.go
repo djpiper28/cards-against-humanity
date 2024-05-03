@@ -71,15 +71,15 @@ func (wsconn *WsConnection) Close() {
 	wsconn.Connected = false
 }
 
-const pingTimeout = 10 * time.Second
 const pingInterval = 5 * time.Second
+const pingTimeout = 2 * pingInterval
 
 func (gcm *IntegratedConnectionManager) NewConnection(conn *websocket.Conn, gameId, playerId uuid.UUID) *WsConnection {
 	c := &WsConnection{conn: &WebsocketConnection{Conn: conn},
 		PlayerId:     playerId,
 		GameId:       gameId,
 		JoinTime:     time.Now(),
-		PingFlag:     true,
+		PingFlag:     false,
 		Connected:    true,
 		LastPingTime: time.Now(),
 	}
@@ -87,6 +87,7 @@ func (gcm *IntegratedConnectionManager) NewConnection(conn *websocket.Conn, game
 
 	// Ping timeout handler
 	go func() {
+		time.Sleep(pingInterval)
 		for {
 			err := func() error {
 				c.lock.Lock()
