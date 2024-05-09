@@ -243,9 +243,7 @@ export default function GameLobby() {
           }}
           setSelectedPackIds={(ids) => {
             const newState = state();
-            newState.settings.cardPacks = ids.map((id) =>
-              packs().find((x) => x.id === id),
-            );
+            newState.settings.cardPacks = ids;
             setState(newState);
           }}
           players={players()}
