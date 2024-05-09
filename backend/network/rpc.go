@@ -191,6 +191,10 @@ type RpcRoundInformationMsg struct {
 	CurrentCardCzarId uuid.UUID             `json:"currentCardCzarId"`
 	BlackCard         gameLogic.BlackCard   `json:"blackCard"`
 	YourHand          []gameLogic.WhiteCard `json:"yourHand"`
+	YourPlays         []gameLogic.WhiteCard `json:"yourPlays"`
+	// Total amuont of players who have played cards, including yourself:
+	// if playerCount - 1 /*card czar*/ == TotalPlays then all players have played
+	TotalPlays int `json:"totalPlays"`
 }
 
 func (msg RpcRoundInformationMsg) Type() RpcMessageType {

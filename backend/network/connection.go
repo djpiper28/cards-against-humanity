@@ -257,10 +257,22 @@ func (c *WsConnection) listenAndHandle() error {
 					return err
 				}
 
+				totalPlays := 0
+				for _, plays := range info.PlayersPlays {
+					if len(plays) > 0 {
+						totalPlays++
+					}
+				}
+
 				for playerId, hand := range info.PlayerHands {
 					handCopy := make([]gameLogic.WhiteCard, len(hand))
 					for i, val := range hand {
 						handCopy[i] = *val
+					}
+
+					playsCopy := make([]gameLogic.WhiteCard, 0)
+					for i, val := range info.PlayersPlays[playerId] {
+						playsCopy[i] = *val
 					}
 
 					roundInfo := RpcRoundInformationMsg{
@@ -268,6 +280,8 @@ func (c *WsConnection) listenAndHandle() error {
 						YourHand:          handCopy,
 						RoundNumber:       info.RoundNumber,
 						BlackCard:         *info.CurrentBlackCard,
+						YourPlays:         playsCopy,
+						TotalPlays:        totalPlays,
 					}
 
 					encodedMessage, err := EncodeRpcMessage(roundInfo)
