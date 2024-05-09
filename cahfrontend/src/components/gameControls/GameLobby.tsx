@@ -176,7 +176,7 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
               return {
                 id: x.id.toString(),
                 name: x.bodyText,
-                pack: "",
+                pack: "Your hand",
                 played: false,
               };
             })}
