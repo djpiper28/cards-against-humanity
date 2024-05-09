@@ -8,7 +8,6 @@ import (
 	"github.com/djpiper28/cards-against-humanity/backend/gameRepo"
 	"github.com/djpiper28/cards-against-humanity/backend/logger"
 	"github.com/google/uuid"
-	"github.com/gorilla/websocket"
 )
 
 type GameConnection struct {
@@ -17,25 +16,15 @@ type GameConnection struct {
 }
 
 // Manages all of the connections
-var GlobalConnectionManager = &IntegratedConnectionManager{GameConnectionMap: make(map[uuid.UUID]*GameConnection)}
+var GlobalConnectionManager = &ConnectionManager{GameConnectionMap: make(map[uuid.UUID]*GameConnection)}
 
-type IntegratedConnectionManager struct {
+type ConnectionManager struct {
 	// Maps a game ID to the game connection pool
 	GameConnectionMap map[uuid.UUID]*GameConnection
 	lock              sync.Mutex
 }
 
-// TODO: Delete this shitty interface
-type ConnectionManager interface {
-	RegisterConnection(gameId, playerId uuid.UUID, connection *WsConnection)
-	NewConnection(conn *websocket.Conn, gameId, playerId uuid.UUID) *WsConnection
-	Close(gameId, playerId uuid.UUID) error
-	RemovePlayer(gameId, playerId uuid.UUID) error
-	RemoveGame(gameId uuid.UUID) error
-	SendToPlayer(gameId, playerId uuid.UUID, message []byte) error
-}
-
-func (g *IntegratedConnectionManager) Close(gameId, playerId uuid.UUID) error {
+func (g *ConnectionManager) Close(gameId, playerId uuid.UUID) error {
 	g.lock.Lock()
 	defer g.lock.Unlock()
 
@@ -49,7 +38,7 @@ func (g *IntegratedConnectionManager) Close(gameId, playerId uuid.UUID) error {
 	return nil
 }
 
-func (g *IntegratedConnectionManager) RegisterConnection(gameId, playerId uuid.UUID, connection *WsConnection) {
+func (g *ConnectionManager) RegisterConnection(gameId, playerId uuid.UUID, connection *WsConnection) {
 	g.lock.Lock()
 	defer g.lock.Unlock()
 
@@ -79,7 +68,7 @@ func (g *IntegratedConnectionManager) RegisterConnection(gameId, playerId uuid.U
 	go connection.ListenAndHandle(g)
 }
 
-func (g *IntegratedConnectionManager) UnregisterConnection(gameId, playerId uuid.UUID) {
+func (g *ConnectionManager) UnregisterConnection(gameId, playerId uuid.UUID) {
 	g.lock.Lock()
 	defer g.lock.Unlock()
 
@@ -115,7 +104,7 @@ func (g *IntegratedConnectionManager) UnregisterConnection(gameId, playerId uuid
 	go g.Broadcast(gameId, message)
 }
 
-func (g *IntegratedConnectionManager) SendToPlayer(gameId, playerId uuid.UUID, message []byte) error {
+func (g *ConnectionManager) SendToPlayer(gameId, playerId uuid.UUID, message []byte) error {
 	g.lock.Lock()
 	defer g.lock.Unlock()
 
@@ -134,7 +123,7 @@ func (g *IntegratedConnectionManager) SendToPlayer(gameId, playerId uuid.UUID, m
 }
 
 // Blocking call to send a message to all players in a game using a wait group
-func (g *IntegratedConnectionManager) Broadcast(gameId uuid.UUID, message []byte) {
+func (g *ConnectionManager) Broadcast(gameId uuid.UUID, message []byte) {
 	g.lock.Lock()
 	defer g.lock.Unlock()
 
@@ -169,7 +158,7 @@ func (g *IntegratedConnectionManager) Broadcast(gameId uuid.UUID, message []byte
 	}
 }
 
-func (g *IntegratedConnectionManager) RemoveGame(gameId uuid.UUID) error {
+func (g *ConnectionManager) RemoveGame(gameId uuid.UUID) error {
 	g.lock.Lock()
 	defer g.lock.Unlock()
 
@@ -197,7 +186,7 @@ func (g *IntegratedConnectionManager) RemoveGame(gameId uuid.UUID) error {
 	return nil
 }
 
-func (g *IntegratedConnectionManager) RemovePlayer(gameId, playerId uuid.UUID) error {
+func (g *ConnectionManager) RemovePlayer(gameId, playerId uuid.UUID) error {
 	res, err := gameRepo.Repo.PlayerLeaveGame(gameId, playerId)
 	if err != nil {
 		logger.Logger.Error("Cannot remove player from game", "err", err)

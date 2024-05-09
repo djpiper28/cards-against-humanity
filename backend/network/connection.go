@@ -25,7 +25,7 @@ var wsupgrader = websocket.Upgrader{
 	CheckOrigin:     wsOriginChecker,
 }
 
-func WsUpgrade(w http.ResponseWriter, r *http.Request, gameId, playerId uuid.UUID, cm ConnectionManager) (*WsConnection, error) {
+func WsUpgrade(w http.ResponseWriter, r *http.Request, gameId, playerId uuid.UUID, cm *ConnectionManager) (*WsConnection, error) {
 	c, err := wsupgrader.Upgrade(w, r, nil)
 	if err != nil {
 		logger.Logger.Error("Failed to set websocket upgrade",
@@ -75,7 +75,7 @@ func (wsconn *WsConnection) Close() {
 const pingInterval = 5 * time.Second
 const pingTimeout = 2 * pingInterval
 
-func (gcm *IntegratedConnectionManager) NewConnection(conn *websocket.Conn, gameId, playerId uuid.UUID) *WsConnection {
+func (gcm *ConnectionManager) NewConnection(conn *websocket.Conn, gameId, playerId uuid.UUID) *WsConnection {
 	c := &WsConnection{conn: &WebsocketConnection{Conn: conn},
 		PlayerId:     playerId,
 		GameId:       gameId,
@@ -226,31 +226,31 @@ func (c *WsConnection) listenAndHandle() error {
 					return errors.New("Only the game owner can start the game")
 				}
 
-				info, err := gameRepo.Repo.StartGame(gid)
-				if err != nil {
-					return err
-				}
+        info, err := gameRepo.Repo.StartGame(gid)
+        if err != nil {
+          return err
+        }
 
-				for playerId, hand := range info.PlayerHands {
-					handCopy := make([]gameLogic.WhiteCard, len(hand))
-					for i, val := range hand {
-						handCopy[i] = *val
-					}
+        for playerId, hand := range info.PlayerHands{
+          handCopy := make([]gameLogic.WhiteCard, len(hand))
+          for i, val := range hand {
+            handCopy[i] = *val
+          }
 
-					roundInfo := RpcRoundInformationMsg{
-						CurrentCardCzarId: info.CurrentCardCzarId,
-						YourHand:          handCopy,
-						RoundNumber:       info.RoundNumber,
-						BlackCard:         *info.CurrentBlackCard,
-					}
+          roundInfo := RpcRoundInformationMsg{
+            CurrentCardCzarId: info.CurrentCardCzarId,
+            YourHand: handCopy,
+            RoundNumber: info.RoundNumber,
+            BlackCard: *info.CurrentBlackCard,
+          }
 
-					encodedMessage, err := EncodeRpcMessage(roundInfo)
-					if err != nil {
-						return err
-					}
+          encodedMessage, err := EncodeRpcMessage(roundInfo)
+          if err != nil {
+            return err
+          }
 
-					go GlobalConnectionManager.SendToPlayer(c.GameId, playerId, encodedMessage)
-				}
+          go GlobalConnectionManager.SendToPlayer(c.GameId, playerId, encodedMessage)
+        }
 				return nil
 			},
 		})
@@ -290,7 +290,7 @@ func (c *WsConnection) listenAndHandle() error {
 	}
 }
 
-func (c *WsConnection) ListenAndHandle(g *IntegratedConnectionManager) {
+func (c *WsConnection) ListenAndHandle(g *ConnectionManager) {
 	err := c.listenAndHandle()
 	if err != nil {
 		logger.Logger.Error("Error whilst handling websocket connection",

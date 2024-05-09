@@ -8,10 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGlobalConnectionManagerMatchesConnectionManagerInterface(t *testing.T) {
-	var gcm network.ConnectionManager = new(network.IntegratedConnectionManager)
-	assert.NotNil(t, gcm)
-}
 
 func TestNewGlobalConnectioManager(t *testing.T) {
 	assert.NotNil(t, network.GlobalConnectionManager, "Global connection manager should not be nil")
