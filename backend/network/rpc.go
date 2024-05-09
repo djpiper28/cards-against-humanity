@@ -98,8 +98,8 @@ func DecodeRpcMessage(data []byte, handlers RpcCommandHandlers) error {
 	case MsgPing:
 		// The ping has no body so we don't bother to check it
 		return handlers.PingHandler()
-  case MsgStartGame:
-    return handlers.StartGameHandler()
+	case MsgStartGame:
+		return handlers.StartGameHandler()
 	default:
 		logger.Logger.Error("Unknown command", "type", cmd.Type)
 		return errors.New("Unknown command")

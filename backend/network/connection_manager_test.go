@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
 func TestNewGlobalConnectioManager(t *testing.T) {
 	assert.NotNil(t, network.GlobalConnectionManager, "Global connection manager should not be nil")
 	assert.NotNil(t, network.GlobalConnectionManager.GameConnectionMap)
