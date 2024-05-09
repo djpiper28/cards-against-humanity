@@ -513,11 +513,42 @@ func TestStartGameSuccess(t *testing.T) {
 		for _, card := range player.Hand {
 			assert.Contains(t, info.PlayerHands[player.Id], card)
 		}
+
+		assert.Len(t, info.PlayersPlays[player.Id], 0)
 	}
 
 	assert.Equal(t, info.CurrentBlackCard, game.CurrentBlackCard)
 	assert.Equal(t, info.CurrentCardCzarId, game.CurrentCardCzarId)
 	assert.Equal(t, info.RoundNumber, game.CurrentRound)
+}
+
+func TestAddingPlayerToGameInProgress(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	if err != nil {
+		t.Log("Cannot make the game")
+		t.FailNow()
+	}
+
+	for i := 0; i < int(settings.MaxPlayers)-2; i++ {
+		_, err = game.AddPlayer(fmt.Sprintf("Player %d", i))
+		if err != nil {
+			t.Log("Cannot add a player", err)
+			t.FailNow()
+		}
+	}
+
+	_, err = game.StartGame()
+	assert.NoError(t, err)
+
+	pid, err := game.AddPlayer("Jesus Christ")
+	assert.NoError(t, err)
+
+	player := game.PlayersMap[pid]
+	assert.Len(t, player.Hand, gameLogic.HandSize)
+	assert.Len(t, player.CurrentPlay, 0)
 }
 
 func TestRemovePlayerFromGameThatIsNotInThere(t *testing.T) {

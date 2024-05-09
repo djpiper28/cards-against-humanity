@@ -247,6 +247,9 @@ func (g *Game) AddPlayer(playerName string) (uuid.UUID, error) {
 
 	g.Players = append(g.Players, player.Id)
 	g.PlayersMap[player.Id] = player
+	if g.GameState != GameStateInLobby {
+		g.newCards()
+	}
 	return player.Id, nil
 }
 
@@ -288,6 +291,7 @@ func (g *Game) RemovePlayer(playerToRemoveId uuid.UUID) (PlayerRemovalResult, er
 // This contains everyone's hands, so just remember not to send it to all players lol
 type RoundInfo struct {
 	PlayerHands       map[uuid.UUID][]*WhiteCard
+	PlayersPlays      map[uuid.UUID][]*WhiteCard
 	CurrentBlackCard  *BlackCard
 	CurrentCardCzarId uuid.UUID
 	RoundNumber       uint
@@ -302,14 +306,21 @@ func (g *Game) roundInfo() (RoundInfo, error) {
 	info := RoundInfo{CurrentBlackCard: g.CurrentBlackCard,
 		CurrentCardCzarId: g.CurrentCardCzarId,
 		RoundNumber:       g.CurrentRound,
-		PlayerHands:       make(map[uuid.UUID][]*WhiteCard)}
+		PlayerHands:       make(map[uuid.UUID][]*WhiteCard),
+		PlayersPlays:      make(map[uuid.UUID][]*WhiteCard)}
 
 	for _, player := range g.PlayersMap {
-		cards := make([]*WhiteCard, 0)
+		handCards := make([]*WhiteCard, 0)
 		for _, card := range player.Hand {
-			cards = append(cards, card)
+			handCards = append(handCards, card)
 		}
-		info.PlayerHands[player.Id] = cards
+		info.PlayerHands[player.Id] = handCards
+
+		playedCards := make([]*WhiteCard, 0)
+		for _, card := range player.CurrentPlay {
+			playedCards = append(playedCards, card)
+		}
+		info.PlayersPlays[player.Id] = playedCards
 	}
 	return info, nil
 }
