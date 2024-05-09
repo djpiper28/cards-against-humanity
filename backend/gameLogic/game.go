@@ -188,18 +188,12 @@ func (g *Game) Info() GameInfo {
 
 // Information about a game you can see when you join. Settings - password + players
 type GameStateInfo struct {
-	Id       uuid.UUID    `json:"id"`
-	Settings GameSettings `json:"settings"`
-
-	CurrentRound     uint       `json:"currentRound"`
-	CreationTime     time.Time  `json:"creationTime"`
-	GameState        GameState  `json:"gameState"`
-	CurrentBlackCard *BlackCard `json:"currentBlackCard"`
-
-	Players []Player `json:"players"`
-
-	CurrentCardCzarId uuid.UUID `json:"currentCardCzarId"`
-	GameOwnerId       uuid.UUID `json:"gameOwnerId"`
+	Id           uuid.UUID    `json:"id"`
+	Settings     GameSettings `json:"settings"`
+	CreationTime time.Time    `json:"creationTime"`
+	GameState    GameState    `json:"gameState"`
+	Players      []Player     `json:"players"`
+	GameOwnerId  uuid.UUID    `json:"gameOwnerId"`
 }
 
 // The state of a game for player who has just joined a game
@@ -219,14 +213,11 @@ func (g *Game) StateInfo() GameStateInfo {
 	}
 
 	return GameStateInfo{Id: g.Id,
-		Settings:          *g.Settings,
-		CurrentRound:      g.CurrentRound,
-		CreationTime:      g.CreationTime,
-		GameState:         g.GameState,
-		CurrentBlackCard:  g.CurrentBlackCard,
-		Players:           players,
-		CurrentCardCzarId: g.CurrentCardCzarId,
-		GameOwnerId:       g.GameOwnerId,
+		Settings:     *g.Settings,
+		CreationTime: g.CreationTime,
+		GameState:    g.GameState,
+		Players:      players,
+		GameOwnerId:  g.GameOwnerId,
 	}
 }
 
@@ -300,6 +291,29 @@ type RoundInfo struct {
 	CurrentBlackCard  *BlackCard
 	CurrentCardCzarId uuid.UUID
 	RoundNumber       uint
+}
+
+func (g *Game) RoundInfo() (RoundInfo, error) {
+	g.Lock.Lock()
+	defer g.Lock.Unlock()
+
+	if g.GameState != GameStateWhiteCardsBeingSelected {
+		return RoundInfo{}, errors.New("The game is not in the white card selection phase")
+	}
+
+	info := RoundInfo{CurrentBlackCard: g.CurrentBlackCard,
+		CurrentCardCzarId: g.CurrentCardCzarId,
+		RoundNumber:       g.CurrentRound,
+		PlayerHands:       make(map[uuid.UUID][]*WhiteCard)}
+
+	for _, player := range g.PlayersMap {
+		cards := make([]*WhiteCard, 0)
+		for _, card := range player.Hand {
+			cards = append(cards, card)
+		}
+		info.PlayerHands[player.Id] = cards
+	}
+	return info, nil
 }
 
 func (g *Game) StartGame() (RoundInfo, error) {

@@ -158,6 +158,7 @@ func (c *WsConnection) listenAndHandle() error {
 
 	GlobalConnectionManager.Broadcast(gid, message)
 
+	// Send the initial state
 	state := RpcOnJoinMsg(RpcOnJoinMsg{State: game.StateInfo()})
 	initialState, err := EncodeRpcMessage(state)
 	if err != nil {
@@ -167,6 +168,31 @@ func (c *WsConnection) listenAndHandle() error {
 	err = c.Send(initialState)
 	if err != nil {
 		return err
+	}
+
+	// Send the round information if applicable
+	info, err := game.RoundInfo()
+	if err == nil {
+		roundInfo := RpcRoundInformationMsg{
+			CurrentCardCzarId: info.CurrentCardCzarId,
+			YourHand:          make([]gameLogic.WhiteCard, len(info.PlayerHands[c.PlayerId])),
+			RoundNumber:       info.RoundNumber,
+			BlackCard:         *info.CurrentBlackCard,
+		}
+
+		for i, val := range info.PlayerHands[c.PlayerId] {
+			roundInfo.YourHand[i] = *val
+		}
+
+		roundInfoMsg, err := EncodeRpcMessage(roundInfo)
+		if err != nil {
+			return err
+		}
+
+		err = c.Send(roundInfoMsg)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Start listening and handling
@@ -226,31 +252,31 @@ func (c *WsConnection) listenAndHandle() error {
 					return errors.New("Only the game owner can start the game")
 				}
 
-        info, err := gameRepo.Repo.StartGame(gid)
-        if err != nil {
-          return err
-        }
+				info, err := gameRepo.Repo.StartGame(gid)
+				if err != nil {
+					return err
+				}
 
-        for playerId, hand := range info.PlayerHands{
-          handCopy := make([]gameLogic.WhiteCard, len(hand))
-          for i, val := range hand {
-            handCopy[i] = *val
-          }
+				for playerId, hand := range info.PlayerHands {
+					handCopy := make([]gameLogic.WhiteCard, len(hand))
+					for i, val := range hand {
+						handCopy[i] = *val
+					}
 
-          roundInfo := RpcRoundInformationMsg{
-            CurrentCardCzarId: info.CurrentCardCzarId,
-            YourHand: handCopy,
-            RoundNumber: info.RoundNumber,
-            BlackCard: *info.CurrentBlackCard,
-          }
+					roundInfo := RpcRoundInformationMsg{
+						CurrentCardCzarId: info.CurrentCardCzarId,
+						YourHand:          handCopy,
+						RoundNumber:       info.RoundNumber,
+						BlackCard:         *info.CurrentBlackCard,
+					}
 
-          encodedMessage, err := EncodeRpcMessage(roundInfo)
-          if err != nil {
-            return err
-          }
+					encodedMessage, err := EncodeRpcMessage(roundInfo)
+					if err != nil {
+						return err
+					}
 
-          go GlobalConnectionManager.SendToPlayer(c.GameId, playerId, encodedMessage)
-        }
+					go GlobalConnectionManager.SendToPlayer(c.GameId, playerId, encodedMessage)
+				}
 				return nil
 			},
 		})

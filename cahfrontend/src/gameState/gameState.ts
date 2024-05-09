@@ -1,4 +1,8 @@
-import { GameStateInfo, GameStateWhiteCardsBeingSelected, Player } from "../gameLogicTypes";
+import {
+  GameStateInfo,
+  GameStateWhiteCardsBeingSelected,
+  Player,
+} from "../gameLogicTypes";
 import {
   MsgChangeSettings,
   MsgCommandError,
@@ -9,6 +13,7 @@ import {
   MsgOnPlayerJoin,
   MsgOnPlayerLeave,
   MsgPing,
+  MsgRoundInformation,
   MsgStartGame,
   RpcChangeSettingsMsg,
   RpcCommandErrorMsg,
@@ -21,6 +26,7 @@ import {
   RpcOnPlayerDisconnectMsg,
   RpcOnPlayerJoinMsg,
   RpcOnPlayerLeaveMsg,
+  RpcRoundInformationMsg,
 } from "../rpcTypes";
 import { WebSocketClient, toWebSocketClient } from "./websocketClient";
 import { apiClient, wsBaseUrl } from "../apiClient";
@@ -56,9 +62,20 @@ class GameState {
     creationTime: new Date(),
     gameState: 0,
   };
+  private roundState: RpcRoundInformationMsg = {
+    roundNumber: 0,
+    currentCardCzarId: "",
+    blackCard: {
+      id: 0,
+      cardsToPlay: 0,
+      bodyText: "",
+    },
+    yourHand: [],
+  };
 
   // Events
   public onLobbyStateChange?: (state?: GameLobbyState) => void;
+  public onRoundStateChange?: (state?: RpcRoundInformationMsg) => void;
   public onPlayerListChange?: (players: GamePlayerList) => void;
   public onCommandError?: (error: RpcCommandErrorMsg) => void;
   public onChangeSettings?: (settings: RpcChangeSettingsMsg) => void;
@@ -85,9 +102,23 @@ class GameState {
       creationTime: new Date(),
       gameState: 0,
     };
+    this.roundState = {
+      roundNumber: 0,
+      currentCardCzarId: "",
+      blackCard: {
+        id: 0,
+        cardsToPlay: 0,
+        bodyText: "",
+      },
+      yourHand: [],
+    };
 
     this.onLobbyStateChange = undefined;
     this.onPlayerListChange = undefined;
+    this.onRoundStateChange = undefined;
+    this.onCommandError = undefined;
+    this.onChangeSettings = undefined;
+    this.onError = undefined;
 
     const url = wsBaseUrl;
     console.log(`Connecting to ${url}`);
@@ -132,6 +163,7 @@ class GameState {
   public emitState() {
     this.onLobbyStateChange?.(structuredClone(this.lobbyState));
     this.onPlayerListChange?.(this.playerList());
+    this.onRoundStateChange?.(structuredClone(this.roundState));
   }
 
   public isOwner(): boolean {
@@ -220,9 +252,11 @@ class GameState {
     this.wsClient?.sendMessage(JSON.stringify(this.encodeMessage(MsgPing, {})));
   }
 
-  private handleStartGame() {
-    // TODO: fix this
+  private handleRoundInformation(data: RpcRoundInformationMsg) {
+    this.roundState = data;
     this.lobbyState.gameState = GameStateWhiteCardsBeingSelected;
+    this.onLobbyStateChange?.(structuredClone(this.lobbyState));
+    this.onRoundStateChange?.(this.roundState);
   }
 
   /**
@@ -240,12 +274,12 @@ class GameState {
       case MsgOnPlayerCreate:
         console.log("Handling on player create message");
         return this.handleOnPlayerCreate(
-          rpcMessage.data as RpcOnPlayerCreateMsg
+          rpcMessage.data as RpcOnPlayerCreateMsg,
         );
       case MsgOnPlayerDisconnect:
         console.log("Handling on player disconnect message");
         return this.handleOnPlayerDisconnect(
-          rpcMessage.data as RpcOnPlayerDisconnectMsg
+          rpcMessage.data as RpcOnPlayerDisconnectMsg,
         );
       case MsgCommandError:
         console.log("Handling command error message");
@@ -265,13 +299,14 @@ class GameState {
       case MsgPing:
         console.log("Handling ping message");
         return this.handlePing();
-
-      case MsgStartGame:
-        console.log("Da game is started");
-        return this.handleStartGame();
+      case MsgRoundInformation:
+        console.log("Handling round information message");
+        return this.handleRoundInformation(
+          rpcMessage.data as RpcRoundInformationMsg,
+        );
       default:
         throw new Error(
-          `Cannot handle RPC message as type is not valid ${rpcMessage.type}`
+          `Cannot handle RPC message as type is not valid ${rpcMessage.type}`,
         );
     }
   }
@@ -312,7 +347,7 @@ class GameState {
     }
 
     this.wsClient.sendMessage(
-      JSON.stringify(this.encodeMessage(MsgStartGame, {}))
+      JSON.stringify(this.encodeMessage(MsgStartGame, {})),
     );
   }
 }

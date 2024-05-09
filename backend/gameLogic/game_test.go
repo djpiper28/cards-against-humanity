@@ -234,11 +234,8 @@ func TestGameStateInfo(t *testing.T) {
 	assert.Equal(t, game.Id, info.Id)
 	assert.Equal(t, *game.Settings, info.Settings)
 	assert.Equal(t, expectedPlayers, info.Players)
-	assert.Equal(t, game.CurrentRound, info.CurrentRound)
 	assert.Equal(t, game.CreationTime, info.CreationTime)
 	assert.Equal(t, game.GameState, info.GameState)
-	assert.Equal(t, game.CurrentBlackCard, info.CurrentBlackCard)
-	assert.Equal(t, game.CurrentCardCzarId, info.CurrentCardCzarId)
 	assert.Equal(t, game.GameOwnerId, info.GameOwnerId)
 }
 
