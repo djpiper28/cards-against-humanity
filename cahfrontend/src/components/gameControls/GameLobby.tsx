@@ -138,7 +138,7 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
                 await gameState.startGame();
               } catch (e) {
                 props.setCommandError(
-                  "Unable to start game. Please try again."
+                  "Unable to start game. Please try again.",
                 );
               }
             }}
@@ -216,7 +216,7 @@ export default function GameLobby() {
         cardPacksList.sort((a, b) => {
           if (!a.name || !b.name) return 0;
           return a.name.localeCompare(b.name);
-        })
+        }),
       );
     } catch (err) {
       console.error(err);
@@ -244,7 +244,7 @@ export default function GameLobby() {
           setSelectedPackIds={(ids) => {
             const newState = state();
             newState.settings.cardPacks = ids.map((id) =>
-              packs().find((x) => x.id === id)
+              packs().find((x) => x.id === id),
             );
             setState(newState);
           }}
