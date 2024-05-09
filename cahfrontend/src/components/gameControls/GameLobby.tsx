@@ -1,7 +1,11 @@
 import { Show, createEffect, createSignal, onMount } from "solid-js";
 import LoadingSlug from "../loading/LoadingSlug";
 import { gamePasswordCookie, gameState } from "../../gameState/gameState";
-import { GameSettings, GameStateInfo } from "../../gameLogicTypes";
+import {
+  GameSettings,
+  GameStateInLobby,
+  GameStateInfo,
+} from "../../gameLogicTypes";
 import GameSettingsInput, { Settings } from "./GameSettingsInput";
 import GameSettingsView from "./GameSettingsView";
 import RoundedWhite from "../containers/RoundedWhite";
@@ -36,7 +40,7 @@ interface LobbyLoadedProps {
   setStateAsDirty: () => void;
 }
 
-function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
+function GameNotStartedView(props: Readonly<LobbyLoadedProps>) {
   const updateSettings = () => {
     const changeSettings: RpcChangeSettingsMsg = {
       settings: {
@@ -51,41 +55,9 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
   const isGameOwner = () => state().ownerId === gameState.getPlayerId();
   const settings = () => state().settings;
   const dirtyState = () => props.dirtyState;
-  const navigate = useNavigate();
-
-  createEffect(() => {
-    cookieStorage.setItem(gamePasswordCookie, settings().gamePassword);
-  });
 
   return (
-    <RoundedWhite>
-      <div class="flex flex-row gap-3 justify-between flex-wrap">
-        <div class="flex flex-row flex-wrap gap-5 w-fit">
-          <Header
-            text={`${
-              props.players.find((x) => x.id === props.state.ownerId)?.name
-            }'s Game`}
-          />
-          <Show when={isGameOwner()}>
-            <SubHeader text="Change your game's settings" />
-          </Show>
-        </div>
-        <Button
-          id="leave-game"
-          onClick={() => {
-            gameState
-              .leaveGame()
-              .then(() => {
-                clearGameCookies();
-                console.log("Left game successfully");
-              })
-              .catch(console.error);
-            navigate(indexUrl);
-          }}
-        >
-          Leave Game
-        </Button>
-      </div>
+    <>
       <Show when={isGameOwner()}>
         <CardsSelector
           cards={props.cardPacks}
@@ -124,7 +96,7 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
       </Show>
 
       <Show when={!isGameOwner()}>
-        <GameSettingsView settings={settings()} packs={props.cardPacks}/>
+        <GameSettingsView settings={settings()} packs={props.cardPacks} />
       </Show>
 
       <Show when={isGameOwner()}>
@@ -147,6 +119,58 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
           </Button>
         </Show>
       </Show>
+    </>
+  );
+}
+
+function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
+  const state = () => props.state;
+  const isGameOwner = () => state().ownerId === gameState.getPlayerId();
+  const settings = () => state().settings;
+  const navigate = useNavigate();
+
+  const isGameStarted = () => state().gameState !== GameStateInLobby;
+
+  createEffect(() => {
+    cookieStorage.setItem(gamePasswordCookie, settings().gamePassword);
+  });
+
+  return (
+    <RoundedWhite>
+      <div class="flex flex-row gap-3 justify-between flex-wrap">
+        <div class="flex flex-row flex-wrap gap-5 w-fit items-center">
+          <Header
+            text={`${
+              props.players.find((x) => x.id === props.state.ownerId)?.name
+            }'s Game`}
+          />
+          <Show when={isGameOwner() && !isGameStarted()}>
+            <SubHeader text="Change your game's settings" />
+          </Show>
+        </div>
+        <Button
+          id="leave-game"
+          onClick={() => {
+            gameState
+              .leaveGame()
+              .then(() => {
+                clearGameCookies();
+                console.log("Left game successfully");
+              })
+              .catch(console.error);
+            navigate(indexUrl);
+          }}
+        >
+          Leave Game
+        </Button>
+      </div>
+
+      <Show when={!isGameStarted()}>
+        <GameNotStartedView {...props} />
+      </Show>
+
+      <Show when={isGameStarted()}>Game has started lolol</Show>
+
       <PlayerList players={props.players} />
     </RoundedWhite>
   );
