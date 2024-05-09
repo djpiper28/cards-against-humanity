@@ -150,3 +150,12 @@ func TestWhiteCardLookupTooHigh(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestDefaultCardPack(t *testing.T) {
+	cards := gameLogic.DefaultCardPack()
+	assert.True(t, len(cards.CardDeck.WhiteCards) > 50)
+	assert.True(t, len(cards.CardDeck.BlackCards) > 5)
+
+	assert.Equal(t, cards.WhiteCards, len(cards.CardDeck.WhiteCards))
+	assert.Equal(t, cards.BlackCards, len(cards.CardDeck.BlackCards))
+}

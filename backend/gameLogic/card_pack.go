@@ -19,6 +19,7 @@ type CardPack struct {
 	CardDeck   *CardDeck `json:"-"`
 }
 
+// Maps pack ID to the cards
 var AllPacks map[uuid.UUID]*CardPack
 var AllWhiteCards []*WhiteCard
 var AllBlackCards []*BlackCard
@@ -51,7 +52,9 @@ func GetBlackCard(id int) (*BlackCard, error) {
 
 func DefaultCardPack() *CardPack {
 	for _, packValue := range AllPacks {
-		return packValue
+		if packValue.BlackCards > 5 && packValue.WhiteCards > 50 {
+			return packValue
+		}
 	}
 
 	logger.Logger.Error("Cannot find any packs for the default settings")

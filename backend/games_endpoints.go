@@ -88,19 +88,12 @@ func createGame(c *gin.Context) {
 		return
 	}
 
-	packs, err := gameLogic.GetCardPacks(createReq.Settings.CardPacks)
-	if err != nil {
-		c.Error(err)
-		c.JSON(http.StatusInternalServerError, NewApiError(err))
-		return
-	}
-
 	settings := gameLogic.GameSettings{
 		MaxRounds:       createReq.Settings.MaxRounds,
 		MaxPlayers:      createReq.Settings.MaxPlayers,
 		PlayingToPoints: createReq.Settings.PlayingToPoints,
 		Password:        createReq.Settings.Password,
-		CardPacks:       packs,
+		CardPacks:       createReq.Settings.CardPacks,
 	}
 
 	gameId, playerId, err := gameRepo.Repo.CreateGame(&settings, createReq.PlayerName)

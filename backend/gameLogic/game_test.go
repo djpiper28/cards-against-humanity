@@ -477,24 +477,13 @@ func TestStartGameNotInLobbyFails(t *testing.T) {
 	}
 }
 
-func TestStartGameNoCardsInDeckFails(t *testing.T) {
+func TestCreateGameWithNoPacksFails(t *testing.T) {
 	t.Parallel()
 
 	settings := gameLogic.DefaultGameSettings()
-	settings.CardPacks = []*gameLogic.CardPack{{}}
-	game, err := gameLogic.NewGame(settings, "Dave")
-	if err != nil {
-		t.Log("Cannot make the game")
-		t.FailNow()
-	}
-
-	game.GameState = gameLogic.GameStateCzarJudgingCards
-
-	_, err = game.StartGame()
-	if err == nil {
-		t.Log("Should not be able to start a game with no cards in the deck")
-		t.FailNow()
-	}
+	settings.CardPacks = []uuid.UUID{}
+	_, err := gameLogic.NewGame(settings, "Dave")
+	assert.Error(t, err)
 }
 
 func TestStartGameSuccess(t *testing.T) {

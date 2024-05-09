@@ -60,7 +60,6 @@ func TestCreateGame(t *testing.T) {
 	repo := gameRepo.New()
 
 	gameSettings := gameLogic.DefaultGameSettings()
-	gameSettings.CardPacks = []*gameLogic.CardPack{{}}
 	name := "Dave"
 	id, pid, err := repo.CreateGame(gameSettings, name)
 	if err != nil {
@@ -90,8 +89,6 @@ func TestGetGames(t *testing.T) {
 	assert.Equal(t, repo.GetGames(), []*gameLogic.Game{}, "There should be no games in the repo yet")
 
 	gameSettings := gameLogic.DefaultGameSettings()
-	gameSettings.CardPacks = []*gameLogic.CardPack{{}}
-	gameSettings.CardPacks = []*gameLogic.CardPack{{}}
 	name := "Dave"
 	id, _, err := repo.CreateGame(gameSettings, name)
 	if err != nil {

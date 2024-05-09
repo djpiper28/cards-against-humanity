@@ -95,11 +95,10 @@ const jsonContentType = "application/json"
 
 func DefaultGameSettings() GameCreateSettings {
 	settings := gameLogic.DefaultGameSettings()
-	packs := make([]uuid.UUID, len(settings.CardPacks))
-	for i, pack := range settings.CardPacks {
-		packs[i] = pack.Id
-	}
-	return GameCreateSettings{MaxRounds: settings.MaxRounds, MaxPlayers: settings.MaxPlayers, PlayingToPoints: settings.PlayingToPoints, CardPacks: packs}
+	return GameCreateSettings{MaxRounds: settings.MaxRounds,
+		MaxPlayers:      settings.MaxPlayers,
+		PlayingToPoints: settings.PlayingToPoints,
+		CardPacks:       settings.CardPacks}
 }
 
 type onJoinRpcMsg struct {

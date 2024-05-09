@@ -41,7 +41,7 @@ type GameSettings struct {
 	// Empty string is no password
 	Password   string      `json:"gamePassword"`
 	MaxPlayers uint        `json:"maxPlayers"`
-	CardPacks  []*CardPack `json:"cardPacks"`
+	CardPacks  []uuid.UUID `json:"cardPacks"`
 }
 
 func DefaultGameSettings() *GameSettings {
@@ -49,7 +49,7 @@ func DefaultGameSettings() *GameSettings {
 		PlayingToPoints: 10,
 		Password:        "",
 		MaxPlayers:      10,
-		CardPacks:       []*CardPack{DefaultCardPack()}}
+		CardPacks:       []uuid.UUID{DefaultCardPack().Id}}
 }
 
 func (gs *GameSettings) Validate() bool {
@@ -293,10 +293,8 @@ type RoundInfo struct {
 	RoundNumber       uint
 }
 
-func (g *Game) RoundInfo() (RoundInfo, error) {
-	g.Lock.Lock()
-	defer g.Lock.Unlock()
-
+// Not thread safe
+func (g *Game) roundInfo() (RoundInfo, error) {
 	if g.GameState != GameStateWhiteCardsBeingSelected {
 		return RoundInfo{}, errors.New("The game is not in the white card selection phase")
 	}
@@ -316,6 +314,39 @@ func (g *Game) RoundInfo() (RoundInfo, error) {
 	return info, nil
 }
 
+func (g *Game) RoundInfo() (RoundInfo, error) {
+	g.Lock.Lock()
+	defer g.Lock.Unlock()
+
+	return g.roundInfo()
+}
+
+// Not thread safe, gives each player new cards
+func (g *Game) newCards() error {
+	blackCard, err := g.CardDeck.GetNewBlackCard()
+	if err != nil {
+		return errors.New("Cannot get a black card")
+	}
+
+	g.CurrentBlackCard = blackCard
+	g.GameState = GameStateWhiteCardsBeingSelected
+
+	for pid, p := range g.PlayersMap {
+		cards, err := g.CardDeck.GetNewWhiteCards(uint(HandSize - len(p.Hand)))
+		if err != nil {
+			return errors.New(fmt.Sprintf("Cannot create game: %s", err))
+		}
+
+		cardIndexSlice := make(map[int]*WhiteCard)
+		for _, card := range cards {
+			cardIndexSlice[card.Id] = card
+		}
+		g.PlayersMap[pid].Hand = cardIndexSlice
+	}
+
+	return nil
+}
+
 func (g *Game) StartGame() (RoundInfo, error) {
 	g.Lock.Lock()
 	defer g.Lock.Unlock()
@@ -328,43 +359,24 @@ func (g *Game) StartGame() (RoundInfo, error) {
 		return RoundInfo{}, errors.New(fmt.Sprintf("Cannot start game until the minimum amount of players %d have joined the game", MinPlayers))
 	}
 
-	deck, err := AccumalateCardPacks(g.Settings.CardPacks)
+	// Validate the decks, as before this they are updated via a lazy copy
+	packs, err := GetCardPacks(g.Settings.CardPacks)
+	if err != nil {
+		return RoundInfo{}, errors.New(fmt.Sprintf("Cannot create the game deck %s", err))
+	}
+
+	deck, err := AccumalateCardPacks(packs)
 	if err != nil {
 		return RoundInfo{}, errors.New(fmt.Sprintf("Cannot create the game deck %s", err))
 	}
 	g.CardDeck = deck
+	g.CurrentRound = 1
 
-	blackCard, err := g.CardDeck.GetNewBlackCard()
+	err = g.newCards()
 	if err != nil {
-		// Allegedly impossible to get here
-		return RoundInfo{}, errors.New("Cannot get a black card")
+		return RoundInfo{}, err
 	}
-
-	g.CurrentBlackCard = blackCard
-	g.GameState = GameStateWhiteCardsBeingSelected
-	g.CurrentRound++
-
-	info := RoundInfo{CurrentBlackCard: g.CurrentBlackCard,
-		CurrentCardCzarId: g.CurrentCardCzarId,
-		RoundNumber:       g.CurrentRound,
-		PlayerHands:       make(map[uuid.UUID][]*WhiteCard)}
-	for _, player := range g.PlayersMap {
-		cards, err := g.CardDeck.GetNewWhiteCards(HandSize)
-		if err != nil {
-			return RoundInfo{}, errors.New(fmt.Sprintf("Cannot create game: %s", err))
-		}
-
-		cardsCopy := make([]*WhiteCard, len(cards))
-		copy(cardsCopy, cards)
-		info.PlayerHands[player.Id] = cardsCopy
-
-		cardIndexSlice := make(map[int]*WhiteCard)
-		for _, card := range cards {
-			cardIndexSlice[card.Id] = card
-		}
-		player.Hand = cardIndexSlice
-	}
-	return info, nil
+	return g.roundInfo()
 }
 
 type GameMetrics struct {
