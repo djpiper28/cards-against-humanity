@@ -15,7 +15,7 @@ interface Props {
 
 export default function PlayerCards(props: Readonly<Props>) {
   return (
-    <div class="flex flex-row flex-wrap gap-2">
+    <div class="flex flex-row flex-wrap gap-2 justify-between">
       {props.cards.map((card) => (
         <button
           class={

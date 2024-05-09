@@ -22,7 +22,7 @@ const App: Component = () => {
         </ul>
       </nav>
 
-      <main class="p-2 md:p-5 flex flex-col w-full gap-5 flex-grow">
+      <main class="p-2 md:p-3 flex flex-col w-full gap-5 flex-grow">
         <Route />
       </main>
     </div>
