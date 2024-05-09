@@ -12,6 +12,12 @@ export const Primar = {
       maxPlayers: 3,
       playingToPoints: 10,
       maxRounds: 5,
+      cardPacks: ["1", "2"],
     },
+    packs: [
+      { id: "1", name: "Pack 1" },
+      { id: "2", name: "Pack 2" },
+      { id: "3", name: "Pack 3" },
+    ]
   },
 };

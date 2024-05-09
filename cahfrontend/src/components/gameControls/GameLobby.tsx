@@ -89,7 +89,7 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
       <Show when={isGameOwner()}>
         <CardsSelector
           cards={props.cardPacks}
-          selectedPackIds={settings().cardPacks.map((x) => x?.id ?? "no-id")}
+          selectedPackIds={settings().cardPacks}
           setSelectedPackIds={(packs) => {
             props.setStateAsDirty();
             props.setSelectedPackIds(packs);
@@ -124,7 +124,7 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
       </Show>
 
       <Show when={!isGameOwner()}>
-        <GameSettingsView settings={settings()} />
+        <GameSettingsView settings={settings()} packs={props.cardPacks}/>
       </Show>
 
       <Show when={isGameOwner()}>

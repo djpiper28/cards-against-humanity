@@ -1,8 +1,9 @@
 import { For } from "solid-js";
-import { GameSettings } from "../../gameLogicTypes";
+import { CardPack, GameSettings } from "../../gameLogicTypes";
 
 interface Props {
   settings: GameSettings;
+  packs: CardPack[];
 }
 
 export default function GameSettingsView(props: Readonly<Props>) {
@@ -31,8 +32,8 @@ export default function GameSettingsView(props: Readonly<Props>) {
         <For each={props.settings.cardPacks}>
           {(pack, i) => (
             <>
-              <span id={pack?.id} class="font-bold">
-                {pack?.name}
+              <span id={pack} class="font-bold">
+                {props.packs.find((p) => p.id == pack)?.name}
               </span>
               {i() == props.settings.cardPacks.length - 1 ? (
                 ""
