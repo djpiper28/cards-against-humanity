@@ -1,11 +1,7 @@
 import { Show, createEffect, createSignal, onMount } from "solid-js";
 import LoadingSlug from "../loading/LoadingSlug";
 import { gamePasswordCookie, gameState } from "../../gameState/gameState";
-import {
-  GameSettings,
-  GameStateInLobby,
-  GameStateInfo,
-} from "../../gameLogicTypes";
+import { GameSettings, GameStateInLobby } from "../../gameLogicTypes";
 import GameSettingsInput, { Settings } from "./GameSettingsInput";
 import GameSettingsView from "./GameSettingsView";
 import RoundedWhite from "../containers/RoundedWhite";
@@ -19,6 +15,7 @@ import {
   MsgChangeSettings,
   RpcChangeSettingsMsg,
   RpcCommandErrorMsg,
+  RpcRoundInformationMsg,
 } from "../../rpcTypes";
 import Button from "../buttons/Button";
 import { cookieStorage } from "@solid-primitives/storage";
@@ -27,6 +24,7 @@ import { indexUrl } from "../../routes";
 import clearGameCookies from "../../gameState/clearGameCookies";
 import SubHeader from "../typography/SubHeader";
 import { GameLobbyState } from "../../gameState/gameLobbyState";
+import PlayerCards from "../gameItems/PlayerCards";
 
 interface LobbyLoadedProps {
   setSettings: (settings: Settings) => void;
@@ -37,6 +35,7 @@ interface LobbyLoadedProps {
   dirtyState: boolean;
   cardPacks: GameLogicCardPack[];
   state: GameLobbyState;
+  roundState: RpcRoundInformationMsg;
   setStateAsDirty: () => void;
 }
 
@@ -125,6 +124,7 @@ function GameNotStartedView(props: Readonly<LobbyLoadedProps>) {
 
 function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
   const state = () => props.state;
+  const roundState = () => props.roundState;
   const isGameOwner = () => state().ownerId === gameState.getPlayerId();
   const settings = () => state().settings;
   const navigate = useNavigate();
@@ -165,13 +165,26 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
         </Button>
       </div>
 
-      <Show when={!isGameStarted()}>
-        <GameNotStartedView {...props} />
-      </Show>
+      <div class="flex flex-col gap-3">
+        <Show when={!isGameStarted()}>
+          <GameNotStartedView {...props} />
+        </Show>
 
-      <Show when={isGameStarted()}>Game has started lolol</Show>
+        <Show when={isGameStarted() && roundState()}>
+          <PlayerCards
+            cards={roundState().yourHand.map((x) => {
+              return {
+                id: x.id.toString(),
+                name: x.bodyText,
+                pack: "",
+                played: false,
+              };
+            })}
+          />
+        </Show>
 
-      <PlayerList players={props.players} />
+        <PlayerList players={props.players} />
+      </div>
     </RoundedWhite>
   );
 }
@@ -191,6 +204,9 @@ const emptyState: GameLobbyState = {
 
 export default function GameLobby() {
   const [state, setState] = createSignal<GameLobbyState | undefined>(undefined);
+  const [roundState, setRoundState] = createSignal<
+    RpcRoundInformationMsg | undefined
+  >(undefined);
   const [players, setPlayers] = createSignal<GamePlayerList>([]);
 
   const [packs, setPacks] = createSignal<GameLogicCardPack[]>([]);
@@ -225,6 +241,9 @@ export default function GameLobby() {
     gameState.onCommandError = (error: RpcCommandErrorMsg) => {
       setCommandError(error.reason);
     };
+    gameState.onRoundStateChange = (state?: RpcRoundInformationMsg) => {
+      setRoundState(state);
+    };
   };
 
   setupHandlers();
@@ -257,6 +276,7 @@ export default function GameLobby() {
       <Show when={!!state()}>
         <GameLobbyLoaded
           state={state()}
+          roundState={roundState()}
           setSettings={(settings) => {
             const newState = state();
             newState.settings.maxRounds = settings.maxRounds;

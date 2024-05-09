@@ -15,7 +15,7 @@ interface Props {
 
 export default function PlayerCards(props: Readonly<Props>) {
   return (
-    <div class="flex flex-row flex-wrap gap-2 md:flex-nowrap md:overflow-x-scroll">
+    <div class="flex flex-row flex-wrap gap-2">
       {props.cards.map((card) => (
         <button
           class={
