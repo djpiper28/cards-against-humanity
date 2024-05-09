@@ -1,4 +1,4 @@
-import { GameStateInfo, Player } from "../gameLogicTypes";
+import { GameStateInfo, GameStateWhiteCardsBeingSelected, Player } from "../gameLogicTypes";
 import {
   MsgChangeSettings,
   MsgCommandError,
@@ -220,6 +220,11 @@ class GameState {
     this.wsClient?.sendMessage(JSON.stringify(this.encodeMessage(MsgPing, {})));
   }
 
+  private handleStartGame() {
+    // TODO: fix this
+    this.lobbyState.gameState = GameStateWhiteCardsBeingSelected;
+  }
+
   /**
    * Handles an RPC message from the server. When testing call the private method and ignore the "error".
    */
@@ -260,6 +265,10 @@ class GameState {
       case MsgPing:
         console.log("Handling ping message");
         return this.handlePing();
+
+      case MsgStartGame:
+        console.log("Da game is started");
+        return this.handleStartGame();
       default:
         throw new Error(
           `Cannot handle RPC message as type is not valid ${rpcMessage.type}`

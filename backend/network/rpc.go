@@ -185,9 +185,10 @@ func (msg RpcStartGameMsg) Type() RpcMessageType {
 }
 
 type RpcRoundInformationMsg struct {
-	RoundNumber uint                  `json:"roundNumber"`
-	BlackCard   gameLogic.BlackCard   `json:"blackCard"`
-	YourHand    []gameLogic.WhiteCard `json:"yourHand"`
+	RoundNumber       uint                  `json:"roundNumber"`
+	CurrentCardCzarId uuid.UUID             `json:"currentCardCzarId"`
+	BlackCard         gameLogic.BlackCard   `json:"blackCard"`
+	YourHand          []gameLogic.WhiteCard `json:"yourHand"`
 }
 
 func (msg RpcRoundInformationMsg) Type() RpcMessageType {

@@ -248,20 +248,19 @@ func (gr *GameRepo) ChangeSettings(gameId uuid.UUID, settings gameLogic.GameSett
 	return nil
 }
 
-func (gr *GameRepo) StartGame(gameId uuid.UUID) error {
+func (gr *GameRepo) StartGame(gameId uuid.UUID) (gameLogic.RoundInfo, error) {
 	gr.lock.RLock()
 	defer gr.lock.RUnlock()
 
 	game, found := gr.GameMap[gameId]
 	if !found {
-		return errors.New("Cannot find game")
+		return gameLogic.RoundInfo{}, errors.New("Cannot find game")
 	}
 
-	err := game.StartGame()
+	info, err := game.StartGame()
 	if err != nil {
-		return err
+		return gameLogic.RoundInfo{}, err
 	}
 
-	// TODO: send round info lol
-	return nil
+	return info, nil
 }

@@ -294,39 +294,55 @@ func (g *Game) RemovePlayer(playerToRemoveId uuid.UUID) (PlayerRemovalResult, er
 	return res, nil
 }
 
-func (g *Game) StartGame() error {
+// This contains everyone's hands, so just remember not to send it to all players lol
+type RoundInfo struct {
+	PlayerHands       map[uuid.UUID][]*WhiteCard
+	CurrentBlackCard  *BlackCard
+	CurrentCardCzarId uuid.UUID
+	RoundNumber       uint
+}
+
+func (g *Game) StartGame() (RoundInfo, error) {
 	g.Lock.Lock()
 	defer g.Lock.Unlock()
 
 	if g.GameState != GameStateInLobby {
-		return errors.New("The game is not in the lobby so cannot be started")
+		return RoundInfo{}, errors.New("The game is not in the lobby so cannot be started")
 	}
 
 	if len(g.Players) < MinPlayers {
-		return errors.New(fmt.Sprintf("Cannot start game until the minimum amount of players %d have joined the game", MinPlayers))
+		return RoundInfo{}, errors.New(fmt.Sprintf("Cannot start game until the minimum amount of players %d have joined the game", MinPlayers))
 	}
 
 	deck, err := AccumalateCardPacks(g.Settings.CardPacks)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Cannot create the game deck %s", err))
+		return RoundInfo{}, errors.New(fmt.Sprintf("Cannot create the game deck %s", err))
 	}
 	g.CardDeck = deck
 
 	blackCard, err := g.CardDeck.GetNewBlackCard()
 	if err != nil {
 		// Allegedly impossible to get here
-		return errors.New("Cannot get a black card")
+		return RoundInfo{}, errors.New("Cannot get a black card")
 	}
 
 	g.CurrentBlackCard = blackCard
 	g.GameState = GameStateWhiteCardsBeingSelected
 	g.CurrentRound++
 
+	info := RoundInfo{CurrentBlackCard: g.CurrentBlackCard,
+		CurrentCardCzarId: g.CurrentCardCzarId,
+		RoundNumber:       g.CurrentRound,
+		PlayerHands:       make(map[uuid.UUID][]*WhiteCard)}
 	for _, player := range g.PlayersMap {
 		cards, err := g.CardDeck.GetNewWhiteCards(HandSize)
 		if err != nil {
-			return errors.New(fmt.Sprintf("Cannot create game %s", err))
+			return RoundInfo{}, errors.New(fmt.Sprintf("Cannot create game: %s", err))
 		}
+
+		cardsCopy := make([]*WhiteCard, len(cards))
+		copy(cardsCopy, cards)
+		info.PlayerHands[player.Id] = cardsCopy
 
 		cardIndexSlice := make(map[int]*WhiteCard)
 		for _, card := range cards {
@@ -334,7 +350,7 @@ func (g *Game) StartGame() error {
 		}
 		player.Hand = cardIndexSlice
 	}
-	return nil
+	return info, nil
 }
 
 type GameMetrics struct {

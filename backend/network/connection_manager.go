@@ -25,12 +25,14 @@ type IntegratedConnectionManager struct {
 	lock              sync.Mutex
 }
 
+// TODO: Delete this shitty interface
 type ConnectionManager interface {
 	RegisterConnection(gameId, playerId uuid.UUID, connection *WsConnection)
 	NewConnection(conn *websocket.Conn, gameId, playerId uuid.UUID) *WsConnection
 	Close(gameId, playerId uuid.UUID) error
 	RemovePlayer(gameId, playerId uuid.UUID) error
 	RemoveGame(gameId uuid.UUID) error
+	SendToPlayer(gameId, playerId uuid.UUID, message []byte) error
 }
 
 func (g *IntegratedConnectionManager) Close(gameId, playerId uuid.UUID) error {
@@ -111,6 +113,24 @@ func (g *IntegratedConnectionManager) UnregisterConnection(gameId, playerId uuid
 	}
 
 	go g.Broadcast(gameId, message)
+}
+
+func (g *IntegratedConnectionManager) SendToPlayer(gameId, playerId uuid.UUID, message []byte) error {
+	g.lock.Lock()
+	defer g.lock.Unlock()
+
+	game, found := g.GameConnectionMap[gameId]
+	if !found {
+		logger.Logger.Error("Cannot find game", "gameId", gameId, "playerId", playerId)
+		return errors.New("Cannot find the game")
+	}
+
+	conn, found := game.playerConnectionMap[playerId]
+	if found {
+		return conn.Send(message)
+	}
+	logger.Logger.Error("Cannot find player", "gameId", gameId, "playerId", playerId)
+	return errors.New("Cannot find the player")
 }
 
 // Blocking call to send a message to all players in a game using a wait group

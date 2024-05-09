@@ -429,7 +429,7 @@ func TestStartGameOnePlayerFails(t *testing.T) {
 		t.FailNow()
 	}
 
-	err = game.StartGame()
+	_, err = game.StartGame()
 	if err == nil {
 		t.Log("Should not be able to start a game with 1 players")
 		t.FailNow()
@@ -454,7 +454,7 @@ func TestStartGameLessThanMinPlayerFails(t *testing.T) {
 		}
 	}
 
-	err = game.StartGame()
+	_, err = game.StartGame()
 	if err == nil {
 		t.Log("Should not be able to start a game with min players")
 		t.FailNow()
@@ -473,7 +473,7 @@ func TestStartGameNotInLobbyFails(t *testing.T) {
 
 	game.GameState = gameLogic.GameStateCzarJudgingCards
 
-	err = game.StartGame()
+	_, err = game.StartGame()
 	if err == nil {
 		t.Log("Should not be able to start a game with invalid state")
 		t.FailNow()
@@ -493,7 +493,7 @@ func TestStartGameNoCardsInDeckFails(t *testing.T) {
 
 	game.GameState = gameLogic.GameStateCzarJudgingCards
 
-	err = game.StartGame()
+	_, err = game.StartGame()
 	if err == nil {
 		t.Log("Should not be able to start a game with no cards in the deck")
 		t.FailNow()
@@ -518,16 +518,20 @@ func TestStartGameSuccess(t *testing.T) {
 		}
 	}
 
-	err = game.StartGame()
-	if err != nil {
-		t.Log("Cannot start game", err)
-	}
+	info, err := game.StartGame()
+	assert.NoError(t, err)
 
 	for _, player := range game.PlayersMap {
-		if player.CardsInHand() != gameLogic.HandSize {
-			t.Log("Player does not have", gameLogic.HandSize, "cards in the hand")
+		assert.Equal(t, gameLogic.HandSize, player.CardsInHand())
+		assert.Len(t, info.PlayerHands[player.Id], gameLogic.HandSize)
+		for _, card := range player.Hand {
+			assert.Contains(t, info.PlayerHands[player.Id], card)
 		}
 	}
+
+	assert.Equal(t, info.CurrentBlackCard, game.CurrentBlackCard)
+	assert.Equal(t, info.CurrentCardCzarId, game.CurrentCardCzarId)
+	assert.Equal(t, info.RoundNumber, game.CurrentRound)
 }
 
 func TestRemovePlayerFromGameThatIsNotInThere(t *testing.T) {

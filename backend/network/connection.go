@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/djpiper28/cards-against-humanity/backend/gameRepo"
 	"github.com/djpiper28/cards-against-humanity/backend/logger"
 	"github.com/google/uuid"
@@ -225,10 +226,31 @@ func (c *WsConnection) listenAndHandle() error {
 					return errors.New("Only the game owner can start the game")
 				}
 
-        err = gameRepo.Repo.StartGame(gid)
-        if err != nil {
-          return err
-        }
+				info, err := gameRepo.Repo.StartGame(gid)
+				if err != nil {
+					return err
+				}
+
+				for playerId, hand := range info.PlayerHands {
+					handCopy := make([]gameLogic.WhiteCard, len(hand))
+					for i, val := range hand {
+						handCopy[i] = *val
+					}
+
+					roundInfo := RpcRoundInformationMsg{
+						CurrentCardCzarId: info.CurrentCardCzarId,
+						YourHand:          handCopy,
+						RoundNumber:       info.RoundNumber,
+						BlackCard:         *info.CurrentBlackCard,
+					}
+
+					encodedMessage, err := EncodeRpcMessage(roundInfo)
+					if err != nil {
+						return err
+					}
+
+					go GlobalConnectionManager.SendToPlayer(c.GameId, playerId, encodedMessage)
+				}
 				return nil
 			},
 		})
