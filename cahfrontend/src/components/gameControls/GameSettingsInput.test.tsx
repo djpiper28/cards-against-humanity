@@ -7,7 +7,7 @@ import GameSettingsInput, {
   validatePointsToPlayTo,
   validatePlayerName,
 } from "./GameSettingsInput";
-import { screen, render, waitFor } from "solid-testing-library";
+import { screen, render, waitFor } from "@solidjs/testing-library";
 import {
   MaxPasswordLength,
   MaxPlayers,
