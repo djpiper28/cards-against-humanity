@@ -260,4 +260,41 @@ func (s *WithServicesSuite) TestPlayerLeavesGame() {
 	assert.True(s.T(), adminLobbyPage.IsAdmin())
 }
 
-// Test that the owner leaving a game transfers ownership to another player
+func (s *WithServicesSuite) TestOwnerLeavingGameTransfersOwnership() {
+	browser := GetBrowser()
+	defer browser.Close()
+
+	createPage := NewCreateGamePage(browser)
+	assert.NotNil(s.T(), createPage, "Page should render and not be nil")
+	createPage.InsertDefaultValidSettings()
+
+	log.Print("Creating game")
+	createPage.CreateGame()
+
+	time.Sleep(Timeout)
+	assert.True(s.T(), strings.Contains(createPage.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
+
+	adminLobbyPage := JoinGamePage{Page: createPage.Page}
+
+	assert.True(s.T(), adminLobbyPage.InLobby())
+
+	// Connect with another client then assert that the settings remain equal
+	browser2 := GetBrowser()
+	defer browser2.Close()
+	playerPage := NewPlayerGamePage(browser2, adminLobbyPage)
+
+	assert.True(s.T(), playerPage.InPlayerJoinPage())
+	playerPage.Password(DefaultPassword)
+	playerPage.PlayerName("Geoff")
+
+	playerPage.Join()
+
+	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
+	assert.True(s.T(), playerLobbyPage.InLobby())
+
+	playerId := adminLobbyPage.PlayerId()
+
+	adminLobbyPage.LeaveGame()
+	assert.NotContains(s.T(), playerLobbyPage.PlayersInGame(), playerId)
+	assert.True(s.T(), playerLobbyPage.IsAdmin())
+}
