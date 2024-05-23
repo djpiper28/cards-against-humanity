@@ -292,9 +292,11 @@ func (s *WithServicesSuite) TestOwnerLeavingGameTransfersOwnership() {
 	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
 	assert.True(s.T(), playerLobbyPage.InLobby())
 
+	time.Sleep(Timeout)
 	playerId := adminLobbyPage.PlayerId()
-
 	adminLobbyPage.LeaveGame()
+
+	time.Sleep(Timeout)
 	assert.NotContains(s.T(), playerLobbyPage.PlayersInGame(), playerId)
 	assert.True(s.T(), playerLobbyPage.IsAdmin())
 }

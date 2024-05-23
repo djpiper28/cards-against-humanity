@@ -44,7 +44,7 @@ func GetInputByLabel(p *rod.Page, label string) *rod.Element {
 func cssSelectorForId(id string) string {
 	if len(id) > 0 {
 		if id[0] >= '0' && id[0] <= '9' {
-			log.Fatal("Illegal Id, this causes the CSS selector to be invalid as it starts with a digit")
+			log.Print("Illegal Id, this causes the CSS selector to be invalid as it starts with a digit")
 		}
 	}
 	return "#" + id

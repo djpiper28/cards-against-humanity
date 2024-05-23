@@ -114,7 +114,7 @@ func (j *JoinGamePage) PlayersInGame() []string {
 }
 
 func (j *JoinGamePage) LeaveGame() {
-	GetById(j.Page, "leave-game").MustClick()
+	GetById(j.Page, "leave-game").Timeout(Timeout).MustClick()
 }
 
 func (j *JoinGamePage) IsAdmin() bool {

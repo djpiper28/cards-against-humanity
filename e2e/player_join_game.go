@@ -40,11 +40,11 @@ func (p *PlayerJoinGame) InPlayerJoinPage() bool {
 }
 
 func (p *PlayerJoinGame) PlayerName(name string) {
-	GetInputByLabel(p.Page, "Player Name").MustInput(name)
+	GetInputByLabel(p.Page, "/Player Name/i").MustInput(name)
 }
 
 func (p *PlayerJoinGame) Password(password string) {
-	GetInputByLabel(p.Page, "Password, leave blank if none").MustInput(password)
+	GetInputByLabel(p.Page, "/Password, leave blank if none/i").MustInput(password)
 }
 
 func (p *PlayerJoinGame) Join() {
