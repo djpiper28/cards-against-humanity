@@ -13,7 +13,9 @@ import (
 )
 
 // You must have the dev porxy set up
-const frontendUrl = "http://localhost:3255/"
+const frontendUrl = "http://localhost:3000/"
+// Proxy for CORS
+const frontendUrlProxy = "http://localhost:3255/"
 const Timeout = time.Millisecond * 200
 
 func testFrontend() error {
@@ -124,11 +126,11 @@ func TestWithServicesSuite(t *testing.T) {
 }
 
 func GetBasePage() string {
-	return frontendUrl
+	return frontendUrlProxy
 }
 
 func GetDomain() string {
-	url, err := url.Parse(frontendUrl)
+	url, err := url.Parse(frontendUrlProxy)
 	if err != nil {
 		log.Fatalf("Cannot get domain for base url: %s", err)
 	}
