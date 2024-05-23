@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"os/exec"
 	"testing"
@@ -14,9 +13,6 @@ import (
 
 // You must have the dev porxy set up
 const frontendUrl = "http://localhost:3000/"
-
-// Proxy for CORS
-const frontendUrlProxy = "http://localhost:3255/"
 
 func testFrontend() error {
 	_, err := http.Get(frontendUrl)
@@ -123,16 +119,4 @@ func (s *WithServicesSuite) TearDownSuite() {
 func TestWithServicesSuite(t *testing.T) {
 	t.Parallel()
 	suite.Run(t, new(WithServicesSuite))
-}
-
-func GetBasePage() string {
-	return frontendUrlProxy
-}
-
-func GetDomain() string {
-	url, err := url.Parse(frontendUrlProxy)
-	if err != nil {
-		log.Fatalf("Cannot get domain for base url: %s", err)
-	}
-	return url.Host
 }

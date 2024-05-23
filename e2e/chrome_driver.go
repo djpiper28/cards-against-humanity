@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -68,4 +69,18 @@ func GetAllById(p *rod.Page, id string) []*rod.Element {
 		}
 	}()
 	return p.Timeout(Timeout).MustElements(cssSelectorForId(id))
+}
+
+const frontendUrlProxy = "http://localhost:3255/"
+
+func GetBasePage() string {
+	return frontendUrlProxy
+}
+
+func GetDomain() string {
+	url, err := url.Parse(frontendUrlProxy)
+	if err != nil {
+		log.Fatalf("Cannot get domain for base url: %s", err)
+	}
+	return url.Host
 }
