@@ -203,7 +203,7 @@ func (s *WithServicesSuite) TestPlayerDisconnectReConnect() {
 	assert.True(s.T(), adminLobbyPage.PlayerConnected(playerId))
 
 	// Disconnect and make sure the UI updates
-	playerPage.Page.MustNavigate("https://google.com").MustActivate()
+	playerPage.Disconnect()
 
 	time.Sleep(Timeout)
 	assert.False(s.T(), adminLobbyPage.PlayerConnected(playerId))
@@ -212,7 +212,7 @@ func (s *WithServicesSuite) TestPlayerDisconnectReConnect() {
 	adminLobbyPage.Page.MustScreenshot("../wiki/assets/player_disconnected.png")
 
 	// Reconnect and make sure the UI updates
-	playerPage.Page.MustNavigateBack().MustActivate()
+	playerPage.ReConnect()
 	time.Sleep(Timeout)
 	assert.True(s.T(), playerLobbyPage.InLobby())
 

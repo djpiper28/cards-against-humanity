@@ -10,7 +10,6 @@ func newLogger() *log.Logger {
 	logger := log.New(os.Stderr)
 	logger.SetReportTimestamp(true)
 	logger.SetReportCaller(true)
-
 	return logger
 }
 

@@ -80,8 +80,11 @@ function GameNotStartedView(props: Readonly<LobbyLoadedProps>) {
           <Show when={dirtyState()} fallback={"Settings are saved."}>
             <div class="flex flex-row gap-2">
               <p class="text-error-colour">Settings are NOT saved.</p>
-              <Button onClick={updateSettings}>Save</Button>
+              <Button id="save-settings" onClick={updateSettings}>
+                Save
+              </Button>
               <Button
+                id="reset-settings"
                 onClick={() => {
                   gameState.emitState();
                   props.setCommandError("");
@@ -104,12 +107,13 @@ function GameNotStartedView(props: Readonly<LobbyLoadedProps>) {
           fallback={"Cannot start a game with unsaved changes."}
         >
           <Button
+            id="start-game"
             onClick={async () => {
               try {
                 await gameState.startGame();
               } catch (e) {
                 props.setCommandError(
-                  "Unable to start game. Please try again.",
+                  "Unable to start game. Please try again."
                 );
               }
             }}
@@ -259,7 +263,7 @@ export default function GameLobby() {
         cardPacksList.sort((a, b) => {
           if (!a.name || !b.name) return 0;
           return a.name.localeCompare(b.name);
-        }),
+        })
       );
     } catch (err) {
       console.error(err);

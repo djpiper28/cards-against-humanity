@@ -14,9 +14,9 @@ import (
 
 // You must have the dev porxy set up
 const frontendUrl = "http://localhost:3000/"
+
 // Proxy for CORS
 const frontendUrlProxy = "http://localhost:3255/"
-const Timeout = time.Millisecond * 200
 
 func testFrontend() error {
 	_, err := http.Get(frontendUrl)

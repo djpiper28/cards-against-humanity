@@ -8,6 +8,7 @@ import (
 	"github.com/go-rod/rod"
 )
 
+// The page for joining a game, when trying to access admin settings in the lobby use this page
 type JoinGamePage struct {
 	Page *rod.Page
 }
@@ -99,31 +100,31 @@ func (j *JoinGamePage) PlayerId() string {
 }
 
 func (j *JoinGamePage) PlayerConnected(playerId string) bool {
-	defer func() {
-		if pan := recover(); pan != nil {
-			log.Printf("Error checking if player %s is connected, %s was saved", playerId, ErrorScreenshot)
-			j.Page.MustScreenshot(ErrorScreenshot)
-			panic(pan)
-		}
-	}()
-
-	domId := fmt.Sprintf("#%s-player-status", playerId)
-	el := j.Page.Timeout(Timeout).MustElement(domId)
+	domId := fmt.Sprintf("player-status-%s", playerId)
+	el := GetById(j.Page, domId)
 	return strings.ToLower(el.MustText()) == "connected"
 }
 
 func (j *JoinGamePage) PlayersInGame() []string {
 	players := []string{}
-	for _, el := range j.Page.MustElements("player-list") {
+	for _, el := range GetAllById(j.Page, "player-list") {
 		players = append(players, el.MustElements("p")[0].MustText())
 	}
 	return players
 }
 
 func (j *JoinGamePage) LeaveGame() {
-	j.Page.Timeout(Timeout).MustElementR("button", "/Leave Game/i").MustClick()
+	GetById(j.Page, "leave-game").MustClick()
 }
 
 func (j *JoinGamePage) IsAdmin() bool {
-	return j.Page.Timeout(Timeout).MustElementR("button", "/Start Game/i") != nil
+	return GetById(j.Page, "start-game") != nil
+}
+
+func (p *JoinGamePage) Disconnect() {
+	p.Page.Timeout(Timeout).MustNavigate(GetBasePage()).MustWaitStable()
+}
+
+func (p *JoinGamePage) ReConnect() {
+	p.Page.Timeout(Timeout).MustNavigate(GetJoinGameUrl()).MustWaitStable()
 }

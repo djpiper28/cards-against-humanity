@@ -26,6 +26,7 @@ func GetBrowser() *rod.Browser {
 }
 
 const ErrorScreenshot = "./error.png"
+const Timeout = time.Millisecond * 200
 
 func GetInputByLabel(p *rod.Page, label string) *rod.Element {
 	defer func() {
@@ -34,5 +35,37 @@ func GetInputByLabel(p *rod.Page, label string) *rod.Element {
 			p.MustScreenshotFullPage(ErrorScreenshot)
 		}
 	}()
-	return p.Timeout(Timeout).MustElementR("label", label).MustElement("input")
+	return p.Timeout(Timeout).
+		MustElementR("label", label).
+		MustElement("input")
+}
+
+func cssSelectorForId(id string) string {
+	if len(id) > 0 {
+		if id[0] >= '0' && id[0] <= '9' {
+			log.Fatal("Illegal Id, this causes the CSS selector to be invalid as it starts with a digit")
+		}
+	}
+	return "#" + id
+	// return fmt.Sprintf("[id='%s']", id)
+}
+
+func GetById(p *rod.Page, id string) *rod.Element {
+	defer func() {
+		if recover() != nil {
+			log.Printf("Error getting element by id '%s', %s was saved", id, ErrorScreenshot)
+			p.MustScreenshotFullPage(ErrorScreenshot)
+		}
+	}()
+	return p.Timeout(Timeout).MustElement(cssSelectorForId(id))
+}
+
+func GetAllById(p *rod.Page, id string) []*rod.Element {
+	defer func() {
+		if recover() != nil {
+			log.Printf("Error getting all elements by id '%s', %s was saved", id, ErrorScreenshot)
+			p.MustScreenshotFullPage(ErrorScreenshot)
+		}
+	}()
+	return p.Timeout(Timeout).MustElements(cssSelectorForId(id))
 }

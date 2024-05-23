@@ -52,3 +52,11 @@ func (p *PlayerJoinGame) Join() {
 	p.Page.MustWaitStable()
 	return
 }
+
+func (p *PlayerJoinGame) Disconnect() {
+	p.Page.Timeout(Timeout).MustNavigate(GetBasePage()).MustActivate()
+}
+
+func (p *PlayerJoinGame) ReConnect() {
+	p.Page.Timeout(Timeout).MustNavigate(GetJoinGameUrl()).MustActivate()
+}

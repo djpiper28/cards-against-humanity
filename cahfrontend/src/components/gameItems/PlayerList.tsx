@@ -17,13 +17,13 @@ export default function PlayerList(props: Readonly<Props>) {
             id="player-list"
             class="flex flex-row gap-3 ease-in duration-700 opacity-100"
           >
-            <p class="font-bold" id={`${player.id}-player-name`}>
+            <p class="font-bold" id={`player-name-${player.id}`}>
               {player.name}
             </p>
-            <p class="font-mono" id={`${player.id}-player-status`}>
+            <p class="font-mono" id={`player-status-${player.id}`}>
               {player.connected ? "CONNECTED" : "DISCONNECTED"}
             </p>
-            <p class="font-bold" id={`${player.id}-player-points`}>
+            <p class="font-bold" id={`player-points-${player.id}`}>
               {player.points} points
             </p>
           </div>
