@@ -297,6 +297,8 @@ func (s *WithServicesSuite) TestOwnerLeavingGameTransfersOwnership() {
 	adminLobbyPage.LeaveGame()
 
 	time.Sleep(Timeout)
+
+	playerLobbyPage.Page.MustScreenshot("../wiki/assets/player_left.png")
 	assert.NotContains(s.T(), playerLobbyPage.PlayersInGame(), playerId)
 	assert.True(s.T(), playerLobbyPage.IsAdmin())
 }
