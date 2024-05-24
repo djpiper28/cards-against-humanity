@@ -50,9 +50,8 @@ function GameNotStartedView(props: Readonly<LobbyLoadedProps>) {
     gameState.sendRpcMessage(MsgChangeSettings, changeSettings);
   };
 
-  const state = () => props.state;
-  const isGameOwner = () => state().ownerId === gameState.getPlayerId();
-  const settings = () => state().settings;
+  const isGameOwner = () => props.state.ownerId === gameState.getPlayerId();
+  const settings = () => props.state.settings;
   const dirtyState = () => props.dirtyState;
 
   return (
@@ -113,7 +112,7 @@ function GameNotStartedView(props: Readonly<LobbyLoadedProps>) {
                 await gameState.startGame();
               } catch (e) {
                 props.setCommandError(
-                  "Unable to start game. Please try again."
+                  "Unable to start game. Please try again.",
                 );
               }
             }}
@@ -127,13 +126,11 @@ function GameNotStartedView(props: Readonly<LobbyLoadedProps>) {
 }
 
 function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
-  const state = () => props.state;
-  const roundState = () => props.roundState;
-  const isGameOwner = () => state().ownerId === gameState.getPlayerId();
-  const settings = () => state().settings;
+  const isGameOwner = () => props.state.ownerId === gameState.getPlayerId();
+  const settings = () => props.state.settings;
   const navigate = useNavigate();
 
-  const isGameStarted = () => state().gameState !== GameStateInLobby;
+  const isGameStarted = () => props.state.gameState !== GameStateInLobby;
 
   createEffect(() => {
     cookieStorage.setItem(gamePasswordCookie, settings().gamePassword);
@@ -174,9 +171,9 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
           <GameNotStartedView {...props} />
         </Show>
 
-        <Show when={isGameStarted() && roundState()}>
+        <Show when={isGameStarted() && props.roundState}>
           <PlayerCards
-            cards={roundState().yourHand.map((x) => {
+            cards={props.roundState.yourHand.map((x) => {
               return {
                 id: x.id.toString(),
                 name: x.bodyText,
@@ -263,7 +260,7 @@ export default function GameLobby() {
         cardPacksList.sort((a, b) => {
           if (!a.name || !b.name) return 0;
           return a.name.localeCompare(b.name);
-        })
+        }),
       );
     } catch (err) {
       console.error(err);

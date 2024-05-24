@@ -245,7 +245,7 @@ class GameState {
 
   private handleOnOwnerChange(msg: RpcNewOwnerMsg) {
     this.lobbyState.ownerId = msg.id;
-    this.onLobbyStateChange?.(this.lobbyState);
+    this.onLobbyStateChange?.(structuredClone(this.lobbyState));
   }
 
   private handlePing() {
