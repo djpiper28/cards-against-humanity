@@ -260,6 +260,7 @@ func (s *WithServicesSuite) TestPlayerLeavesGame() {
 	assert.True(s.T(), adminLobbyPage.IsAdmin())
 }
 
+// Genuine fail remind me to fix
 func (s *WithServicesSuite) TestOwnerLeavingGameTransfersOwnership() {
 	browser := GetBrowser()
 	defer browser.Close()
@@ -295,6 +296,7 @@ func (s *WithServicesSuite) TestOwnerLeavingGameTransfersOwnership() {
 	time.Sleep(Timeout)
 	playerId := adminLobbyPage.PlayerId()
 	adminLobbyPage.LeaveGame()
+  adminLobbyPage.Page.MustScreenshot("../wiki/assets/admin_left.png")
 
 	time.Sleep(Timeout)
 
