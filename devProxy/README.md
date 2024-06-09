@@ -3,6 +3,7 @@
 Hosts a proxy for the backend and frontend on `http://localhost:3255`
 
 ## Requirements
+
 - nginx
 
 ## Setup
