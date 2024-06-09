@@ -157,13 +157,15 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
               .then(() => {
                 clearGameCookies();
                 console.log("Left game successfully");
-                navigate(indexUrl);
               })
               .catch((e) => {
                 console.error(e);
                 props.setCommandError(
                   "Unable to leave game. Please try again.",
                 );
+              })
+              .finally(() => {
+                navigate(indexUrl);
               });
           }}
         >
