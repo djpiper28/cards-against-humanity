@@ -769,3 +769,4 @@ func TestPlayingCardNotInHandFails(t *testing.T) {
 
 // TODO: Check the success case
 // TODO: Check that the next round is triggered correctly
+// TODO: Check that being in the wrong state fails
