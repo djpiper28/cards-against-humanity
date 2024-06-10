@@ -164,7 +164,7 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
                 props.setCommandError(
                   "Unable to leave game. Please try again.",
                 );
-              })
+              });
           }}
         >
           Leave Game
