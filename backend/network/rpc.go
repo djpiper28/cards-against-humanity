@@ -39,6 +39,8 @@ const (
 
 	// Tx the current round info
 	MsgRoundInformation
+
+	MsgPlayCards
 )
 
 type RpcMessageBody struct {
@@ -63,6 +65,7 @@ type RpcCommandHandlers struct {
 	ChangeSettingsHandler func(msg RpcChangeSettingsMsg) error
 	PingHandler           func() error
 	StartGameHandler      func() error
+	PlayCardsHandler      func(msg RpcPlayCardsMsg) error
 }
 
 func decodeAs[T any](data []byte) (T, error) {
@@ -100,6 +103,13 @@ func DecodeRpcMessage(data []byte, handlers RpcCommandHandlers) error {
 		return handlers.PingHandler()
 	case MsgStartGame:
 		return handlers.StartGameHandler()
+	case MsgPlayCards:
+		command, err := decodeAs[RpcPlayCardsMsg](data)
+		if err != nil {
+			return err
+		}
+
+		return handlers.PlayCardsHandler(command)
 	default:
 		logger.Logger.Error("Unknown command", "type", cmd.Type)
 		return errors.New("Unknown command")
@@ -199,4 +209,12 @@ type RpcRoundInformationMsg struct {
 
 func (msg RpcRoundInformationMsg) Type() RpcMessageType {
 	return MsgRoundInformation
+}
+
+type RpcPlayCardsMsg struct {
+	CardIds []uuid.UUID `json:"cardIds"`
+}
+
+func (msg RpcPlayCardsMsg) Type() RpcMessageType {
+	return MsgPlayCards
 }

@@ -426,3 +426,79 @@ func (g *Game) ChangeSettings(newSettings GameSettings) error {
 	g.Settings = &newSettings
 	return nil
 }
+
+type PlayCardsResult struct {
+	// Moves to the czar judging phase when all players have played
+	MovedToNextCardCzarPhase bool
+}
+
+func (g *Game) PlayCards(playerId uuid.UUID, cardIds []int) (PlayCardsResult, error) {
+	g.Lock.Lock()
+	defer g.Lock.Unlock()
+
+	if g.GameState != GameStateWhiteCardsBeingSelected {
+		return PlayCardsResult{}, errors.New("The game is not in the white card selection phase")
+	}
+
+	if g.CurrentCardCzarId == playerId {
+		return PlayCardsResult{}, errors.New("The card czar cannot play cards")
+	}
+
+	if uint(len(cardIds)) != g.CurrentBlackCard.CardsToPlay {
+		return PlayCardsResult{}, errors.New("The amount of cards played does not match the amount of blanks")
+	}
+
+	player, found := g.PlayersMap[playerId]
+	if !found {
+		return PlayCardsResult{}, errors.New("Cannot find the player in the game")
+	}
+
+	// Check that the cards are in the hand
+	currentPlay := make([]*WhiteCard, 0)
+	for _, cardId := range cardIds {
+		whiteCard, err := GetWhiteCard(cardId)
+		if err != nil {
+			return PlayCardsResult{}, errors.New(fmt.Sprintf("Cannot find card %d", cardId))
+		}
+
+		currentPlay = append(currentPlay, whiteCard)
+	}
+
+	// Check that: there are no duplicates and all cards are in the players hands
+	checkedCards := make(map[int]bool)
+	for _, cardId := range cardIds {
+		// Duplicate check
+		_, found := checkedCards[cardId]
+		if found {
+			return PlayCardsResult{}, errors.New(fmt.Sprintf("Duplicate card in cardIds detected %d", cardId))
+		}
+
+		// Search for card in hand
+		found = false
+		checkedCards[cardId] = true
+		for _, handCard := range player.Hand {
+			if handCard.Id == cardId {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return PlayCardsResult{}, errors.New(fmt.Sprintf("Cannot find card in your hand %d", cardId))
+		}
+	}
+
+	// Save their current play
+	player.CurrentPlay = currentPlay
+
+	// Check that all players have played
+	allPlayersPlayed := true
+	for _, player := range g.PlayersMap {
+		if len(player.CurrentPlay) == 0 {
+			allPlayersPlayed = false
+			break
+		}
+	}
+
+	return PlayCardsResult{MovedToNextCardCzarPhase: allPlayersPlayed}, nil
+}

@@ -643,3 +643,129 @@ func TestCannotChangeSettingsToInvalidSettings(t *testing.T) {
 	err = game.ChangeSettings(*newSettings)
 	assert.Error(t, err)
 }
+
+func TestPlayingCardThatDoesNotExistFails(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	game.GameState = gameLogic.GameStateWhiteCardsBeingSelected
+	game.CurrentBlackCard = &gameLogic.BlackCard{
+		Id:          180,
+		CardsToPlay: 1,
+		BodyText:    "Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.",
+	}
+
+	pid := game.Players[0]
+	cardId := -1
+	_, err = gameLogic.GetWhiteCard(cardId)
+	assert.Error(t, err)
+
+	_, err = game.PlayCards(pid, []int{cardId})
+	assert.Error(t, err)
+}
+
+func TestPlayingCardsForAPlayerThatDoesNotExistFails(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	game.GameState = gameLogic.GameStateWhiteCardsBeingSelected
+	game.CurrentBlackCard = &gameLogic.BlackCard{
+		Id:          180,
+		CardsToPlay: 1,
+		BodyText:    "Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.",
+	}
+
+	cardId := 1
+	_, err = gameLogic.GetWhiteCard(cardId)
+	assert.NoError(t, err)
+
+	_, err = game.PlayCards(uuid.New(), []int{cardId})
+	assert.Error(t, err)
+}
+
+func TestPlayingWrongAmountOfCardsFails(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	game.GameState = gameLogic.GameStateWhiteCardsBeingSelected
+	game.CurrentBlackCard = &gameLogic.BlackCard{
+		Id:          180,
+		CardsToPlay: 2,
+		BodyText:    "Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.",
+	}
+
+	cardId := 1
+	card, err := gameLogic.GetWhiteCard(cardId)
+	assert.NoError(t, err)
+
+	pid := game.Players[0]
+	game.PlayersMap[pid].Hand = make(map[int]*gameLogic.WhiteCard)
+	game.PlayersMap[pid].Hand[cardId] = card
+
+	_, err = game.PlayCards(pid, []int{cardId})
+	assert.Error(t, err)
+}
+
+func TestPlayingDuplicateCardsFails(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	game.GameState = gameLogic.GameStateWhiteCardsBeingSelected
+	game.CurrentBlackCard = &gameLogic.BlackCard{
+		Id:          180,
+		CardsToPlay: 2,
+		BodyText:    "Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.",
+	}
+
+	cardId := 1
+	card, err := gameLogic.GetWhiteCard(cardId)
+	assert.NoError(t, err)
+
+	pid := game.Players[0]
+	game.PlayersMap[pid].Hand = make(map[int]*gameLogic.WhiteCard)
+	game.PlayersMap[pid].Hand[cardId] = card
+
+	_, err = game.PlayCards(pid, []int{cardId, cardId})
+	assert.Error(t, err)
+}
+
+func TestPlayingCardNotInHandFails(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	game.GameState = gameLogic.GameStateWhiteCardsBeingSelected
+	game.CurrentBlackCard = &gameLogic.BlackCard{
+		Id:          180,
+		CardsToPlay: 1,
+		BodyText:    "Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.",
+	}
+
+	cardId := 2
+	_, err = gameLogic.GetWhiteCard(cardId)
+	assert.NoError(t, err)
+
+	pid := game.Players[0]
+	game.PlayersMap[pid].Hand = make(map[int]*gameLogic.WhiteCard)
+	game.PlayersMap[pid].Hand[cardId-1] = gameLogic.NewWhiteCard(cardId-1, "Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.")
+
+	_, err = game.PlayCards(pid, []int{cardId})
+	assert.Error(t, err)
+}
+
+// TODO: Check the success case
+// TODO: Check that the next round is triggered correctly

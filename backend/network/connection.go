@@ -293,6 +293,10 @@ func (c *WsConnection) listenAndHandle() error {
 				}
 				return nil
 			},
+			PlayCardsHandler: func(msg RpcPlayCardsMsg) error {
+				handler = "Play Cards"
+				return errors.New("Not implemented yet")
+			},
 		})
 
 		endTime := time.Now()
