@@ -49,7 +49,7 @@ func (s *WithServicesSuite) TestGamesShowTheSameInitialSettings() {
 
 	adminLobbyPage := JoinGamePage{Page: createPage.Page}
 
-	assert.True(s.T(), adminLobbyPage.InLobby())
+	assert.True(s.T(), adminLobbyPage.InLobbyAdmin())
 	assert.True(s.T(), adminLobbyPage.IsAdmin())
 	assert.Equal(s.T(), adminLobbyPage.AdminMaxPlayers().MustText(), "6")
 	assert.Equal(s.T(), adminLobbyPage.AdminPointsToPlayTo().MustText(), "10")
@@ -69,7 +69,7 @@ func (s *WithServicesSuite) TestGamesShowTheSameInitialSettings() {
 
 	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
 
-	assert.True(s.T(), playerLobbyPage.InLobby())
+	assert.True(s.T(), playerLobbyPage.InLobbyAdmin())
 
 	assert.Equal(s.T(),
 		adminLobbyPage.AdminMaxPlayers().MustText(),
@@ -103,7 +103,7 @@ func (s *WithServicesSuite) TestChangingSettingsSyncsBetweenClients() {
 
 	adminLobbyPage := JoinGamePage{Page: createPage.Page}
 
-	assert.True(s.T(), adminLobbyPage.InLobby())
+	assert.True(s.T(), adminLobbyPage.InLobbyAdmin())
 
 	// Connect with another client then assert that the settings remain equal
 	browser2 := GetBrowser()
@@ -118,7 +118,7 @@ func (s *WithServicesSuite) TestChangingSettingsSyncsBetweenClients() {
 
 	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
 
-	assert.True(s.T(), playerLobbyPage.InLobby())
+	assert.True(s.T(), playerLobbyPage.InLobbyAdmin())
 
 	adminLobbyPage.AdminGamePasssowrd().MustInput("Password 123")
 	assert.Equal(s.T(), adminLobbyPage.AdminGamePasssowrd().MustText(), "poopPassword 123")
@@ -177,7 +177,7 @@ func (s *WithServicesSuite) TestPlayerDisconnectReConnect() {
 
 	adminLobbyPage := JoinGamePage{Page: createPage.Page}
 
-	assert.True(s.T(), adminLobbyPage.InLobby())
+	assert.True(s.T(), adminLobbyPage.InLobbyAdmin())
 
 	adminPlayerId := adminLobbyPage.PlayerId()
 	assert.True(s.T(),
@@ -195,7 +195,7 @@ func (s *WithServicesSuite) TestPlayerDisconnectReConnect() {
 	playerPage.Join()
 
 	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
-	assert.True(s.T(), playerLobbyPage.InLobby())
+	assert.True(s.T(), playerLobbyPage.InLobbyAdmin())
 
 	playerId := playerLobbyPage.PlayerId()
 
@@ -213,10 +213,12 @@ func (s *WithServicesSuite) TestPlayerDisconnectReConnect() {
 
 	// Reconnect and make sure the UI updates
 	playerPage.ReConnect()
+	playerPage.Page.MustScreenshot(WikiUriBase + "player_reconnect.png")
 	time.Sleep(Timeout)
+
 	assert.True(s.T(), adminLobbyPage.PlayerConnected(adminPlayerId))
 	assert.True(s.T(), adminLobbyPage.PlayerConnected(playerId))
-	assert.True(s.T(), playerLobbyPage.InLobby())
+	assert.True(s.T(), playerPage.InPlayerJoinPage())
 }
 
 func (s *WithServicesSuite) TestPlayerLeavesGame() {
@@ -235,7 +237,7 @@ func (s *WithServicesSuite) TestPlayerLeavesGame() {
 
 	adminLobbyPage := JoinGamePage{Page: createPage.Page}
 
-	assert.True(s.T(), adminLobbyPage.InLobby())
+	assert.True(s.T(), adminLobbyPage.InLobbyAdmin())
 
 	// Connect with another client then assert that the settings remain equal
 	browser2 := GetBrowser()
@@ -249,7 +251,7 @@ func (s *WithServicesSuite) TestPlayerLeavesGame() {
 	playerPage.Join()
 
 	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
-	assert.True(s.T(), playerLobbyPage.InLobby())
+	assert.True(s.T(), playerLobbyPage.InLobbyAdmin())
 
 	playerId := playerLobbyPage.PlayerId()
 
@@ -275,7 +277,7 @@ func (s *WithServicesSuite) TestOwnerLeavingGameTransfersOwnership() {
 
 	adminLobbyPage := JoinGamePage{Page: createPage.Page}
 
-	assert.True(s.T(), adminLobbyPage.InLobby())
+	assert.True(s.T(), adminLobbyPage.InLobbyAdmin())
 
 	// Connect with another client then assert that the settings remain equal
 	browser2 := GetBrowser()
@@ -289,7 +291,7 @@ func (s *WithServicesSuite) TestOwnerLeavingGameTransfersOwnership() {
 	playerPage.Join()
 
 	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
-	assert.True(s.T(), playerLobbyPage.InLobby())
+	assert.True(s.T(), playerLobbyPage.InLobbyAdmin())
 
 	time.Sleep(Timeout)
 	playerId := adminLobbyPage.PlayerId()

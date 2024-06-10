@@ -54,9 +54,9 @@ func (p *PlayerJoinGame) Join() {
 }
 
 func (p *PlayerJoinGame) Disconnect() {
-	p.Page.Timeout(Timeout).MustNavigate(GetBasePage()).MustActivate()
+	p.Page.Timeout(Timeout).MustNavigate(GetBasePage()).MustWaitStable()
 }
 
 func (p *PlayerJoinGame) ReConnect() {
-	p.Page.Timeout(Timeout).MustNavigate(GetJoinGameUrl()).MustActivate()
+	p.Page.Timeout(Timeout).MustNavigate(GetJoinGameUrl()).MustWaitStable()
 }

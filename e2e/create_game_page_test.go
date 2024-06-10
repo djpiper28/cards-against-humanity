@@ -34,7 +34,7 @@ func (s *WithServicesSuite) TestCreateGamePageDefaultInput() {
 
 	lobbyPage := JoinGamePage{Page: page.Page}
 
-	assert.True(s.T(), lobbyPage.InLobby())
+	assert.True(s.T(), lobbyPage.InLobbyAdmin())
 	assert.Equal(s.T(), lobbyPage.AdminMaxPlayers().MustText(), "6")
 	assert.Equal(s.T(), lobbyPage.AdminPointsToPlayTo().MustText(), "10")
 	assert.Equal(s.T(), lobbyPage.AdminMaxGameRounds().MustText(), "25")
