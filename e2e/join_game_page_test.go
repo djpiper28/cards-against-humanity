@@ -84,7 +84,7 @@ func (s *WithServicesSuite) TestGamesShowTheSameInitialSettings() {
 		adminLobbyPage.AdminGamePasssowrd().MustText(),
 		playerLobbyPage.UserGamePassword().MustText())
 
-	playerLobbyPage.Page.MustScreenshotFullPage("../wiki/player_lobby_page.png")
+	playerLobbyPage.Page.MustScreenshotFullPage(WikiUriBase + "player_lobby_page.png")
 }
 
 func (s *WithServicesSuite) TestChangingSettingsSyncsBetweenClients() {
@@ -158,7 +158,7 @@ func (s *WithServicesSuite) TestChangingSettingsSyncsBetweenClients() {
 		adminLobbyPage.AdminGamePasssowrd().MustText(),
 		playerLobbyPage.UserGamePassword().MustText())
 
-	playerLobbyPage.Page.MustScreenshotFullPage("../wiki/assets/player_lobby_page.png")
+	playerLobbyPage.Page.MustScreenshotFullPage(WikiUriBase + "player_lobby_page.png")
 }
 
 func (s *WithServicesSuite) TestPlayerDisconnectReConnect() {
@@ -209,7 +209,7 @@ func (s *WithServicesSuite) TestPlayerDisconnectReConnect() {
 	assert.False(s.T(), adminLobbyPage.PlayerConnected(playerId))
 	assert.True(s.T(), playerLobbyPage.PlayerConnected(adminPlayerId))
 
-	adminLobbyPage.Page.MustScreenshot("../wiki/assets/player_disconnected.png")
+	adminLobbyPage.Page.MustScreenshot(WikiUriBase + "player_disconnected.png")
 
 	// Reconnect and make sure the UI updates
 	playerPage.ReConnect()
@@ -296,11 +296,11 @@ func (s *WithServicesSuite) TestOwnerLeavingGameTransfersOwnership() {
 	time.Sleep(Timeout)
 	playerId := adminLobbyPage.PlayerId()
 	adminLobbyPage.LeaveGame()
-  adminLobbyPage.Page.MustScreenshot("../wiki/assets/admin_left.png")
 
 	time.Sleep(Timeout)
+	adminLobbyPage.Page.MustScreenshot(WikiUriBase + "admin_left.png")
+	playerLobbyPage.Page.MustScreenshot(WikiUriBase + "/player_left.png")
 
-	playerLobbyPage.Page.MustScreenshot("../wiki/assets/player_left.png")
 	assert.NotContains(s.T(), playerLobbyPage.PlayersInGame(), playerId)
 	assert.True(s.T(), playerLobbyPage.IsAdmin())
 }

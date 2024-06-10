@@ -10,7 +10,7 @@ func (s *WithServicesSuite) TestHomePageRender() {
 
 	page := NewHomePage(browser)
 	assert.NotNil(s.T(), page, "Page should render and not be nil")
-	page.Page.MustScreenshotFullPage("../wiki/assets/home.png")
+	page.Page.MustScreenshotFullPage(WikiUriBase + "home.png")
 }
 
 func (s *WithServicesSuite) TestClickCreateAGame() {
