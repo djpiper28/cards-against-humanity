@@ -161,7 +161,7 @@ func (s *WithServicesSuite) TestChangingSettingsSyncsBetweenClients() {
 	playerLobbyPage.Page.MustScreenshotFullPage(WikiUriBase + "player_lobby_page.png")
 }
 
-func (s *WithServicesSuite) TestPlayerDisconnectReConnect() {
+func (s *WithServicesSuite) TestPlayerDisconnectReConnectWithNoSearchParamsInJoinLink() {
 	browser := GetBrowser()
 	defer browser.Close()
 
@@ -214,7 +214,7 @@ func (s *WithServicesSuite) TestPlayerDisconnectReConnect() {
 
 	// Reconnect and make sure the UI updates
 	playerPage.ReConnect()
-	time.Sleep(time.Second)
+	time.Sleep(Timeout)
 	playerPage.Page.MustScreenshot(WikiUriBase + "player_reconnect.png")
 
 	assert.True(s.T(), adminLobbyPage.PlayerConnected(adminPlayerId))

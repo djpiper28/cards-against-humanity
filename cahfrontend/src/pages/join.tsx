@@ -24,11 +24,11 @@ export default function Join() {
   const navigate = useNavigate();
 
   onMount(() => {
-    const gameId = searchParams[gameIdParamCookie];
+    let gameId = searchParams[gameIdParamCookie];
     const alternateGameId = cookieStorage.getItem(gameIdParamCookie);
     if (!gameId && alternateGameId) {
       navigate(`${joinGameUrl}?${gameIdParamCookie}=${alternateGameId}`);
-      return;
+      gameId = alternateGameId;
     }
 
     if (!gameId) {
