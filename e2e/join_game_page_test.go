@@ -209,16 +209,17 @@ func (s *WithServicesSuite) TestPlayerDisconnectReConnect() {
 	assert.False(s.T(), adminLobbyPage.PlayerConnected(playerId))
 	assert.True(s.T(), adminLobbyPage.PlayerConnected(adminPlayerId))
 
-	adminLobbyPage.Page.MustScreenshot(WikiUriBase + "player_disconnected.png")
+	adminLobbyPage.Page.MustScreenshot(WikiUriBase + "admin_player_disconnected.png")
+	playerPage.Page.MustScreenshot(WikiUriBase + "player_disconnected.png")
 
 	// Reconnect and make sure the UI updates
 	playerPage.ReConnect()
+	time.Sleep(time.Second)
 	playerPage.Page.MustScreenshot(WikiUriBase + "player_reconnect.png")
-	time.Sleep(Timeout)
 
 	assert.True(s.T(), adminLobbyPage.PlayerConnected(adminPlayerId))
 	assert.True(s.T(), adminLobbyPage.PlayerConnected(playerId))
-	assert.True(s.T(), playerPage.InPlayerJoinPage())
+	assert.True(s.T(), playerPage.InLobbyPlayer())
 }
 
 func (s *WithServicesSuite) TestPlayerLeavesGame() {
