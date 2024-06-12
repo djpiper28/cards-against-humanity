@@ -794,12 +794,64 @@ func TestPlayingCardSuccessCase(t *testing.T) {
 	game.PlayersMap[pid].Hand = make(map[int]*gameLogic.WhiteCard)
 	game.PlayersMap[pid].Hand[cardId] = card
 
-	_, err = game.PlayCards(pid, []int{cardId})
+	resp, err := game.PlayCards(pid, []int{cardId})
 	assert.NoError(t, err)
 	assert.Equal(t, game.PlayersMap[pid].CurrentPlay, []*gameLogic.WhiteCard{game.PlayersMap[pid].Hand[cardId]})
+	assert.False(t, resp.MovedToNextCardCzarPhase)
 }
 
-// TODO: Check that the next round is triggered correctly
+func TestPlayingCardCausesCzarJudingPhase(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 2")
+	assert.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 3")
+	assert.NoError(t, err)
+
+	_, err = game.StartGame()
+	assert.NoError(t, err)
+
+	cardId := 1
+	card, err := gameLogic.GetWhiteCard(cardId)
+	assert.NoError(t, err)
+
+	for _, player := range game.PlayersMap {
+		player.Hand = make(map[int]*gameLogic.WhiteCard)
+		player.Hand[cardId] = card
+	}
+
+	pid := game.Players[0]
+	resp, err := game.PlayCards(pid, []int{cardId})
+	assert.NoError(t, err)
+	assert.Equal(t, game.PlayersMap[pid].CurrentPlay, []*gameLogic.WhiteCard{game.PlayersMap[pid].Hand[cardId]})
+	assert.False(t, resp.MovedToNextCardCzarPhase)
+
+	pid = game.Players[1]
+	resp, err = game.PlayCards(pid, []int{cardId})
+	assert.NoError(t, err)
+	assert.Equal(t, game.PlayersMap[pid].CurrentPlay, []*gameLogic.WhiteCard{game.PlayersMap[pid].Hand[cardId]})
+	assert.False(t, resp.MovedToNextCardCzarPhase)
+
+	pid = game.Players[2]
+	resp, err = game.PlayCards(pid, []int{cardId})
+	assert.NoError(t, err)
+	assert.NotNil(t, game.PlayersMap[pid].CurrentPlay)
+	assert.Empty(t, game.PlayersMap[pid].CurrentPlay)
+	assert.True(t, resp.MovedToNextCardCzarPhase)
+
+	assert.Equal(t, resp.CzarJudingPhaseInfo.AllPlays, []*gameLogic.WhiteCard{card, card, card})
+	assert.NotNil(t, resp.CzarJudingPhaseInfo.PlayerHands)
+
+	for _, hand := range resp.CzarJudingPhaseInfo.PlayerHands {
+		assert.NotNil(t, hand)
+	}
+}
+
 // TODO: Check that being in the wrong state fails
 // TODO: Check that when a player leaves and all other players have played the judging starts
 // TODO: Check that when a player leaves and there are too few players the game ends

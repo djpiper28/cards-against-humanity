@@ -469,7 +469,7 @@ func (g *Game) moveToCzarJudgingPhase() (CzarJudingPhaseInfo, error) {
 		}
 
 		player.Hand = newHand
-		player.CurrentPlay = nil
+		player.CurrentPlay = make([]*WhiteCard, 0)
 	}
 
 	err := g.newCards()
