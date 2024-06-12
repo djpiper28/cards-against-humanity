@@ -198,7 +198,7 @@ func (g *ConnectionManager) RemovePlayer(gameId, playerId uuid.UUID) error {
 	g.UnregisterConnection(gameId, playerId)
 
   if res.NewGameState == gameLogic.GameStateCzarJudgingCards {
-    go g.moveToCzarJudgingPhase(gameId, res.CzarJudingPhaseInfo)
+    go g.MoveToCzarJudgingPhase(gameId, res.CzarJudingPhaseInfo)
   }
 
 	if res.PlayersLeft == 0 {
@@ -232,8 +232,10 @@ func (g *ConnectionManager) RemovePlayer(gameId, playerId uuid.UUID) error {
 	return nil
 }
 
-// Not thread safe.
-func (g *ConnectionManager) moveToCzarJudgingPhase(gid uuid.UUID, info gameLogic.CzarJudingPhaseInfo) error {
+func (g *ConnectionManager) MoveToCzarJudgingPhase(gid uuid.UUID, info gameLogic.CzarJudingPhaseInfo) error {
+	g.lock.Lock()
+	defer g.lock.Unlock()
+
 	game, found := g.GameConnectionMap[gid]
 	if !found {
 		return errors.New(fmt.Sprintf("Cannot find game %s", gid))
@@ -267,11 +269,4 @@ func (g *ConnectionManager) moveToCzarJudgingPhase(gid uuid.UUID, info gameLogic
 		logger.Logger.Warn("Was not able to send Czar judging phase message to all players")
 	}
 	return sendErr
-}
-
-func (g *ConnectionManager) MoveToCzarJudgingPhase(gid uuid.UUID, info gameLogic.CzarJudingPhaseInfo) error {
-	g.lock.Lock()
-	defer g.lock.Unlock()
-
-  return g.moveToCzarJudgingPhase(gid, info)
 }
