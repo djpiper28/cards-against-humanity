@@ -45,5 +45,6 @@ jobs:
         with:
           fail_ci_if_error: yes
           files: ./backend/coverage.out,./cahfrontend/coverage/coverage-final.json
-          token: ${{ secrets.CODECOVIO }}
           verbose: yes
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOVIO }}
