@@ -844,7 +844,9 @@ func TestPlayingCardCausesCzarJudingPhase(t *testing.T) {
 	assert.Empty(t, game.PlayersMap[pid].CurrentPlay)
 	assert.True(t, resp.MovedToNextCardCzarPhase)
 
-	assert.Equal(t, resp.CzarJudingPhaseInfo.AllPlays, []*gameLogic.WhiteCard{card, card, card})
+	for _, plays := range resp.CzarJudingPhaseInfo.AllPlays {
+		assert.Equal(t, plays, []*gameLogic.WhiteCard{card})
+	}
 	assert.NotNil(t, resp.CzarJudingPhaseInfo.PlayerHands)
 
 	for _, hand := range resp.CzarJudingPhaseInfo.PlayerHands {

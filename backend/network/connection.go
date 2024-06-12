@@ -295,7 +295,36 @@ func (c *WsConnection) listenAndHandle() error {
 			},
 			PlayCardsHandler: func(msg RpcPlayCardsMsg) error {
 				handler = "Play Cards"
-				return errors.New("Not implemented yet")
+
+				info, err := gameRepo.Repo.PlayerPlayCards(c.GameId, c.PlayerId, msg.CardIds)
+				if err != nil {
+					return err
+				}
+
+				cardPlayedMsg := RpcOnCardPlayedMsg{
+					PlayerId: c.PlayerId,
+				}
+
+				broadcastMessage, err := EncodeRpcMessage(cardPlayedMsg)
+				if err != nil {
+					return err
+				}
+
+				go GlobalConnectionManager.Broadcast(gid, broadcastMessage)
+				if info.MovedToNextCardCzarPhase {
+					moveToNextPhaseMsg := RpcOnCzarJudgingPhase{
+						AllPlays: info.CzarJudingPhaseInfo.AllPlays,
+						NewHand:  info.CzarJudingPhaseInfo.PlayerHands[c.PlayerId],
+					}
+
+					broadcastMessage, err := EncodeRpcMessage(moveToNextPhaseMsg)
+					if err != nil {
+						return err
+					}
+
+					go GlobalConnectionManager.Broadcast(gid, broadcastMessage)
+				}
+				return nil
 			},
 		})
 

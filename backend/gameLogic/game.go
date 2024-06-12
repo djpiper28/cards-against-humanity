@@ -446,7 +446,7 @@ func (g *Game) ChangeSettings(newSettings GameSettings) error {
 }
 
 type CzarJudingPhaseInfo struct {
-	AllPlays    []*WhiteCard
+	AllPlays    [][]*WhiteCard
 	PlayerHands map[uuid.UUID][]*WhiteCard
 }
 
@@ -460,17 +460,19 @@ func (g *Game) moveToCzarJudgingPhase() (CzarJudingPhaseInfo, error) {
 
 	// Remove cards from each players hand, and add to allPlays
 	g.GameState = GameStateCzarJudgingCards
-	allPlays := make([]*WhiteCard, 0)
+	allPlays := make([][]*WhiteCard, 0)
 	for _, player := range g.PlayersMap {
 		if player.CurrentPlay == nil {
 			continue
 		}
 
-		newHand := make(map[int]*WhiteCard)
+		playersPlay := make([]*WhiteCard, 0)
 		for _, card := range player.CurrentPlay {
-			allPlays = append(allPlays, card)
+			playersPlay = append(playersPlay, card)
 		}
+		allPlays = append(allPlays, playersPlay)
 
+		newHand := make(map[int]*WhiteCard)
 		for _, playerCard := range player.Hand {
 			found := false
 			for _, card := range player.CurrentPlay {

@@ -40,7 +40,12 @@ const (
 	// Tx the current round info
 	MsgRoundInformation
 
+	// Rx when a player plays a card
 	MsgPlayCards
+	// Tx to announce that a player has played a card
+	MsgOnCardPlayed
+	// Tx when the judging phase starts
+	MsgOnCzarJudgingPhase
 )
 
 type RpcMessageBody struct {
@@ -212,9 +217,26 @@ func (msg RpcRoundInformationMsg) Type() RpcMessageType {
 }
 
 type RpcPlayCardsMsg struct {
-	CardIds []uuid.UUID `json:"cardIds"`
+	CardIds []int `json:"cardIds"`
 }
 
 func (msg RpcPlayCardsMsg) Type() RpcMessageType {
 	return MsgPlayCards
+}
+
+type RpcOnCardPlayedMsg struct {
+	PlayerId uuid.UUID `json:"playerId"`
+}
+
+func (msg RpcOnCardPlayedMsg) Type() RpcMessageType {
+	return MsgOnCardPlayed
+}
+
+type RpcOnCzarJudgingPhase struct {
+	AllPlays [][]*gameLogic.WhiteCard `json:"allPlays"`
+	NewHand  []*gameLogic.WhiteCard   `json:"newHand"`
+}
+
+func (msg RpcOnCzarJudgingPhase) Type() RpcMessageType {
+	return MsgOnCzarJudgingPhase
 }
