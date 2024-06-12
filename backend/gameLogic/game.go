@@ -120,8 +120,8 @@ const (
 	GameStateWhiteCardsBeingSelected
 	GameStateCzarJudgingCards
 	GameStateDisplayingWinningCard
-  // Not used in normal game play, used to denote unchanged or error game states
-  GameStateEmpty = -1
+	// Not used in normal game play, used to denote unchanged or error game states
+	GameStateEmpty = -1
 )
 
 type Game struct {
@@ -257,10 +257,10 @@ func (g *Game) AddPlayer(playerName string) (uuid.UUID, error) {
 }
 
 type PlayerRemovalResult struct {
-	NewGameOwner uuid.UUID
-	PlayersLeft  int
-  NewGameState GameState
-  CzarJudingPhaseInfo CzarJudingPhaseInfo
+	NewGameOwner        uuid.UUID
+	PlayersLeft         int
+	NewGameState        GameState
+	CzarJudingPhaseInfo CzarJudingPhaseInfo
 }
 
 func (g *Game) RemovePlayer(playerToRemoveId uuid.UUID) (PlayerRemovalResult, error) {
@@ -291,18 +291,18 @@ func (g *Game) RemovePlayer(playerToRemoveId uuid.UUID) (PlayerRemovalResult, er
 		res.NewGameOwner = g.GameOwnerId
 	}
 
-  // If the remaining players have all played move to judging
-  if g.GameState == GameStateWhiteCardsBeingSelected && g.playersHaveAllPlayed() {
-    czarJudgingPhaseInfo, err := g.moveToCzarJudgingPhase()
-    if err != nil {
-      return PlayerRemovalResult{}, err
-    }
+	// If the remaining players have all played move to judging
+	if g.GameState == GameStateWhiteCardsBeingSelected && g.playersHaveAllPlayed() {
+		czarJudgingPhaseInfo, err := g.moveToCzarJudgingPhase()
+		if err != nil {
+			return PlayerRemovalResult{}, err
+		}
 
-    res.NewGameState = g.GameState
-    res.CzarJudingPhaseInfo = czarJudgingPhaseInfo
-  }
+		res.NewGameState = g.GameState
+		res.CzarJudingPhaseInfo = czarJudgingPhaseInfo
+	}
 
-  // TODO: If there are below the minimum amount of players move to the lobby
+	// TODO: If there are below the minimum amount of players move to the lobby
 	return res, nil
 }
 
@@ -524,7 +524,7 @@ func (g *Game) playersHaveAllPlayed() bool {
 			break
 		}
 	}
-  return allPlayersPlayed
+	return allPlayersPlayed
 }
 
 func (g *Game) PlayCards(playerId uuid.UUID, cardIds []int) (PlayCardsResult, error) {
@@ -587,7 +587,7 @@ func (g *Game) PlayCards(playerId uuid.UUID, cardIds []int) (PlayCardsResult, er
 	player.CurrentPlay = currentPlay
 
 	// Check that all players have played
-  allPlayersPlayed := g.playersHaveAllPlayed()
+	allPlayersPlayed := g.playersHaveAllPlayed()
 
 	ret := PlayCardsResult{MovedToNextCardCzarPhase: allPlayersPlayed}
 	if allPlayersPlayed {

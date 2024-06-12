@@ -878,5 +878,6 @@ func TestPlayingCardInWrongGameStateFails(t *testing.T) {
 	assert.Error(t, err)
 	assert.Nil(t, game.PlayersMap[pid].CurrentPlay)
 }
+
 // TODO: Check that when a player leaves and all other players have played the judging starts
 // TODO: Check that when a player leaves and there are too few players the game ends

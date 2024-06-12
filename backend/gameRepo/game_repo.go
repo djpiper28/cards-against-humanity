@@ -264,3 +264,20 @@ func (gr *GameRepo) StartGame(gameId uuid.UUID) (gameLogic.RoundInfo, error) {
 
 	return info, nil
 }
+
+func (gr *GameRepo) PlayerPlayCards(gameId, playerId uuid.UUID, cardIds []int) (gameLogic.PlayCardsResult, error) {
+	gr.lock.RLock()
+	defer gr.lock.RUnlock()
+
+	game, found := gr.GameMap[gameId]
+	if !found {
+		return gameLogic.PlayCardsResult{}, errors.New("Cannot find game")
+	}
+
+	info, err := game.PlayCards(playerId, cardIds)
+	if err != nil {
+		return gameLogic.PlayCardsResult{}, err
+	}
+
+	return info, nil
+}

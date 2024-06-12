@@ -235,3 +235,30 @@ func TestPlayerLeaveLastPlayer(t *testing.T) {
 	_, err = repo.GetGame(gid)
 	assert.Error(t, err)
 }
+
+func TestPlayerPlaysCards(t *testing.T) {
+	t.Parallel()
+
+	repo := gameRepo.New()
+	settings := gameLogic.DefaultGameSettings()
+	gid, pid, err := repo.CreateGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	_, err = repo.CreatePlayer(gid, "Player 2", settings.Password)
+	assert.NoError(t, err)
+
+	_, err = repo.CreatePlayer(gid, "Player 3", settings.Password)
+	assert.NoError(t, err)
+
+	startGameInfo, err := repo.StartGame(gid)
+	assert.NoError(t, err)
+
+	cards := make([]int, 0)
+	for i := 0; i < int(startGameInfo.CurrentBlackCard.CardsToPlay); i++ {
+		cards = append(cards, startGameInfo.PlayerHands[pid][i].Id)
+	}
+
+	info, err := repo.PlayerPlayCards(gid, pid, cards)
+	assert.NoError(t, err)
+	assert.False(t, info.MovedToNextCardCzarPhase)
+}
