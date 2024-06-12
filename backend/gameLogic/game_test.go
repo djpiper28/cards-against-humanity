@@ -777,20 +777,22 @@ func TestPlayingCardSuccessCase(t *testing.T) {
 	game, err := gameLogic.NewGame(settings, "Dave")
 	assert.NoError(t, err)
 
-	game.GameState = gameLogic.GameStateWhiteCardsBeingSelected
-	game.CurrentBlackCard = &gameLogic.BlackCard{
-		Id:          180,
-		CardsToPlay: 1,
-		BodyText:    "Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.",
-	}
+	_, err = game.AddPlayer("Player 2")
+	assert.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 3")
+	assert.NoError(t, err)
+
+	_, err = game.StartGame()
+	assert.NoError(t, err)
 
 	cardId := 1
-  card, err := gameLogic.GetWhiteCard(cardId)
+	card, err := gameLogic.GetWhiteCard(cardId)
 	assert.NoError(t, err)
 
 	pid := game.Players[0]
 	game.PlayersMap[pid].Hand = make(map[int]*gameLogic.WhiteCard)
-	game.PlayersMap[pid].Hand[cardId] = card 
+	game.PlayersMap[pid].Hand[cardId] = card
 
 	_, err = game.PlayCards(pid, []int{cardId})
 	assert.NoError(t, err)

@@ -3,6 +3,7 @@ package gameLogic
 import (
 	"errors"
 	"fmt"
+	"log"
 	"math/rand"
 	"sync"
 	"time"
@@ -427,9 +428,73 @@ func (g *Game) ChangeSettings(newSettings GameSettings) error {
 	return nil
 }
 
+type CzarJudingPhaseInfo struct {
+	AllPlays    []*WhiteCard
+	PlayerHands map[uuid.UUID][]*WhiteCard
+}
+
+// This assumes that all players have played, please sanity check before calling,
+// see PlayCards.
+// Not thread safe.
+func (g *Game) moveToCzarJudgingPhase() (CzarJudingPhaseInfo, error) {
+	if g.GameState != GameStateWhiteCardsBeingSelected {
+		return CzarJudingPhaseInfo{}, errors.New("The game is not in the white card selection phase")
+	}
+
+	// Remove cards from each players hand, and add to allPlays
+	g.GameState = GameStateCzarJudgingCards
+	allPlays := make([]*WhiteCard, 0)
+	for _, player := range g.PlayersMap {
+		if player.CurrentPlay == nil {
+			continue
+		}
+
+		newHand := make(map[int]*WhiteCard)
+		for _, card := range player.CurrentPlay {
+			allPlays = append(allPlays, card)
+		}
+
+		for _, playerCard := range player.Hand {
+			found := false
+			for _, card := range player.CurrentPlay {
+				if card.Id == playerCard.Id {
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				newHand[playerCard.Id] = playerCard
+			}
+		}
+
+		player.Hand = newHand
+		player.CurrentPlay = nil
+	}
+
+	err := g.newCards()
+	if err != nil {
+		log.Print("Cannot give players new cards, after judging the game will end.")
+		return CzarJudingPhaseInfo{}, err
+	}
+
+	// Copy out players hands
+	newHands := make(map[uuid.UUID][]*WhiteCard)
+	for pid, player := range g.PlayersMap {
+		hand := make([]*WhiteCard, 0)
+		for _, card := range player.Hand {
+			hand = append(hand, card)
+		}
+
+		newHands[pid] = hand
+	}
+	return CzarJudingPhaseInfo{AllPlays: allPlays, PlayerHands: newHands}, nil
+}
+
 type PlayCardsResult struct {
 	// Moves to the czar judging phase when all players have played
 	MovedToNextCardCzarPhase bool
+	CzarJudingPhaseInfo      CzarJudingPhaseInfo
 }
 
 func (g *Game) PlayCards(playerId uuid.UUID, cardIds []int) (PlayCardsResult, error) {
@@ -500,5 +565,15 @@ func (g *Game) PlayCards(playerId uuid.UUID, cardIds []int) (PlayCardsResult, er
 		}
 	}
 
-	return PlayCardsResult{MovedToNextCardCzarPhase: allPlayersPlayed}, nil
+	ret := PlayCardsResult{MovedToNextCardCzarPhase: allPlayersPlayed}
+	if allPlayersPlayed {
+		info, err := g.moveToCzarJudgingPhase()
+		if err != nil {
+			return PlayCardsResult{}, err
+		}
+
+		ret.CzarJudingPhaseInfo = info
+	}
+
+	return ret, nil
 }
