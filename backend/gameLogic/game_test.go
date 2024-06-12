@@ -852,6 +852,31 @@ func TestPlayingCardCausesCzarJudingPhase(t *testing.T) {
 	}
 }
 
-// TODO: Check that being in the wrong state fails
+func TestPlayingCardInWrongGameStateFails(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	game.GameState = gameLogic.GameStateCzarJudgingCards
+	game.CurrentBlackCard = &gameLogic.BlackCard{
+		Id:          180,
+		CardsToPlay: 1,
+		BodyText:    "Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.",
+	}
+
+	cardId := 2
+	_, err = gameLogic.GetWhiteCard(cardId)
+	assert.NoError(t, err)
+
+	pid := game.Players[0]
+	game.PlayersMap[pid].Hand = make(map[int]*gameLogic.WhiteCard)
+	game.PlayersMap[pid].Hand[cardId-1] = gameLogic.NewWhiteCard(cardId-1, "Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.")
+
+	_, err = game.PlayCards(pid, []int{cardId})
+	assert.Error(t, err)
+	assert.Nil(t, game.PlayersMap[pid].CurrentPlay)
+}
 // TODO: Check that when a player leaves and all other players have played the judging starts
 // TODO: Check that when a player leaves and there are too few players the game ends

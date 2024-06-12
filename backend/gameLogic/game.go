@@ -120,6 +120,8 @@ const (
 	GameStateWhiteCardsBeingSelected
 	GameStateCzarJudgingCards
 	GameStateDisplayingWinningCard
+  // Not used in normal game play, used to denote unchanged or error game states
+  GameStateEmpty = -1
 )
 
 type Game struct {
@@ -257,6 +259,8 @@ func (g *Game) AddPlayer(playerName string) (uuid.UUID, error) {
 type PlayerRemovalResult struct {
 	NewGameOwner uuid.UUID
 	PlayersLeft  int
+  NewGameState GameState
+  CzarJudingPhaseInfo CzarJudingPhaseInfo
 }
 
 func (g *Game) RemovePlayer(playerToRemoveId uuid.UUID) (PlayerRemovalResult, error) {
@@ -286,6 +290,19 @@ func (g *Game) RemovePlayer(playerToRemoveId uuid.UUID) (PlayerRemovalResult, er
 		g.GameOwnerId = g.Players[i]
 		res.NewGameOwner = g.GameOwnerId
 	}
+
+  // If the remaining players have all played move to judging
+  if g.GameState == GameStateWhiteCardsBeingSelected && g.playersHaveAllPlayed() {
+    czarJudgingPhaseInfo, err := g.moveToCzarJudgingPhase()
+    if err != nil {
+      return PlayerRemovalResult{}, err
+    }
+
+    res.NewGameState = g.GameState
+    res.CzarJudingPhaseInfo = czarJudgingPhaseInfo
+  }
+
+  // TODO: If there are below the minimum amount of players move to the lobby
 	return res, nil
 }
 
@@ -497,6 +514,19 @@ type PlayCardsResult struct {
 	CzarJudingPhaseInfo      CzarJudingPhaseInfo
 }
 
+// Whether all of the players have played.
+// Not thread safe.
+func (g *Game) playersHaveAllPlayed() bool {
+	allPlayersPlayed := true
+	for _, player := range g.PlayersMap {
+		if len(player.CurrentPlay) == 0 {
+			allPlayersPlayed = false
+			break
+		}
+	}
+  return allPlayersPlayed
+}
+
 func (g *Game) PlayCards(playerId uuid.UUID, cardIds []int) (PlayCardsResult, error) {
 	g.Lock.Lock()
 	defer g.Lock.Unlock()
@@ -557,13 +587,7 @@ func (g *Game) PlayCards(playerId uuid.UUID, cardIds []int) (PlayCardsResult, er
 	player.CurrentPlay = currentPlay
 
 	// Check that all players have played
-	allPlayersPlayed := true
-	for _, player := range g.PlayersMap {
-		if len(player.CurrentPlay) == 0 {
-			allPlayersPlayed = false
-			break
-		}
-	}
+  allPlayersPlayed := g.playersHaveAllPlayed()
 
 	ret := PlayCardsResult{MovedToNextCardCzarPhase: allPlayersPlayed}
 	if allPlayersPlayed {
