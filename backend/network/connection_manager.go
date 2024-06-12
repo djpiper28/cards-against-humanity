@@ -2,9 +2,11 @@ package network
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"sync"
 
+	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/djpiper28/cards-against-humanity/backend/gameRepo"
 	"github.com/djpiper28/cards-against-humanity/backend/logger"
 	"github.com/google/uuid"
@@ -224,4 +226,40 @@ func (g *ConnectionManager) RemovePlayer(gameId, playerId uuid.UUID) error {
 
 	go g.Broadcast(gameId, message)
 	return nil
+}
+
+func (g *ConnectionManager) MoveToCzarJudgingPhase(gid uuid.UUID, info gameLogic.CzarJudingPhaseInfo) error {
+	game, found := g.GameConnectionMap[gid]
+	if !found {
+		return errors.New(fmt.Sprintf("Cannot find game %s", gid))
+	}
+
+	var sendErr error
+
+	wg := sync.WaitGroup{}
+	wg.Add(len(game.playerConnectionMap))
+	for pid, conn := range game.playerConnectionMap {
+		func(pid uuid.UUID, conn *WsConnection) {
+			defer wg.Done()
+			moveToNextPhaseMsg := RpcOnCzarJudgingPhase{
+				AllPlays: info.AllPlays,
+				NewHand:  info.PlayerHands[pid],
+			}
+
+			broadcastMessage, err := EncodeRpcMessage(moveToNextPhaseMsg)
+			if err != nil {
+				sendErr = err
+				logger.Logger.Error("Cannot send a message to a player",
+					"playerId", pid)
+			}
+
+			err = conn.Send(broadcastMessage)
+		}(pid, conn)
+	}
+	wg.Wait()
+
+	if sendErr != nil {
+		logger.Logger.Warn("Was not able to send Czar judging phase message to all players")
+	}
+	return sendErr
 }

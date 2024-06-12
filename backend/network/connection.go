@@ -312,17 +312,7 @@ func (c *WsConnection) listenAndHandle() error {
 
 				go GlobalConnectionManager.Broadcast(gid, broadcastMessage)
 				if info.MovedToNextCardCzarPhase {
-					moveToNextPhaseMsg := RpcOnCzarJudgingPhase{
-						AllPlays: info.CzarJudingPhaseInfo.AllPlays,
-						NewHand:  info.CzarJudingPhaseInfo.PlayerHands[c.PlayerId],
-					}
-
-					broadcastMessage, err := EncodeRpcMessage(moveToNextPhaseMsg)
-					if err != nil {
-						return err
-					}
-
-					go GlobalConnectionManager.Broadcast(gid, broadcastMessage)
+					go GlobalConnectionManager.MoveToCzarJudgingPhase(gid, info.CzarJudingPhaseInfo)
 				}
 				return nil
 			},
