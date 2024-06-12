@@ -713,6 +713,7 @@ func TestPlayingWrongAmountOfCardsFails(t *testing.T) {
 
 	_, err = game.PlayCards(pid, []int{cardId})
 	assert.Error(t, err)
+	assert.Nil(t, game.PlayersMap[pid].CurrentPlay)
 }
 
 func TestPlayingDuplicateCardsFails(t *testing.T) {
@@ -739,6 +740,7 @@ func TestPlayingDuplicateCardsFails(t *testing.T) {
 
 	_, err = game.PlayCards(pid, []int{cardId, cardId})
 	assert.Error(t, err)
+	assert.Nil(t, game.PlayersMap[pid].CurrentPlay)
 }
 
 func TestPlayingCardNotInHandFails(t *testing.T) {
@@ -765,8 +767,37 @@ func TestPlayingCardNotInHandFails(t *testing.T) {
 
 	_, err = game.PlayCards(pid, []int{cardId})
 	assert.Error(t, err)
+	assert.Nil(t, game.PlayersMap[pid].CurrentPlay)
 }
 
-// TODO: Check the success case
+func TestPlayingCardSuccessCase(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	game.GameState = gameLogic.GameStateWhiteCardsBeingSelected
+	game.CurrentBlackCard = &gameLogic.BlackCard{
+		Id:          180,
+		CardsToPlay: 1,
+		BodyText:    "Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.",
+	}
+
+	cardId := 1
+  card, err := gameLogic.GetWhiteCard(cardId)
+	assert.NoError(t, err)
+
+	pid := game.Players[0]
+	game.PlayersMap[pid].Hand = make(map[int]*gameLogic.WhiteCard)
+	game.PlayersMap[pid].Hand[cardId] = card 
+
+	_, err = game.PlayCards(pid, []int{cardId})
+	assert.NoError(t, err)
+	assert.Equal(t, game.PlayersMap[pid].CurrentPlay, []*gameLogic.WhiteCard{game.PlayersMap[pid].Hand[cardId]})
+}
+
 // TODO: Check that the next round is triggered correctly
 // TODO: Check that being in the wrong state fails
+// TODO: Check that when a player leaves and all other players have played the judging starts
+// TODO: Check that when a player leaves and there are too few players the game ends
