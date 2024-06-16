@@ -7,7 +7,8 @@ RUN npm i -g pnpm
 
 WORKDIR /build
 
-COPY . . 
+# Set context to ../
+COPY . .
 RUN make backend -j
 
 FROM build as release

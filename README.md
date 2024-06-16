@@ -9,6 +9,12 @@ Cards Against Humanity website written in Golang.
 
 ## Dev Stuff
 
+You can run the software via Docker Compose, or build it yourself.
+
+```sh
+docker-compose up
+```
+
 ### Building
 
 #### Deps
@@ -16,6 +22,8 @@ Cards Against Humanity website written in Golang.
 - pnpm
 - Go
 - GNU Make
+- Docker
+- Docker Compose
 
 To build/test all parts of the system use the below commands.
 

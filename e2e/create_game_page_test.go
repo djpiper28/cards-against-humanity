@@ -9,6 +9,7 @@ import (
 )
 
 func (s *WithServicesSuite) TestCreateGamePageRender() {
+	s.T().Parallel()
 	browser := GetBrowser()
 	defer browser.Close()
 
@@ -18,6 +19,7 @@ func (s *WithServicesSuite) TestCreateGamePageRender() {
 }
 
 func (s *WithServicesSuite) TestCreateGamePageDefaultInput() {
+	s.T().Parallel()
 	browser := GetBrowser()
 	defer browser.Close()
 

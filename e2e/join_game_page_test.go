@@ -10,6 +10,7 @@ import (
 
 func (s *WithServicesSuite) TestJoinGameRedirectsOnEmptyGameId() {
 	t := s.T()
+	t.Parallel()
 	browser := GetBrowser()
 	defer browser.Close()
 
@@ -20,6 +21,7 @@ func (s *WithServicesSuite) TestJoinGameRedirectsOnEmptyGameId() {
 
 func (s *WithServicesSuite) TestJoinGameRedirectsOnEmptyPlayerId() {
 	t := s.T()
+	t.Parallel()
 
 	gameId := "testing123"
 	browser := GetBrowser()
@@ -34,6 +36,7 @@ func (s *WithServicesSuite) TestJoinGameRedirectsOnEmptyPlayerId() {
 }
 
 func (s *WithServicesSuite) TestGamesShowTheSameInitialSettings() {
+	s.T().Parallel()
 	browser := GetBrowser()
 	defer browser.Close()
 
@@ -88,6 +91,7 @@ func (s *WithServicesSuite) TestGamesShowTheSameInitialSettings() {
 }
 
 func (s *WithServicesSuite) TestChangingSettingsSyncsBetweenClients() {
+	s.T().Parallel()
 	browser := GetBrowser()
 	defer browser.Close()
 
@@ -162,6 +166,7 @@ func (s *WithServicesSuite) TestChangingSettingsSyncsBetweenClients() {
 }
 
 func (s *WithServicesSuite) TestPlayerDisconnectReConnect() {
+	s.T().Parallel()
 	browser := GetBrowser()
 	defer browser.Close()
 
@@ -222,6 +227,7 @@ func (s *WithServicesSuite) TestPlayerDisconnectReConnect() {
 }
 
 func (s *WithServicesSuite) TestPlayerLeavesGame() {
+	s.T().Parallel()
 	browser := GetBrowser()
 	defer browser.Close()
 
@@ -262,6 +268,7 @@ func (s *WithServicesSuite) TestPlayerLeavesGame() {
 
 // Genuine fail remind me to fix
 func (s *WithServicesSuite) TestOwnerLeavingGameTransfersOwnership() {
+	s.T().Parallel()
 	browser := GetBrowser()
 	defer browser.Close()
 
@@ -296,7 +303,7 @@ func (s *WithServicesSuite) TestOwnerLeavingGameTransfersOwnership() {
 	time.Sleep(Timeout)
 	playerId := adminLobbyPage.PlayerId()
 	adminLobbyPage.LeaveGame()
-  adminLobbyPage.Page.MustScreenshot("../wiki/assets/admin_left.png")
+	adminLobbyPage.Page.MustScreenshot("../wiki/assets/admin_left.png")
 
 	time.Sleep(Timeout)
 

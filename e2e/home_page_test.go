@@ -5,6 +5,8 @@ import (
 )
 
 func (s *WithServicesSuite) TestHomePageRender() {
+	s.T().Parallel()
+
 	browser := GetBrowser()
 	defer browser.Close()
 
@@ -14,6 +16,7 @@ func (s *WithServicesSuite) TestHomePageRender() {
 }
 
 func (s *WithServicesSuite) TestClickCreateAGame() {
+	s.T().Parallel()
 	browser := GetBrowser()
 	defer browser.Close()
 

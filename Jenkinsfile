@@ -11,7 +11,7 @@ pipeline {
 
         stage('Build and package backend') {
           steps {
-            sh 'docker build -t cahbackend .'
+            sh 'docker build -t cahbackend backend --context .'
             sh 'docker tag cahbackend localhost:5000/cahbackend'
             sh 'docker push localhost:5000/cahbackend'
           }
