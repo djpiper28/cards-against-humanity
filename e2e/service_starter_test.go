@@ -62,7 +62,7 @@ type WithServicesSuite struct {
 }
 
 func (s *WithServicesSuite) start() {
-	log.Println("Starting frontend")
+	log.Println("Starting...")
 	s.appProcess = exec.Command("docker-compose", "up", "--build", "--detach")
 	s.appProcess.Stdout = os.Stdout
 	s.appProcess.Stderr = os.Stderr
@@ -70,7 +70,8 @@ func (s *WithServicesSuite) start() {
 	if err != nil {
 		log.Fatalf("Cannot start frontend: %s", err)
 	}
-	log.Println("Started frontend")
+  s.appProcess.Wait()
+	log.Println("Started")
 }
 
 func (s *WithServicesSuite) SetupSuite() {

@@ -72,7 +72,7 @@ func GetAllById(p *rod.Page, id string) []*rod.Element {
 	return p.Timeout(Timeout).MustElements(cssSelectorForId(id))
 }
 
-const frontendUrlProxy = "http://localhost:3255/"
+const frontendUrlProxy = "http://localhost:8000/"
 
 func GetBasePage() string {
 	return frontendUrlProxy
