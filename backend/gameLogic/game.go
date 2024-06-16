@@ -3,6 +3,7 @@ package gameLogic
 import (
 	"errors"
 	"fmt"
+	"log"
 	"math/rand"
 	"sync"
 	"time"
@@ -119,6 +120,8 @@ const (
 	GameStateWhiteCardsBeingSelected
 	GameStateCzarJudgingCards
 	GameStateDisplayingWinningCard
+	// Not used in normal game play, used to denote unchanged or error game states
+	GameStateEmpty = -1
 )
 
 type Game struct {
@@ -254,8 +257,10 @@ func (g *Game) AddPlayer(playerName string) (uuid.UUID, error) {
 }
 
 type PlayerRemovalResult struct {
-	NewGameOwner uuid.UUID
-	PlayersLeft  int
+	NewGameOwner        uuid.UUID
+	PlayersLeft         int
+	NewGameState        GameState
+	CzarJudingPhaseInfo CzarJudingPhaseInfo
 }
 
 func (g *Game) RemovePlayer(playerToRemoveId uuid.UUID) (PlayerRemovalResult, error) {
@@ -285,6 +290,19 @@ func (g *Game) RemovePlayer(playerToRemoveId uuid.UUID) (PlayerRemovalResult, er
 		g.GameOwnerId = g.Players[i]
 		res.NewGameOwner = g.GameOwnerId
 	}
+
+	// If the remaining players have all played move to judging
+	if g.GameState == GameStateWhiteCardsBeingSelected && g.playersHaveAllPlayed() {
+		czarJudgingPhaseInfo, err := g.moveToCzarJudgingPhase()
+		if err != nil {
+			return PlayerRemovalResult{}, err
+		}
+
+		res.NewGameState = g.GameState
+		res.CzarJudingPhaseInfo = czarJudgingPhaseInfo
+	}
+
+	// TODO: If there are below the minimum amount of players move to the lobby
 	return res, nil
 }
 
@@ -425,4 +443,163 @@ func (g *Game) ChangeSettings(newSettings GameSettings) error {
 
 	g.Settings = &newSettings
 	return nil
+}
+
+type CzarJudingPhaseInfo struct {
+	AllPlays    [][]*WhiteCard
+	PlayerHands map[uuid.UUID][]*WhiteCard
+}
+
+// This assumes that all players have played, please sanity check before calling,
+// see PlayCards.
+// Not thread safe.
+func (g *Game) moveToCzarJudgingPhase() (CzarJudingPhaseInfo, error) {
+	if g.GameState != GameStateWhiteCardsBeingSelected {
+		return CzarJudingPhaseInfo{}, errors.New("The game is not in the white card selection phase")
+	}
+
+	// Remove cards from each players hand, and add to allPlays
+	g.GameState = GameStateCzarJudgingCards
+	allPlays := make([][]*WhiteCard, 0)
+	for _, player := range g.PlayersMap {
+		if player.CurrentPlay == nil {
+			continue
+		}
+
+		playersPlay := make([]*WhiteCard, 0)
+		for _, card := range player.CurrentPlay {
+			playersPlay = append(playersPlay, card)
+		}
+		allPlays = append(allPlays, playersPlay)
+
+		newHand := make(map[int]*WhiteCard)
+		for _, playerCard := range player.Hand {
+			found := false
+			for _, card := range player.CurrentPlay {
+				if card.Id == playerCard.Id {
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				newHand[playerCard.Id] = playerCard
+			}
+		}
+
+		player.Hand = newHand
+		player.CurrentPlay = make([]*WhiteCard, 0)
+	}
+
+	err := g.newCards()
+	if err != nil {
+		log.Print("Cannot give players new cards, after judging the game will end.")
+		return CzarJudingPhaseInfo{}, err
+	}
+
+	// Copy out players hands
+	newHands := make(map[uuid.UUID][]*WhiteCard)
+	for pid, player := range g.PlayersMap {
+		hand := make([]*WhiteCard, 0)
+		for _, card := range player.Hand {
+			hand = append(hand, card)
+		}
+
+		newHands[pid] = hand
+	}
+	return CzarJudingPhaseInfo{AllPlays: allPlays, PlayerHands: newHands}, nil
+}
+
+type PlayCardsResult struct {
+	// Moves to the czar judging phase when all players have played
+	MovedToNextCardCzarPhase bool
+	CzarJudingPhaseInfo      CzarJudingPhaseInfo
+}
+
+// Whether all of the players have played.
+// Not thread safe.
+func (g *Game) playersHaveAllPlayed() bool {
+	allPlayersPlayed := true
+	for _, player := range g.PlayersMap {
+		if len(player.CurrentPlay) == 0 {
+			allPlayersPlayed = false
+			break
+		}
+	}
+	return allPlayersPlayed
+}
+
+func (g *Game) PlayCards(playerId uuid.UUID, cardIds []int) (PlayCardsResult, error) {
+	g.Lock.Lock()
+	defer g.Lock.Unlock()
+
+	if g.GameState != GameStateWhiteCardsBeingSelected {
+		return PlayCardsResult{}, errors.New("The game is not in the white card selection phase")
+	}
+
+	if g.CurrentCardCzarId == playerId {
+		return PlayCardsResult{}, errors.New("The card czar cannot play cards")
+	}
+
+	if uint(len(cardIds)) != g.CurrentBlackCard.CardsToPlay {
+		return PlayCardsResult{}, errors.New("The amount of cards played does not match the amount of blanks")
+	}
+
+	player, found := g.PlayersMap[playerId]
+	if !found {
+		return PlayCardsResult{}, errors.New("Cannot find the player in the game")
+	}
+
+	// Check that the cards are in the hand
+	currentPlay := make([]*WhiteCard, 0)
+	for _, cardId := range cardIds {
+		whiteCard, err := GetWhiteCard(cardId)
+		if err != nil {
+			return PlayCardsResult{}, errors.New(fmt.Sprintf("Cannot find card %d", cardId))
+		}
+
+		currentPlay = append(currentPlay, whiteCard)
+	}
+
+	// Check that: there are no duplicates and all cards are in the players hands
+	checkedCards := make(map[int]bool)
+	for _, cardId := range cardIds {
+		// Duplicate check
+		_, found := checkedCards[cardId]
+		if found {
+			return PlayCardsResult{}, errors.New(fmt.Sprintf("Duplicate card in cardIds detected %d", cardId))
+		}
+
+		// Search for card in hand
+		found = false
+		checkedCards[cardId] = true
+		for _, handCard := range player.Hand {
+			if handCard.Id == cardId {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return PlayCardsResult{}, errors.New(fmt.Sprintf("Cannot find card in your hand %d", cardId))
+		}
+	}
+
+	// Save their current play
+	player.CurrentPlay = currentPlay
+
+	// Check that all players have played
+	allPlayersPlayed := g.playersHaveAllPlayed()
+
+	ret := PlayCardsResult{MovedToNextCardCzarPhase: allPlayersPlayed}
+	if allPlayersPlayed {
+		info, err := g.moveToCzarJudgingPhase()
+		if err != nil {
+			return PlayCardsResult{}, err
+		}
+
+		ret.CzarJudingPhaseInfo = info
+	}
+
+	return ret, nil
 }

@@ -39,6 +39,13 @@ const (
 
 	// Tx the current round info
 	MsgRoundInformation
+
+	// Rx when a player plays a card
+	MsgPlayCards
+	// Tx to announce that a player has played a card
+	MsgOnCardPlayed
+	// Tx when the judging phase starts
+	MsgOnCzarJudgingPhase
 )
 
 type RpcMessageBody struct {
@@ -63,6 +70,7 @@ type RpcCommandHandlers struct {
 	ChangeSettingsHandler func(msg RpcChangeSettingsMsg) error
 	PingHandler           func() error
 	StartGameHandler      func() error
+	PlayCardsHandler      func(msg RpcPlayCardsMsg) error
 }
 
 func decodeAs[T any](data []byte) (T, error) {
@@ -100,6 +108,13 @@ func DecodeRpcMessage(data []byte, handlers RpcCommandHandlers) error {
 		return handlers.PingHandler()
 	case MsgStartGame:
 		return handlers.StartGameHandler()
+	case MsgPlayCards:
+		command, err := decodeAs[RpcPlayCardsMsg](data)
+		if err != nil {
+			return err
+		}
+
+		return handlers.PlayCardsHandler(command)
 	default:
 		logger.Logger.Error("Unknown command", "type", cmd.Type)
 		return errors.New("Unknown command")
@@ -199,4 +214,29 @@ type RpcRoundInformationMsg struct {
 
 func (msg RpcRoundInformationMsg) Type() RpcMessageType {
 	return MsgRoundInformation
+}
+
+type RpcPlayCardsMsg struct {
+	CardIds []int `json:"cardIds"`
+}
+
+func (msg RpcPlayCardsMsg) Type() RpcMessageType {
+	return MsgPlayCards
+}
+
+type RpcOnCardPlayedMsg struct {
+	PlayerId uuid.UUID `json:"playerId"`
+}
+
+func (msg RpcOnCardPlayedMsg) Type() RpcMessageType {
+	return MsgOnCardPlayed
+}
+
+type RpcOnCzarJudgingPhase struct {
+	AllPlays [][]*gameLogic.WhiteCard `json:"allPlays"`
+	NewHand  []*gameLogic.WhiteCard   `json:"newHand"`
+}
+
+func (msg RpcOnCzarJudgingPhase) Type() RpcMessageType {
+	return MsgOnCzarJudgingPhase
 }

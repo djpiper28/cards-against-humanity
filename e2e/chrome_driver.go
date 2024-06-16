@@ -28,6 +28,7 @@ func GetBrowser() *rod.Browser {
 
 const ErrorScreenshot = "./error.png"
 const Timeout = time.Millisecond * 200
+const WikiUriBase = "../wiki/assets/"
 
 func GetInputByLabel(p *rod.Page, label string) *rod.Element {
 	defer func() {

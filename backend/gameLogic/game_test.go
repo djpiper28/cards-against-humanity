@@ -643,3 +643,243 @@ func TestCannotChangeSettingsToInvalidSettings(t *testing.T) {
 	err = game.ChangeSettings(*newSettings)
 	assert.Error(t, err)
 }
+
+func TestPlayingCardThatDoesNotExistFails(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	game.GameState = gameLogic.GameStateWhiteCardsBeingSelected
+	game.CurrentBlackCard = &gameLogic.BlackCard{
+		Id:          180,
+		CardsToPlay: 1,
+		BodyText:    "Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.",
+	}
+
+	pid := game.Players[0]
+	cardId := -1
+	_, err = gameLogic.GetWhiteCard(cardId)
+	assert.Error(t, err)
+
+	_, err = game.PlayCards(pid, []int{cardId})
+	assert.Error(t, err)
+}
+
+func TestPlayingCardsForAPlayerThatDoesNotExistFails(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	game.GameState = gameLogic.GameStateWhiteCardsBeingSelected
+	game.CurrentBlackCard = &gameLogic.BlackCard{
+		Id:          180,
+		CardsToPlay: 1,
+		BodyText:    "Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.",
+	}
+
+	cardId := 1
+	_, err = gameLogic.GetWhiteCard(cardId)
+	assert.NoError(t, err)
+
+	_, err = game.PlayCards(uuid.New(), []int{cardId})
+	assert.Error(t, err)
+}
+
+func TestPlayingWrongAmountOfCardsFails(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	game.GameState = gameLogic.GameStateWhiteCardsBeingSelected
+	game.CurrentBlackCard = &gameLogic.BlackCard{
+		Id:          180,
+		CardsToPlay: 2,
+		BodyText:    "Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.",
+	}
+
+	cardId := 1
+	card, err := gameLogic.GetWhiteCard(cardId)
+	assert.NoError(t, err)
+
+	pid := game.Players[0]
+	game.PlayersMap[pid].Hand = make(map[int]*gameLogic.WhiteCard)
+	game.PlayersMap[pid].Hand[cardId] = card
+
+	_, err = game.PlayCards(pid, []int{cardId})
+	assert.Error(t, err)
+	assert.Nil(t, game.PlayersMap[pid].CurrentPlay)
+}
+
+func TestPlayingDuplicateCardsFails(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	game.GameState = gameLogic.GameStateWhiteCardsBeingSelected
+	game.CurrentBlackCard = &gameLogic.BlackCard{
+		Id:          180,
+		CardsToPlay: 2,
+		BodyText:    "Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.",
+	}
+
+	cardId := 1
+	card, err := gameLogic.GetWhiteCard(cardId)
+	assert.NoError(t, err)
+
+	pid := game.Players[0]
+	game.PlayersMap[pid].Hand = make(map[int]*gameLogic.WhiteCard)
+	game.PlayersMap[pid].Hand[cardId] = card
+
+	_, err = game.PlayCards(pid, []int{cardId, cardId})
+	assert.Error(t, err)
+	assert.Nil(t, game.PlayersMap[pid].CurrentPlay)
+}
+
+func TestPlayingCardNotInHandFails(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	game.GameState = gameLogic.GameStateWhiteCardsBeingSelected
+	game.CurrentBlackCard = &gameLogic.BlackCard{
+		Id:          180,
+		CardsToPlay: 1,
+		BodyText:    "Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.",
+	}
+
+	cardId := 2
+	_, err = gameLogic.GetWhiteCard(cardId)
+	assert.NoError(t, err)
+
+	pid := game.Players[0]
+	game.PlayersMap[pid].Hand = make(map[int]*gameLogic.WhiteCard)
+	game.PlayersMap[pid].Hand[cardId-1] = gameLogic.NewWhiteCard(cardId-1, "Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.")
+
+	_, err = game.PlayCards(pid, []int{cardId})
+	assert.Error(t, err)
+	assert.Nil(t, game.PlayersMap[pid].CurrentPlay)
+}
+
+func TestPlayingCardSuccessCase(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 2")
+	assert.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 3")
+	assert.NoError(t, err)
+
+	_, err = game.StartGame()
+	assert.NoError(t, err)
+
+	cardId := 1
+	card, err := gameLogic.GetWhiteCard(cardId)
+	assert.NoError(t, err)
+
+	pid := game.Players[0]
+	game.PlayersMap[pid].Hand = make(map[int]*gameLogic.WhiteCard)
+	game.PlayersMap[pid].Hand[cardId] = card
+
+	resp, err := game.PlayCards(pid, []int{cardId})
+	assert.NoError(t, err)
+	assert.Equal(t, game.PlayersMap[pid].CurrentPlay, []*gameLogic.WhiteCard{game.PlayersMap[pid].Hand[cardId]})
+	assert.False(t, resp.MovedToNextCardCzarPhase)
+}
+
+func TestPlayingCardCausesCzarJudingPhase(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 2")
+	assert.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 3")
+	assert.NoError(t, err)
+
+	_, err = game.StartGame()
+	assert.NoError(t, err)
+
+	cardId := 1
+	card, err := gameLogic.GetWhiteCard(cardId)
+	assert.NoError(t, err)
+
+	for _, player := range game.PlayersMap {
+		player.Hand = make(map[int]*gameLogic.WhiteCard)
+		player.Hand[cardId] = card
+	}
+
+	pid := game.Players[0]
+	resp, err := game.PlayCards(pid, []int{cardId})
+	assert.NoError(t, err)
+	assert.Equal(t, game.PlayersMap[pid].CurrentPlay, []*gameLogic.WhiteCard{game.PlayersMap[pid].Hand[cardId]})
+	assert.False(t, resp.MovedToNextCardCzarPhase)
+
+	pid = game.Players[1]
+	resp, err = game.PlayCards(pid, []int{cardId})
+	assert.NoError(t, err)
+	assert.Equal(t, game.PlayersMap[pid].CurrentPlay, []*gameLogic.WhiteCard{game.PlayersMap[pid].Hand[cardId]})
+	assert.False(t, resp.MovedToNextCardCzarPhase)
+
+	pid = game.Players[2]
+	resp, err = game.PlayCards(pid, []int{cardId})
+	assert.NoError(t, err)
+	assert.NotNil(t, game.PlayersMap[pid].CurrentPlay)
+	assert.Empty(t, game.PlayersMap[pid].CurrentPlay)
+	assert.True(t, resp.MovedToNextCardCzarPhase)
+
+	for _, plays := range resp.CzarJudingPhaseInfo.AllPlays {
+		assert.Equal(t, plays, []*gameLogic.WhiteCard{card})
+	}
+	assert.NotNil(t, resp.CzarJudingPhaseInfo.PlayerHands)
+
+	for _, hand := range resp.CzarJudingPhaseInfo.PlayerHands {
+		assert.NotNil(t, hand)
+	}
+}
+
+func TestPlayingCardInWrongGameStateFails(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	game.GameState = gameLogic.GameStateCzarJudgingCards
+	game.CurrentBlackCard = &gameLogic.BlackCard{
+		Id:          180,
+		CardsToPlay: 1,
+		BodyText:    "Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.",
+	}
+
+	cardId := 2
+	_, err = gameLogic.GetWhiteCard(cardId)
+	assert.NoError(t, err)
+
+	pid := game.Players[0]
+	game.PlayersMap[pid].Hand = make(map[int]*gameLogic.WhiteCard)
+	game.PlayersMap[pid].Hand[cardId-1] = gameLogic.NewWhiteCard(cardId-1, "Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.")
+
+	_, err = game.PlayCards(pid, []int{cardId})
+	assert.Error(t, err)
+	assert.Nil(t, game.PlayersMap[pid].CurrentPlay)
+}
+
+// TODO: Check that when a player leaves and all other players have played the judging starts
+// TODO: Check that when a player leaves and there are too few players the game ends

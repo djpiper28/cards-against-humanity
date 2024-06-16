@@ -39,6 +39,14 @@ func (p *PlayerJoinGame) InPlayerJoinPage() bool {
 	return strings.Contains(p.Page.MustInfo().URL, GetPlayerJoinGameUrl())
 }
 
+func (p *PlayerJoinGame) InLobbyPlayer() bool {
+	if !strings.Contains(p.Page.MustInfo().URL, GetJoinGameUrl()) {
+		log.Printf("Cannot be in lobby - not under %s", GetJoinGameUrl())
+		return false
+	}
+	return GetById(p.Page, "leave-game") != nil
+}
+
 func (p *PlayerJoinGame) PlayerName(name string) {
 	GetInputByLabel(p.Page, "/Player Name/i").MustInput(name)
 }
@@ -54,9 +62,9 @@ func (p *PlayerJoinGame) Join() {
 }
 
 func (p *PlayerJoinGame) Disconnect() {
-	p.Page.Timeout(Timeout).MustNavigate(GetBasePage()).MustActivate()
+	p.Page.MustNavigate("https://google.com").MustWaitStable()
 }
 
 func (p *PlayerJoinGame) ReConnect() {
-	p.Page.Timeout(Timeout).MustNavigate(GetJoinGameUrl()).MustActivate()
+	p.Page.Timeout(Timeout * 5).MustNavigate(GetJoinGameUrl()).MustWaitStable()
 }

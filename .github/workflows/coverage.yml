@@ -44,6 +44,7 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           fail_ci_if_error: yes
-          files: ./backend/coverage.out,./cahfrontend/coverage-final.json
-          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./backend/coverage.out,./cahfrontend/coverage/coverage-final.json
           verbose: yes
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOVIO }}

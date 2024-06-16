@@ -25,7 +25,7 @@ func NewJoinGamePage(b *rod.Browser, gameId string) JoinGamePage {
 	return JoinGamePage{Page: b.MustPage(url).MustWaitStable()}
 }
 
-func (page *JoinGamePage) InLobby() bool {
+func (page *JoinGamePage) InLobbyAdmin() bool {
 	page.Page.Timeout(Timeout).MustElementR("h1", fmt.Sprintf("/.*'s game/i"))
 	return true
 }

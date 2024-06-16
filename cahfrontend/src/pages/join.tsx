@@ -14,6 +14,7 @@ import {
   indexUrl,
   playerJoinUrl,
   gameErrorUrl,
+  joinGameUrl,
 } from "../routes";
 import { errorMessageParam } from "./gameError";
 
@@ -23,7 +24,13 @@ export default function Join() {
   const navigate = useNavigate();
 
   onMount(() => {
-    const gameId = searchParams[gameIdParamCookie];
+    let gameId = searchParams[gameIdParamCookie];
+    const alternateGameId = cookieStorage.getItem(gameIdParamCookie);
+    if (!gameId && alternateGameId) {
+      navigate(`${joinGameUrl}?${gameIdParamCookie}=${alternateGameId}`);
+      gameId = alternateGameId;
+    }
+
     if (!gameId) {
       console.error("There is no gameId, redirecting to index");
       navigate(indexUrl);

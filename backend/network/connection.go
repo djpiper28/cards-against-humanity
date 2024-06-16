@@ -293,6 +293,29 @@ func (c *WsConnection) listenAndHandle() error {
 				}
 				return nil
 			},
+			PlayCardsHandler: func(msg RpcPlayCardsMsg) error {
+				handler = "Play Cards"
+
+				info, err := gameRepo.Repo.PlayerPlayCards(c.GameId, c.PlayerId, msg.CardIds)
+				if err != nil {
+					return err
+				}
+
+				cardPlayedMsg := RpcOnCardPlayedMsg{
+					PlayerId: c.PlayerId,
+				}
+
+				broadcastMessage, err := EncodeRpcMessage(cardPlayedMsg)
+				if err != nil {
+					return err
+				}
+
+				go GlobalConnectionManager.Broadcast(gid, broadcastMessage)
+				if info.MovedToNextCardCzarPhase {
+					go GlobalConnectionManager.MoveToCzarJudgingPhase(gid, info.CzarJudingPhaseInfo)
+				}
+				return nil
+			},
 		})
 
 		endTime := time.Now()
