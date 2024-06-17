@@ -6,10 +6,11 @@ Cards Against Humanity website written in Golang.
 
 [![codecov](https://codecov.io/gh/djpiper28/cards-against-humanity/graph/badge.svg?token=X6YLDCVVLL)](https://codecov.io/gh/djpiper28/cards-against-humanity)
 [![Go](https://github.com/djpiper28/cards-against-humanity/actions/workflows/coverage.yml/badge.svg)](https://github.com/djpiper28/cards-against-humanity/actions/workflows/coverage.yml)
+[![e2e](https://github.com/djpiper28/cards-against-humanity/actions/workflows/e2e.yml/badge.svg)](https://github.com/djpiper28/cards-against-humanity/actions/workflows/e2e.yml)
 
 ## Dev Stuff
 
-You can run the software via Docker Compose, or build it yourself.
+You can run the software via Docker Compose, or build it yourself. You can then go to `http://localhost:8000`
 
 ```sh
 docker-compose up
