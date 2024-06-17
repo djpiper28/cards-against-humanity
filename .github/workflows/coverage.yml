@@ -40,11 +40,9 @@ jobs:
           npm i -g @vitest/coverage-v8
           cd cahfrontend 
           npx vitest run --coverage
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@2.3.0
         with:
-          fail_ci_if_error: yes
-          files: ./backend/coverage.out,./cahfrontend/coverage/coverage-final.json
-          verbose: yes
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOVIO }}
+          args: >
+            -Dsonar.go.coverage.reportPaths=backend/coverage.out
+            -Dsonar.javascript.lcov.reportPaths=cahfrontend/coverage/lcov.info
