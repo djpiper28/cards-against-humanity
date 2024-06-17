@@ -1,8 +1,14 @@
 ./e2e
+./wiki
+./charts
 README.md
 LICENSE
-Jenkinsfiel
+Jenkinsfile
 jenkinsBuilds.sh
 Dockerfile
 .gitignore
 .gitsubmodules
+.DS_Store
+*.orig
+.git/
+.github/

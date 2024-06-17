@@ -66,11 +66,17 @@ func (s *WithServicesSuite) start() {
 	s.appProcess = exec.Command("docker-compose", "up", "--build", "--detach")
 	s.appProcess.Stdout = os.Stdout
 	s.appProcess.Stderr = os.Stderr
+  s.appProcess.Dir = ".."
+
 	err := s.appProcess.Start()
 	if err != nil {
 		log.Fatalf("Cannot start frontend: %s", err)
 	}
-  s.appProcess.Wait()
+  err = s.appProcess.Wait()
+	if err != nil {
+		log.Fatalf("Cannot wait frontend: %s", err)
+	}
+
 	log.Println("Started")
 }
 
