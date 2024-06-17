@@ -22,5 +22,5 @@ ENV GIN_MODE release
 
 EXPOSE 8080
 COPY --from=build /build/backend/backend .
-COPY --from=build /build/backend/packs packs
+COPY --from=build /build/backend/packs/cah-all-compact.json packs/cah-all-compact.json
 CMD ["./backend"]
