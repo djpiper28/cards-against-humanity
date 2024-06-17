@@ -43,7 +43,7 @@ backend: swagger
 test-frontend: frontend-types
 	cd ./cahfrontend && pnpm run test
 	
-GO_TEST_ARGS=-v -benchmem -parallel 16 ./... -covermode=atomic -coverprofile=coverage.out
+GO_TEST_ARGS=-v -benchmem -parallel 16 ./... -race -cover -coverpkg ./... -covermode=atomic -coverprofile=coverage.out
 
 .PHONY: test-backend
 test-backend: backend
