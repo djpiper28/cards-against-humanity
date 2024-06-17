@@ -16,8 +16,8 @@ ENV PATH=$PATH:/usr/local/bin
 ENV PATH=$PATH:$GOPATH/bin
 ENV PATH=$PATH:/usr/local/go/bin
 
-ARG BASE_URL=localhost:8000/api
-ENV VITE_API_BASE_URL=http://$BASE_URL
+ARG BASE_URL=localhost:8000
+ENV VITE_API_BASE_URL=http://$BASE_URL/api
 ENV VITE_WS_BASE_URL=ws://$BASE_URL/ws
 
 RUN rm -r cahfrontend/node_modules
