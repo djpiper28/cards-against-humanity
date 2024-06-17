@@ -3,12 +3,8 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
-	"os/exec"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/suite"
 )
 
 // You must have the dev porxy set up
@@ -21,7 +17,8 @@ func testFrontend() error {
 
 const maxTries = 10
 
-func waitForFrontend() {
+func TestFrontend(t *testing.T) {
+	t.Parallel()
 	for tries := 0; tries < maxTries; tries++ {
 		err := testFrontend()
 		if err != nil {
@@ -42,7 +39,9 @@ func testBackend() error {
 	return err
 }
 
-func waitForBackend() {
+func TestBackend(t *testing.T) {
+	t.Parallel()
+
 	for tries := 0; tries < maxTries; tries++ {
 		err := testBackend()
 		if err != nil {
@@ -54,42 +53,4 @@ func waitForBackend() {
 		time.Sleep(time.Second)
 	}
 	log.Println("Backend responded to poll")
-}
-
-type WithServicesSuite struct {
-	suite.Suite
-	appProcess *exec.Cmd
-}
-
-func (s *WithServicesSuite) start() {
-	log.Println("Starting...")
-	s.appProcess = exec.Command("docker-compose", "up", "--build", "--detach")
-	s.appProcess.Stdout = os.Stdout
-	s.appProcess.Stderr = os.Stderr
-  s.appProcess.Dir = ".."
-
-	err := s.appProcess.Start()
-	if err != nil {
-		log.Fatalf("Cannot start frontend: %s", err)
-	}
-  err = s.appProcess.Wait()
-	if err != nil {
-		log.Fatalf("Cannot wait frontend: %s", err)
-	}
-
-	log.Println("Started")
-}
-
-func (s *WithServicesSuite) SetupSuite() {
-	log.Printf("Starting services")
-	s.start()
-
-	log.Printf("Waiting for services to become ready")
-	waitForBackend()
-	waitForFrontend()
-}
-
-func TestWithServicesSuite(t *testing.T) {
-	t.Parallel()
-	suite.Run(t, new(WithServicesSuite))
 }

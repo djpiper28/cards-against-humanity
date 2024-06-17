@@ -3,13 +3,13 @@ package main
 import (
 	"log"
 	"strings"
+	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func (s *WithServicesSuite) TestJoinGameRedirectsOnEmptyGameId() {
-	t := s.T()
+func TestJoinGameRedirectsOnEmptyGameId(t *testing.T) {
 	t.Parallel()
 	browser := GetBrowser()
 	defer browser.Close()
@@ -19,8 +19,7 @@ func (s *WithServicesSuite) TestJoinGameRedirectsOnEmptyGameId() {
 	assert.Equal(t, GetBasePage(), joinGame.Page.MustInfo().URL)
 }
 
-func (s *WithServicesSuite) TestJoinGameRedirectsOnEmptyPlayerId() {
-	t := s.T()
+func TestJoinGameRedirectsOnEmptyPlayerId(t *testing.T) {
 	t.Parallel()
 
 	gameId := "testing123"
@@ -35,36 +34,36 @@ func (s *WithServicesSuite) TestJoinGameRedirectsOnEmptyPlayerId() {
 	assert.Nil(t, err)
 }
 
-func (s *WithServicesSuite) TestGamesShowTheSameInitialSettings() {
-	s.T().Parallel()
+func TestGamesShowTheSameInitialSettings(t *testing.T) {
+	t.Parallel()
 	browser := GetBrowser()
 	defer browser.Close()
 
 	createPage := NewCreateGamePage(browser)
-	assert.NotNil(s.T(), createPage, "Page should render and not be nil")
+	assert.NotNil(t, createPage, "Page should render and not be nil")
 	createPage.InsertDefaultValidSettings()
 
 	log.Print("Creating game")
 	createPage.CreateGame()
 
 	time.Sleep(Timeout)
-	assert.True(s.T(), strings.Contains(createPage.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
+	assert.True(t, strings.Contains(createPage.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
 
 	adminLobbyPage := JoinGamePage{Page: createPage.Page}
 
-	assert.True(s.T(), adminLobbyPage.InLobbyAdmin())
-	assert.True(s.T(), adminLobbyPage.IsAdmin())
-	assert.Equal(s.T(), adminLobbyPage.AdminMaxPlayers().MustText(), "6")
-	assert.Equal(s.T(), adminLobbyPage.AdminPointsToPlayTo().MustText(), "10")
-	assert.Equal(s.T(), adminLobbyPage.AdminMaxGameRounds().MustText(), "25")
-	assert.Equal(s.T(), adminLobbyPage.AdminGamePasssowrd().MustText(), DefaultPassword)
+	assert.True(t, adminLobbyPage.InLobbyAdmin())
+	assert.True(t, adminLobbyPage.IsAdmin())
+	assert.Equal(t, adminLobbyPage.AdminMaxPlayers().MustText(), "6")
+	assert.Equal(t, adminLobbyPage.AdminPointsToPlayTo().MustText(), "10")
+	assert.Equal(t, adminLobbyPage.AdminMaxGameRounds().MustText(), "25")
+	assert.Equal(t, adminLobbyPage.AdminGamePasssowrd().MustText(), DefaultPassword)
 
 	// Connect with another client then assert that the settings remain equal
 	browser2 := GetBrowser()
 	defer browser2.Close()
 	playerPage := NewPlayerGamePage(browser2, adminLobbyPage)
 
-	assert.True(s.T(), playerPage.InPlayerJoinPage())
+	assert.True(t, playerPage.InPlayerJoinPage())
 	playerPage.Password(DefaultPassword)
 	playerPage.PlayerName("Geoff")
 
@@ -72,49 +71,49 @@ func (s *WithServicesSuite) TestGamesShowTheSameInitialSettings() {
 
 	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
 
-	assert.True(s.T(), playerLobbyPage.InLobbyAdmin())
+	assert.True(t, playerLobbyPage.InLobbyAdmin())
 
-	assert.Equal(s.T(),
+	assert.Equal(t,
 		adminLobbyPage.AdminMaxPlayers().MustText(),
 		playerLobbyPage.UserMaxPlayers().MustText())
-	assert.Equal(s.T(),
+	assert.Equal(t,
 		adminLobbyPage.AdminPointsToPlayTo().MustText(),
 		playerLobbyPage.UserPlayingToPoints().MustText())
-	assert.Equal(s.T(),
+	assert.Equal(t,
 		adminLobbyPage.AdminMaxGameRounds().MustText(),
 		playerLobbyPage.UserMaxGameRounds().MustText())
-	assert.Equal(s.T(),
+	assert.Equal(t,
 		adminLobbyPage.AdminGamePasssowrd().MustText(),
 		playerLobbyPage.UserGamePassword().MustText())
 
 	playerLobbyPage.Page.MustScreenshotFullPage(WikiUriBase + "player_lobby_page.png")
 }
 
-func (s *WithServicesSuite) TestChangingSettingsSyncsBetweenClients() {
-	s.T().Parallel()
+func TestChangingSettingsSyncsBetweenClients(t *testing.T) {
+	t.Parallel()
 	browser := GetBrowser()
 	defer browser.Close()
 
 	createPage := NewCreateGamePage(browser)
-	assert.NotNil(s.T(), createPage, "Page should render and not be nil")
+	assert.NotNil(t, createPage, "Page should render and not be nil")
 	createPage.InsertDefaultValidSettings()
 
 	log.Print("Creating game")
 	createPage.CreateGame()
 
 	time.Sleep(Timeout)
-	assert.True(s.T(), strings.Contains(createPage.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
+	assert.True(t, strings.Contains(createPage.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
 
 	adminLobbyPage := JoinGamePage{Page: createPage.Page}
 
-	assert.True(s.T(), adminLobbyPage.InLobbyAdmin())
+	assert.True(t, adminLobbyPage.InLobbyAdmin())
 
 	// Connect with another client then assert that the settings remain equal
 	browser2 := GetBrowser()
 	defer browser2.Close()
 	playerPage := NewPlayerGamePage(browser2, adminLobbyPage)
 
-	assert.True(s.T(), playerPage.InPlayerJoinPage())
+	assert.True(t, playerPage.InPlayerJoinPage())
 	playerPage.Password(DefaultPassword)
 	playerPage.PlayerName("Geoff")
 
@@ -122,70 +121,70 @@ func (s *WithServicesSuite) TestChangingSettingsSyncsBetweenClients() {
 
 	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
 
-	assert.True(s.T(), playerLobbyPage.InLobbyAdmin())
+	assert.True(t, playerLobbyPage.InLobbyAdmin())
 
 	adminLobbyPage.AdminGamePasssowrd().MustInput("Password 123")
-	assert.Equal(s.T(), adminLobbyPage.AdminGamePasssowrd().MustText(), "poopPassword 123")
+	assert.Equal(t, adminLobbyPage.AdminGamePasssowrd().MustText(), "poopPassword 123")
 
-	assert.True(s.T(), adminLobbyPage.Saved())
+	assert.True(t, adminLobbyPage.Saved())
 
 	found := false
 	for _, cookie := range browser.MustGetCookies() {
 		if cookie.Name == "password" {
-			assert.Equal(s.T(), "poopPassword 123", cookie.Value)
+			assert.Equal(t, "poopPassword 123", cookie.Value)
 			found = true
 			break
 		}
 	}
-	assert.True(s.T(), found)
+	assert.True(t, found)
 
 	found = false
 	for _, cookie := range browser2.MustGetCookies() {
 		if cookie.Name == "password" {
-			assert.Equal(s.T(), "poopPassword 123", cookie.Value)
+			assert.Equal(t, "poopPassword 123", cookie.Value)
 			found = true
 			break
 		}
 	}
-	assert.True(s.T(), found)
+	assert.True(t, found)
 
-	assert.Equal(s.T(),
+	assert.Equal(t,
 		adminLobbyPage.AdminMaxPlayers().MustText(),
 		playerLobbyPage.UserMaxPlayers().MustText())
-	assert.Equal(s.T(),
+	assert.Equal(t,
 		adminLobbyPage.AdminPointsToPlayTo().MustText(),
 		playerLobbyPage.UserPlayingToPoints().MustText())
-	assert.Equal(s.T(),
+	assert.Equal(t,
 		adminLobbyPage.AdminMaxGameRounds().MustText(),
 		playerLobbyPage.UserMaxGameRounds().MustText())
-	assert.Equal(s.T(),
+	assert.Equal(t,
 		adminLobbyPage.AdminGamePasssowrd().MustText(),
 		playerLobbyPage.UserGamePassword().MustText())
 
 	playerLobbyPage.Page.MustScreenshotFullPage(WikiUriBase + "player_lobby_page.png")
 }
 
-func (s *WithServicesSuite) TestPlayerDisconnectReConnectWithNoSearchParamsInJoinLink() {
-	s.T().Parallel()
+func TestPlayerDisconnectReConnectWithNoSearchParamsInJoinLink(t *testing.T) {
+	t.Parallel()
 	browser := GetBrowser()
 	defer browser.Close()
 
 	createPage := NewCreateGamePage(browser)
-	assert.NotNil(s.T(), createPage, "Page should render and not be nil")
+	assert.NotNil(t, createPage, "Page should render and not be nil")
 	createPage.InsertDefaultValidSettings()
 
 	log.Print("Creating game")
 	createPage.CreateGame()
 
 	time.Sleep(Timeout)
-	assert.True(s.T(), strings.Contains(createPage.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
+	assert.True(t, strings.Contains(createPage.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
 
 	adminLobbyPage := JoinGamePage{Page: createPage.Page}
 
-	assert.True(s.T(), adminLobbyPage.InLobbyAdmin())
+	assert.True(t, adminLobbyPage.InLobbyAdmin())
 
 	adminPlayerId := adminLobbyPage.PlayerId()
-	assert.True(s.T(),
+	assert.True(t,
 		adminLobbyPage.PlayerConnected(adminPlayerId))
 
 	// Connect with another client then assert that the settings remain equal
@@ -193,26 +192,26 @@ func (s *WithServicesSuite) TestPlayerDisconnectReConnectWithNoSearchParamsInJoi
 	defer browser2.Close()
 	playerPage := NewPlayerGamePage(browser2, adminLobbyPage)
 
-	assert.True(s.T(), playerPage.InPlayerJoinPage())
+	assert.True(t, playerPage.InPlayerJoinPage())
 	playerPage.Password(DefaultPassword)
 	playerPage.PlayerName("Geoff")
 
 	playerPage.Join()
 
 	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
-	assert.True(s.T(), playerLobbyPage.InLobbyAdmin())
+	assert.True(t, playerLobbyPage.InLobbyAdmin())
 
 	playerId := playerLobbyPage.PlayerId()
 
 	time.Sleep(Timeout)
-	assert.True(s.T(), adminLobbyPage.PlayerConnected(playerId))
+	assert.True(t, adminLobbyPage.PlayerConnected(playerId))
 
 	// Disconnect and make sure the UI updates
 	playerPage.Disconnect()
 
 	time.Sleep(Timeout)
-	assert.False(s.T(), adminLobbyPage.PlayerConnected(playerId))
-	assert.True(s.T(), adminLobbyPage.PlayerConnected(adminPlayerId))
+	assert.False(t, adminLobbyPage.PlayerConnected(playerId))
+	assert.True(t, adminLobbyPage.PlayerConnected(adminPlayerId))
 
 	adminLobbyPage.Page.MustScreenshot(WikiUriBase + "admin_player_disconnected.png")
 	playerPage.Page.MustScreenshot(WikiUriBase + "player_disconnected.png")
@@ -222,90 +221,90 @@ func (s *WithServicesSuite) TestPlayerDisconnectReConnectWithNoSearchParamsInJoi
 	time.Sleep(Timeout)
 	playerPage.Page.MustScreenshot(WikiUriBase + "player_reconnect.png")
 
-	assert.True(s.T(), adminLobbyPage.PlayerConnected(adminPlayerId))
-	assert.True(s.T(), adminLobbyPage.PlayerConnected(playerId))
-	assert.True(s.T(), playerPage.InLobbyPlayer())
+	assert.True(t, adminLobbyPage.PlayerConnected(adminPlayerId))
+	assert.True(t, adminLobbyPage.PlayerConnected(playerId))
+	assert.True(t, playerPage.InLobbyPlayer())
 }
 
-func (s *WithServicesSuite) TestPlayerLeavesGame() {
-	s.T().Parallel()
+func TestPlayerLeavesGame(t *testing.T) {
+	t.Parallel()
 	browser := GetBrowser()
 	defer browser.Close()
 
 	createPage := NewCreateGamePage(browser)
-	assert.NotNil(s.T(), createPage, "Page should render and not be nil")
+	assert.NotNil(t, createPage, "Page should render and not be nil")
 	createPage.InsertDefaultValidSettings()
 
 	log.Print("Creating game")
 	createPage.CreateGame()
 
 	time.Sleep(Timeout)
-	assert.True(s.T(), strings.Contains(createPage.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
+	assert.True(t, strings.Contains(createPage.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
 
 	adminLobbyPage := JoinGamePage{Page: createPage.Page}
 
-	assert.True(s.T(), adminLobbyPage.InLobbyAdmin())
+	assert.True(t, adminLobbyPage.InLobbyAdmin())
 
 	// Connect with another client then assert that the settings remain equal
 	browser2 := GetBrowser()
 	defer browser2.Close()
 	playerPage := NewPlayerGamePage(browser2, adminLobbyPage)
 
-	assert.True(s.T(), playerPage.InPlayerJoinPage())
+	assert.True(t, playerPage.InPlayerJoinPage())
 	playerPage.Password(DefaultPassword)
 	playerPage.PlayerName("Geoff")
 
 	playerPage.Join()
 
 	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
-	assert.True(s.T(), playerLobbyPage.InLobbyAdmin())
+	assert.True(t, playerLobbyPage.InLobbyAdmin())
 
 	playerId := playerLobbyPage.PlayerId()
 
 	playerLobbyPage.LeaveGame()
-	assert.NotContains(s.T(), adminLobbyPage.PlayersInGame(), playerId)
-	assert.True(s.T(), adminLobbyPage.IsAdmin())
+	assert.NotContains(t, adminLobbyPage.PlayersInGame(), playerId)
+	assert.True(t, adminLobbyPage.IsAdmin())
 }
 
 // Genuine fail remind me to fix
-func (s *WithServicesSuite) TestOwnerLeavingGameTransfersOwnership() {
-	s.T().Parallel()
+func TestOwnerLeavingGameTransfersOwnership(t *testing.T) {
+	t.Parallel()
 	browser := GetBrowser()
 	defer browser.Close()
 
 	createPage := NewCreateGamePage(browser)
-	assert.NotNil(s.T(), createPage, "Page should render and not be nil")
+	assert.NotNil(t, createPage, "Page should render and not be nil")
 	createPage.InsertDefaultValidSettings()
 
 	log.Print("Creating game")
 	createPage.CreateGame()
 
 	time.Sleep(Timeout)
-	assert.True(s.T(), strings.Contains(createPage.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
+	assert.True(t, strings.Contains(createPage.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
 
 	adminLobbyPage := JoinGamePage{Page: createPage.Page}
 
-	assert.True(s.T(), adminLobbyPage.InLobbyAdmin())
+	assert.True(t, adminLobbyPage.InLobbyAdmin())
 
 	// Connect with another client then assert that the settings remain equal
 	browser2 := GetBrowser()
 	defer browser2.Close()
 	playerPage := NewPlayerGamePage(browser2, adminLobbyPage)
 
-	assert.True(s.T(), playerPage.InPlayerJoinPage())
+	assert.True(t, playerPage.InPlayerJoinPage())
 	playerPage.Password(DefaultPassword)
 	playerPage.PlayerName("Geoff")
 
 	playerPage.Join()
 
 	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
-	assert.True(s.T(), playerLobbyPage.InLobbyAdmin())
+	assert.True(t, playerLobbyPage.InLobbyAdmin())
 
 	time.Sleep(Timeout)
 	playerId := adminLobbyPage.PlayerId()
 	adminLobbyPage.LeaveGame()
 
 	time.Sleep(Timeout)
-	assert.NotContains(s.T(), playerLobbyPage.PlayersInGame(), playerId)
-	assert.True(s.T(), playerLobbyPage.IsAdmin())
+	assert.NotContains(t, playerLobbyPage.PlayersInGame(), playerId)
+	assert.True(t, playerLobbyPage.IsAdmin())
 }

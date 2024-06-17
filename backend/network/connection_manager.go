@@ -197,9 +197,9 @@ func (g *ConnectionManager) RemovePlayer(gameId, playerId uuid.UUID) error {
 
 	g.UnregisterConnection(gameId, playerId)
 
-  if res.NewGameState == gameLogic.GameStateCzarJudgingCards {
-    go g.MoveToCzarJudgingPhase(gameId, res.CzarJudingPhaseInfo)
-  }
+	if res.NewGameState == gameLogic.GameStateCzarJudgingCards {
+		go g.MoveToCzarJudgingPhase(gameId, res.CzarJudingPhaseInfo)
+	}
 
 	if res.PlayersLeft == 0 {
 		g.RemoveGame(gameId)

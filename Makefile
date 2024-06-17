@@ -49,9 +49,13 @@ GO_TEST_ARGS=-v -benchmem -parallel 16 ./... -covermode=atomic -coverprofile=cov
 test-backend: backend
 	cd ./backend/ &&	go test './...' ${GO_TEST_ARGS}
 
+.PHONY: start-docker-compose
+start-docker-compose:
+	docker-compose up --build --detach
+
 # Everything is tested within docker, so this can be started imediately
 .PHONY: test-e2e
-test-e2e:
+test-e2e: start-docker-compose
 	cd ./e2e/ && go test './...' ${GO_TEST_ARGS}
 
 .PHONY: test
