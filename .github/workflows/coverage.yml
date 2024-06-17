@@ -50,4 +50,4 @@ jobs:
             -Dsonar.javascript.lcov.reportPaths=cahfrontend/coverage/clover.xml
             -Dsonar.projectKey=djpiper28_cards-against-humanity
             -Dsonar.organization=djpiper28
-            -Dsonar.coverage.exclusions=**/*.test.ts, **/*.test.js, **/*.spec.ts, **/*.spec.js, **/*.test.tsx, e2e/, **/*_test.go, **/*_config.ts, **/test_*.go
+            -Dsonar.coverage.exclusions=**/*.test.ts,**/*.test.js,**/*.spec.ts,**/*.spec.js,**/*.test.tsx,e2e/,**/*_test.go,**/*_config.ts,**/test_*.go
