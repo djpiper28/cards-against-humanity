@@ -7,6 +7,11 @@ services:
       - "8001:80"
     networks: 
       - cah
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
   backend:
     build:
       context: .
@@ -15,6 +20,11 @@ services:
       - "8002:8080"
     networks: 
       - cah
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/res/packs"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
   gateway:
     build:
       context: .
@@ -23,6 +33,11 @@ services:
       - "8000:80"
     networks:
       - cah
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 networks:
   cah:
