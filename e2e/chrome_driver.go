@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/go-rod/rod"
@@ -26,15 +27,22 @@ func GetBrowser() *rod.Browser {
 	return browser.MustConnect()
 }
 
-const ErrorScreenshot = "./error.png"
 const Timeout = time.Millisecond * 200
 const WikiUriBase = "../wiki/assets/"
+
+var errorPngLock sync.Mutex
+
+func screenshotError(p *rod.Page) {
+	errorPngLock.Lock()
+	defer errorPngLock.Unlock()
+	p.MustScreenshotFullPage("error.png")
+}
 
 func GetInputByLabel(p *rod.Page, label string) *rod.Element {
 	defer func() {
 		if recover() != nil {
-			log.Printf("Error getting input by label '%s', %s was saved", label, ErrorScreenshot)
-			p.MustScreenshotFullPage(ErrorScreenshot)
+			log.Printf("Error getting input by label '%s', screenshot was saved", label)
+			screenshotError(p)
 		}
 	}()
 	return p.Timeout(Timeout).
@@ -55,8 +63,8 @@ func cssSelectorForId(id string) string {
 func GetById(p *rod.Page, id string) *rod.Element {
 	defer func() {
 		if recover() != nil {
-			log.Printf("Error getting element by id '%s', %s was saved", id, ErrorScreenshot)
-			p.MustScreenshotFullPage(ErrorScreenshot)
+			log.Printf("Error getting element by id '%s', screenshot was saved", id)
+			screenshotError(p)
 		}
 	}()
 	return p.Timeout(Timeout).MustElement(cssSelectorForId(id))
@@ -65,14 +73,14 @@ func GetById(p *rod.Page, id string) *rod.Element {
 func GetAllById(p *rod.Page, id string) []*rod.Element {
 	defer func() {
 		if recover() != nil {
-			log.Printf("Error getting all elements by id '%s', %s was saved", id, ErrorScreenshot)
-			p.MustScreenshotFullPage(ErrorScreenshot)
+			log.Printf("Error getting all elements by id '%s', screenshot was saved", id)
+			screenshotError(p)
 		}
 	}()
 	return p.Timeout(Timeout).MustElements(cssSelectorForId(id))
 }
 
-const frontendUrlProxy = "http://localhost:3255/"
+const frontendUrlProxy = "http://localhost:8000/"
 
 func GetBasePage() string {
 	return frontendUrlProxy

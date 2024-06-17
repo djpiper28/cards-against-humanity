@@ -1,0 +1,5 @@
+./docs/
+backend
+backend.test
+*.out
+^packs/*.json
