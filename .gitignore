@@ -30,3 +30,4 @@ cahfrontend/src/api.ts
 cahfrontend/src/rpcTypes.ts
 cahfrontend/src/gameLogicTypes.ts
 wiki
+*.orig
