@@ -24,6 +24,7 @@ export default function GameSettingsInput(props: Readonly<Props>) {
   return (
     <div class="flex flex-col gap-2">
       <fieldset class="flex flex-row flex-wrap gap-2 md:gap-1">
+        <legend class="hidden">Other Game Settings</legend>
         <Input
           inputType={InputType.Text}
           placeHolder="password"

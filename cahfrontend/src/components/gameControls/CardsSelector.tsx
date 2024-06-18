@@ -34,7 +34,8 @@ export default function CardsSelector(props: Readonly<Props>) {
 
   return (
     <div class="flex flex-col gap-3">
-      <div class="flex flex-row flex-wrap gap-2 md:gap-1 overflow-auto max-h-64">
+      <fieldset class="flex flex-row flex-wrap gap-2 md:gap-1 overflow-auto max-h-64">
+        <legend class="hidden">Card Packs</legend>
         <For each={props.cards}>
           {(pack) => (
             <Checkbox
@@ -55,7 +56,7 @@ export default function CardsSelector(props: Readonly<Props>) {
             />
           )}
         </For>
-      </div>
+      </fieldset>
       <p class={panelTitleCss()}>
         {`You have added ${whiteCards()} white cards and ${blackCards()} black cards.`}
       </p>
