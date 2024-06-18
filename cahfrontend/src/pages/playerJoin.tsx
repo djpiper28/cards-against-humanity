@@ -32,77 +32,74 @@ export default function PlayerJoin() {
     return;
   }
 
+  const onSubmit = async () => {
+    if (!validatePlayerName(playerName())) {
+      return;
+    }
+
+    setError("");
+    apiClient.games
+      .joinCreate({
+        gameId: gameId,
+        playerName: playerName(),
+        password: password(),
+      })
+      .then(async (res) => {
+        try {
+          await gameState.leaveGame();
+          clearGameCookies();
+        } catch (e) {
+          console.log(e);
+        }
+
+        cookieStorage.setItem(gamePasswordCookie, password(), cookieOptions);
+        cookieStorage.setItem(playerIdCookie, res.data.playerId, cookieOptions);
+        cookieStorage.setItem(gameIdParamCookie, gameId, cookieOptions);
+        cookieStorage.setItem(
+          authenticationCookie,
+          res.data.authentication,
+          cookieOptions
+        );
+
+        naviagte(
+          `${joinGameUrl}?${gameIdParamCookie}=${encodeURIComponent(gameId)}`
+        );
+      })
+      .catch((res) => {
+        setError(res.error.error);
+      });
+  };
+
   return (
     <RoundedWhite>
-      <Header text="Enter a username to join the game" />
-      <Input
-        inputType={InputType.Text}
-        label="Player Name"
-        value={playerName()}
-        onChanged={(value) => setPlayerName(value)}
-        placeHolder="John Smith"
-        errorState={!validatePlayerName(playerName())}
-      />
-      <Input
-        inputType={InputType.Text}
-        autocomplete="password"
-        label="Password, leave blank if none"
-        value={password()}
-        onChanged={(value) => setPassword(value)}
-        placeHolder="Password"
-        errorState={password().length > MaxPasswordLength}
-      />
-      <p class="text-error-colour">{error()}</p>
-
-      <Button
-        onClick={async () => {
-          if (!validatePlayerName(playerName())) {
-            return;
-          }
-
-          setError("");
-          apiClient.games
-            .joinCreate({
-              gameId: gameId,
-              playerName: playerName(),
-              password: password(),
-            })
-            .then(async (res) => {
-              try {
-                await gameState.leaveGame();
-                clearGameCookies();
-              } catch (e) {
-                console.log(e);
-              }
-
-              cookieStorage.setItem(
-                gamePasswordCookie,
-                password(),
-                cookieOptions,
-              );
-              cookieStorage.setItem(
-                playerIdCookie,
-                res.data.playerId,
-                cookieOptions,
-              );
-              cookieStorage.setItem(gameIdParamCookie, gameId, cookieOptions);
-              cookieStorage.setItem(
-                authenticationCookie,
-                res.data.authentication,
-                cookieOptions,
-              );
-
-              naviagte(
-                `${joinGameUrl}?${gameIdParamCookie}=${encodeURIComponent(gameId)}`,
-              );
-            })
-            .catch((res) => {
-              setError(res.error.error);
-            });
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSubmit;
         }}
       >
-        Join Game
-      </Button>
+        <Header text="Enter a username to join the game" />
+        <Input
+          inputType={InputType.Text}
+          label="Player Name"
+          value={playerName()}
+          onChanged={(value) => setPlayerName(value)}
+          placeHolder="John Smith"
+          errorState={!validatePlayerName(playerName())}
+        />
+        <Input
+          inputType={InputType.Text}
+          autocomplete="password"
+          label="Password, leave blank if none"
+          value={password()}
+          onChanged={(value) => setPassword(value)}
+          placeHolder="Password"
+          errorState={password().length > MaxPasswordLength}
+        />
+        <p class="text-error-colour">{error()}</p>
+
+        <Button onClick={onSubmit}>Join Game</Button>
+      </form>
     </RoundedWhite>
   );
 }

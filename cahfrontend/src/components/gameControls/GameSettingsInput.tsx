@@ -23,7 +23,7 @@ interface Props {
 export default function GameSettingsInput(props: Readonly<Props>) {
   return (
     <div class="flex flex-col gap-2">
-      <div class="flex flex-row flex-wrap gap-2 md:gap-1">
+      <fieldset class="flex flex-row flex-wrap gap-2 md:gap-1">
         <Input
           inputType={InputType.Text}
           placeHolder="password"
@@ -74,7 +74,7 @@ export default function GameSettingsInput(props: Readonly<Props>) {
           label="Max Game Rounds"
           errorState={!validateMaxGameRounds(props.settings.maxRounds)}
         />
-      </div>
+      </fieldset>
 
       <p class="text-error-colour text-lg">{props.errorMessage}</p>
     </div>

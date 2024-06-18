@@ -40,7 +40,7 @@ export default function Create() {
         cardPacksList.sort((a, b) => {
           if (!a.name || !b.name) return 0;
           return a.name.localeCompare(b.name);
-        }),
+        })
       );
     } catch (err) {
       console.error(err);
@@ -58,8 +58,70 @@ export default function Create() {
   const [playerName, setPlayerName] = createSignal("");
   const [gameSettings, setGameSettings] = createSignal(settings);
 
+  const onSubmit = async () => {
+    if (!validateGameSettings(settings)) {
+      console.error("The game settings are invalid");
+      return;
+    }
+
+    try {
+      await gameState.leaveGame();
+      clearGameCookies();
+    } catch (e) {
+      console.log(e);
+    }
+
+    apiClient.games
+      .createCreate({
+        settings: {
+          cardPacks: selectedPacks(),
+          gamePassword: gameSettings().gamePassword,
+          maxPlayers: gameSettings().maxPlayers,
+          maxRounds: gameSettings().maxRounds,
+          playingToPoints: gameSettings().playingToPoints,
+        },
+        playerName: playerName(),
+      })
+      .then((newGame) => {
+        console.log("Creating game for ", JSON.stringify(newGame.data));
+        cookieStorage.setItem(
+          playerIdCookie,
+          newGame.data.playerId ?? "error",
+          cookieOptions
+        );
+        cookieStorage.setItem(
+          gameIdParamCookie,
+          newGame.data.gameId ?? "error",
+          cookieOptions
+        );
+        cookieStorage.setItem(
+          gamePasswordCookie,
+          gameSettings().gamePassword,
+          cookieOptions
+        );
+        cookieStorage.setItem(
+          authenticationCookie,
+          newGame.data.authentication,
+          cookieOptions
+        );
+        navigate(
+          `${joinGameUrl}?${gameIdParamCookie}=${encodeURIComponent(
+            newGame.data.gameId ?? "error"
+          )}`
+        );
+      })
+      .catch((err) => {
+        setErrorMessage(err.error.error);
+      });
+  };
+
   return (
-    <>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit;
+      }}
+    >
       <Header text="Create a game" />
       <RoundedWhite>
         <SubHeader
@@ -95,67 +157,8 @@ export default function Create() {
           setSettings={setGameSettings}
         />
 
-        <Button
-          onClick={async () => {
-            if (!validateGameSettings(settings)) {
-              console.error("The game settings are invalid");
-              return;
-            }
-
-            try {
-              await gameState.leaveGame();
-              clearGameCookies();
-            } catch (e) {
-              console.log(e);
-            }
-
-            apiClient.games
-              .createCreate({
-                settings: {
-                  cardPacks: selectedPacks(),
-                  gamePassword: gameSettings().gamePassword,
-                  maxPlayers: gameSettings().maxPlayers,
-                  maxRounds: gameSettings().maxRounds,
-                  playingToPoints: gameSettings().playingToPoints,
-                },
-                playerName: playerName(),
-              })
-              .then((newGame) => {
-                console.log("Creating game for ", JSON.stringify(newGame.data));
-                cookieStorage.setItem(
-                  playerIdCookie,
-                  newGame.data.playerId ?? "error",
-                  cookieOptions,
-                );
-                cookieStorage.setItem(
-                  gameIdParamCookie,
-                  newGame.data.gameId ?? "error",
-                  cookieOptions,
-                );
-                cookieStorage.setItem(
-                  gamePasswordCookie,
-                  gameSettings().gamePassword,
-                  cookieOptions,
-                );
-                cookieStorage.setItem(
-                  authenticationCookie,
-                  newGame.data.authentication,
-                  cookieOptions,
-                );
-                navigate(
-                  `${joinGameUrl}?${gameIdParamCookie}=${encodeURIComponent(
-                    newGame.data.gameId ?? "error",
-                  )}`,
-                );
-              })
-              .catch((err) => {
-                setErrorMessage(err.error.error);
-              });
-          }}
-        >
-          Create Game
-        </Button>
+        <Button onClick={onSubmit}>Create Game</Button>
       </RoundedWhite>
-    </>
+    </form>
   );
 }
