@@ -27,8 +27,8 @@ services:
       retries: 3
   gateway:
     build:
-      context: .
-      dockerfile: proxy.Dockerfile
+      context: devProxy
+      dockerfile: Dockerfile
     ports:
       - "8000:80"
     networks:
