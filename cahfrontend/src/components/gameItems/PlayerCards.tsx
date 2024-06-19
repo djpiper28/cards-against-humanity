@@ -34,7 +34,10 @@ export default function PlayerCards(props: Readonly<Props>) {
               onClick={() => props.onSelectCard?.(card.id)}
             >
               {isSelected() ? (
-                <div class="absolute px-1 py-0.5 bg-blue-500 rounded-br-xl">
+                <div
+                  class="absolute px-1 py-0.5 bg-blue-500 rounded-br-xl"
+                  id={`selected-${cardNumber()}-${card.id}`}
+                >
                   <p class="font-bold text-white">{cardNumber()}</p>
                 </div>
               ) : (
