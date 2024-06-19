@@ -186,6 +186,7 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
                 played: false,
               };
             })}
+            selectedCardIds={[]}
           />
         </Show>
 
