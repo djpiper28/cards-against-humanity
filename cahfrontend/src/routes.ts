@@ -15,6 +15,10 @@ export const createGameUrl = `${gameUrlSegment}/create`;
 export const playerJoinUrl = `${gameUrlSegment}/playerJoin`;
 export const gameErrorUrl = `${gameUrlSegment}/error`;
 
+/*
+ * The routes required for normal gameplay are pre-loaded by default, error states, and other
+ * pages are lazy-loaded to reduce the bundle size.
+ **/
 export const routes: RouteDefinition[] = [
   {
     path: indexUrl,
