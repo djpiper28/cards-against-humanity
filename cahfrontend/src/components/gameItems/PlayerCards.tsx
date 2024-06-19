@@ -5,7 +5,6 @@ interface GameCard {
   id: string;
   name: string;
   pack: string;
-  played: boolean;
 }
 
 interface Props {
@@ -27,11 +26,16 @@ export default function PlayerCards(props: Readonly<Props>) {
             }
             onClick={() => props.onSelectCard?.(card.id)}
           >
-            <Card
-              isWhite={!card.played}
-              cardText={card.name}
-              packName={card.pack}
-            />
+            {!!props.selectedCardIds.find((x) => x === card.id) ? (
+              <div class="absolute p-1 bg-blue-500 rounded-br-xl">
+                <p class="font-bold text-white">
+                  {props.selectedCardIds.indexOf(card.id) + 1}
+                </p>
+              </div>
+            ) : (
+              <></>
+            )}
+            <Card isWhite={true} cardText={card.name} packName={card.pack} />
           </button>
         )}
       </For>

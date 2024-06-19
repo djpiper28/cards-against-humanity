@@ -7,7 +7,7 @@ export default {
 
 export const Primary = {
   args: {
-    selectedCardId: "1",
+    selectedCardIds: ["1", "3"],
     cards: [
       {
         name: "Brexit",
