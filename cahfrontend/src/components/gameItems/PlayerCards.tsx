@@ -1,3 +1,4 @@
+import { For } from "solid-js";
 import Card from "./Card";
 
 interface GameCard {
@@ -9,29 +10,31 @@ interface GameCard {
 
 interface Props {
   cards: GameCard[];
-  selectedCardId?: string;
+  selectedCardIds: string[];
   onSelectCard?: (cardId: string) => void;
 }
 
 export default function PlayerCards(props: Readonly<Props>) {
   return (
     <div class="flex flex-row flex-wrap gap-2 justify-between">
-      {props.cards.map((card) => (
-        <button
-          class={
-            card.id === props.selectedCardId
-              ? "border-4 border-blue-500 rounded-2xl bg-white"
-              : ""
-          }
-          onClick={() => props.onSelectCard?.(card.id)}
-        >
-          <Card
-            isWhite={!card.played}
-            cardText={card.name}
-            packName={card.pack}
-          />
-        </button>
-      ))}
+      <For each={props.cards}>
+        {(card) => (
+          <button
+            class={
+              !!props.selectedCardIds.find((x) => x === card.id)
+                ? "border-4 border-blue-500 rounded-2xl bg-white"
+                : ""
+            }
+            onClick={() => props.onSelectCard?.(card.id)}
+          >
+            <Card
+              isWhite={!card.played}
+              cardText={card.name}
+              packName={card.pack}
+            />
+          </button>
+        )}
+      </For>
     </div>
   );
 }
