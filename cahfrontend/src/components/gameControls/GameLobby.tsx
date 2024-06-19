@@ -183,7 +183,6 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
                 id: x.id.toString(),
                 name: x.bodyText,
                 pack: "Your hand",
-                played: false,
               };
             })}
             selectedCardIds={[]}
