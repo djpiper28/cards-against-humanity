@@ -44,7 +44,7 @@ func Start() {
 	router.Use(cors.New(cors.Config{
 		AllowOrigins: []string{"http://localhost:3000",
 			"http://localhost:3255",
-      "http://localhost:8000",
+			"http://localhost:8000",
 			"https://cards.djpiper28.co.uk"},
 		AllowHeaders: []string{"Content-Type",
 			"Set-Cookie",

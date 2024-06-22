@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 	"time"
 
@@ -114,37 +113,27 @@ func (s *ServerTestSuite) TestJoinGameEndpoint() {
 	t := s.T()
 	t.Parallel()
 
-	game := createTestGame(t)
-	url := WsBaseUrl + "/games/join"
-
-	dialer := websocket.DefaultDialer
-	dialer.HandshakeTimeout = time.Millisecond * 100
-
-	log.Print("Dialing server")
-	conn, _, err := dialer.Dial(url, game.Jar.Headers())
+	client, err := NewTestGameConnection()
 	assert.Nil(t, err, "Should have connected to the ws server successfully")
-	defer conn.Close()
-	assert.NotNil(t, conn)
 
 	// First message should be the player join broadcast
-	msgType, msg, err := conn.ReadMessage()
+	msgType, msg, err := client.Read()
 
 	assert.Nil(t, err, "Should be able to read (the initial game state)")
 	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
 	assert.Equal(t, msgType, websocket.TextMessage)
 
-	gameRepoGame, err := gameRepo.Repo.GetGame(game.Ids.GameId)
+	gameRepoGame, err := gameRepo.Repo.GetGame(client.GameId)
 	assert.NoError(t, err)
-	assert.True(t, gameRepoGame.PlayersMap[game.Ids.PlayerId].Connected)
+	assert.True(t, gameRepoGame.PlayersMap[client.PlayerId].Connected)
 
 	var onPlayerJoinMsg onPlayerJoinMsg
 	err = json.Unmarshal(msg, &onPlayerJoinMsg)
 	assert.Nil(t, err)
-	assert.Equal(t, game.Ids.PlayerId, onPlayerJoinMsg.Data.Id, "The current user should have joined the game")
+	assert.Equal(t, client.PlayerId, onPlayerJoinMsg.Data.Id, "The current user should have joined the game")
 
 	// Second message should be the state
-
-	msgType, msg, err = conn.ReadMessage()
+	msgType, msg, err = client.Read()
 
 	assert.Nil(t, err, "Should be able to read (the initial game state)")
 	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
@@ -154,10 +143,10 @@ func (s *ServerTestSuite) TestJoinGameEndpoint() {
 	err = json.Unmarshal(msg, &onJoinMsg)
 
 	assert.Nil(t, err, "Should be a join message")
-	assert.Equal(t, game.Ids.GameId, onJoinMsg.Data.State.Id)
+	assert.Equal(t, client.GameId, onJoinMsg.Data.State.Id)
 	assert.Len(t, onJoinMsg.Data.State.Players, 1)
 	assert.Contains(t, onJoinMsg.Data.State.Players, gameLogic.Player{
-		Id:        game.Ids.PlayerId,
+		Id:        client.PlayerId,
 		Name:      "Dave",
 		Points:    0,
 		Connected: true})

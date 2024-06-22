@@ -55,13 +55,14 @@ type GameData struct {
 	Jar *GameJoinCookieJar
 }
 
-// This game has no password
-func createTestGame(t *testing.T) GameData {
+func createTestGame_2() (GameData, error) {
 	name := "Dave"
 	gs := DefaultGameSettings()
 
 	postBody, err := json.Marshal(GameCreateRequest{Settings: gs, PlayerName: name})
-	assert.Nil(t, err, "Should be able to create json body")
+	if err != nil {
+		return GameData{}, err
+	}
 
 	reader := bytes.NewReader(postBody)
 
@@ -71,24 +72,47 @@ func createTestGame(t *testing.T) GameData {
 		Jar:     jar,
 	}
 	resp, err := client.Post(HttpBaseUrl+"/games/create", jsonContentType, reader)
-	assert.Nil(t, err, "Should be able to POST")
-	assert.Equal(t, http.StatusCreated, resp.StatusCode, "Game should have been made and is ready for connecting to")
+	if err != nil {
+		return GameData{}, err
+	}
+	if resp.StatusCode != http.StatusCreated {
+		return GameData{}, fmt.Errorf("Game should have been made and is ready for connecting")
+	}
 
 	body, err := io.ReadAll(resp.Body)
-	assert.Nil(t, err, "Should be able to read the body")
+	if err != nil {
+		return GameData{}, err
+	}
 
 	var gameIds GameCreatedResp
 	err = json.Unmarshal(body, &gameIds)
-	assert.Nil(t, err, "There should not be an error reading the game ids")
+	if err != nil {
+		return GameData{}, err
+	}
 
-	assert.NotEmpty(t, gameIds.PlayerId, "Player ID should be set")
-	assert.NotEmpty(t, gameIds.GameId, "Game ID should be set")
-	assert.NotEmpty(t, jar.Token, "Authorisation cookie was not set")
+	if gameIds.PlayerId == uuid.Nil {
+		return GameData{}, fmt.Errorf("Player ID should be set")
+	}
+
+	if gameIds.GameId == uuid.Nil {
+		return GameData{}, fmt.Errorf("Game ID should be set")
+	}
+
+	if jar.Token == "" {
+		return GameData{}, fmt.Errorf("Authorisation cookie was not set")
+	}
 
 	jar.GameId = gameIds.GameId
 	jar.PlayerId = gameIds.PlayerId
 	jar.Password = gs.Password
-	return GameData{Ids: gameIds, Jar: jar}
+	return GameData{Ids: gameIds, Jar: jar}, nil
+}
+
+// This game has no password
+func createTestGame(t *testing.T) GameData {
+	data, err := createTestGame_2()
+	assert.Nil(t, err)
+	return data
 }
 
 const jsonContentType = "application/json"
