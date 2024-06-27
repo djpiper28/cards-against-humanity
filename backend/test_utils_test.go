@@ -50,18 +50,18 @@ func TestServerStart(t *testing.T) {
 	suite.Run(t, new(ServerTestSuite))
 }
 
-type GameData struct {
+type TestGameData struct {
 	Ids GameCreatedResp
 	Jar *GameJoinCookieJar
 }
 
-func createTestGame_2() (GameData, error) {
+func createTestGame_2() (TestGameData, error) {
 	name := "Dave"
 	gs := DefaultGameSettings()
 
 	postBody, err := json.Marshal(GameCreateRequest{Settings: gs, PlayerName: name})
 	if err != nil {
-		return GameData{}, err
+		return TestGameData{}, err
 	}
 
 	reader := bytes.NewReader(postBody)
@@ -73,43 +73,43 @@ func createTestGame_2() (GameData, error) {
 	}
 	resp, err := client.Post(HttpBaseUrl+"/games/create", jsonContentType, reader)
 	if err != nil {
-		return GameData{}, err
+		return TestGameData{}, err
 	}
 	if resp.StatusCode != http.StatusCreated {
-		return GameData{}, fmt.Errorf("Game should have been made and is ready for connecting")
+		return TestGameData{}, fmt.Errorf("Game should have been made and is ready for connecting")
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return GameData{}, err
+		return TestGameData{}, err
 	}
 
 	var gameIds GameCreatedResp
 	err = json.Unmarshal(body, &gameIds)
 	if err != nil {
-		return GameData{}, err
+		return TestGameData{}, err
 	}
 
 	if gameIds.PlayerId == uuid.Nil {
-		return GameData{}, fmt.Errorf("Player ID should be set")
+		return TestGameData{}, fmt.Errorf("Player ID should be set")
 	}
 
 	if gameIds.GameId == uuid.Nil {
-		return GameData{}, fmt.Errorf("Game ID should be set")
+		return TestGameData{}, fmt.Errorf("Game ID should be set")
 	}
 
 	if jar.Token == "" {
-		return GameData{}, fmt.Errorf("Authorisation cookie was not set")
+		return TestGameData{}, fmt.Errorf("Authorisation cookie was not set")
 	}
 
 	jar.GameId = gameIds.GameId
 	jar.PlayerId = gameIds.PlayerId
 	jar.Password = gs.Password
-	return GameData{Ids: gameIds, Jar: jar}, nil
+	return TestGameData{Ids: gameIds, Jar: jar}, nil
 }
 
 // This game has no password
-func createTestGame(t *testing.T) GameData {
+func createTestGame(t *testing.T) TestGameData {
 	data, err := createTestGame_2()
 	assert.Nil(t, err)
 	return data
@@ -225,7 +225,7 @@ func (s *ServerTestSuite) CreateDefaultGame() TestGameInfo {
 	return TestGameInfo{gameId: gameIds.GameId, playerId: gameIds.PlayerId, maxPlayers: gs.MaxPlayers, password: gs.Password}
 }
 
-func (s *ServerTestSuite) CreatePlayer(gameId uuid.UUID, name, password string) GameData {
+func (s *ServerTestSuite) CreatePlayer(gameId uuid.UUID, name, password string) TestGameData {
 	t := s.T()
 
 	jsonBody := CreatePlayerRequest{
@@ -252,5 +252,5 @@ func (s *ServerTestSuite) CreatePlayer(gameId uuid.UUID, name, password string) 
 	assert.Nil(t, err)
 
 	assert.NotEmpty(t, create.PlayerId)
-	return GameData{Ids: GameCreatedResp{GameId: gameId, PlayerId: create.PlayerId}, Jar: &GameJoinCookieJar{GameId: gameId, PlayerId: create.PlayerId, Password: password}}
+	return TestGameData{Ids: GameCreatedResp{GameId: gameId, PlayerId: create.PlayerId}, Jar: &GameJoinCookieJar{GameId: gameId, PlayerId: create.PlayerId, Password: password}}
 }

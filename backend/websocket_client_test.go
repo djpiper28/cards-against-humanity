@@ -1,10 +1,15 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
+	"io"
+	"log"
+	"net/http"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
-	"log"
-	"time"
 )
 
 type TestGameConnection struct {
@@ -48,4 +53,32 @@ func NewTestGameConnection() (*TestGameConnection, error) {
 		PlayerId:   game.Ids.PlayerId,
 		Connection: conn,
 	}, nil
+}
+
+func (tgc *TestGameConnection) AddPlayer(playerName string) (GameJoinCookieJar, error) {
+	jsonBody := CreatePlayerRequest{
+		PlayerName: playerName,
+		GameId:     tgc.GameId,
+	}
+	body, err := json.Marshal(jsonBody)
+	if err != nil {
+		return GameJoinCookieJar{}, err
+	}
+
+	resp, err := http.Post(HttpBaseUrl+"/games/join", jsonContentType, bytes.NewReader(body))
+	if err != nil {
+		return GameJoinCookieJar{}, err
+	}
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return GameJoinCookieJar{}, err
+	}
+
+	var createdPlayerInfo CreatePlayerResponse
+	err = json.Unmarshal(data, &createdPlayerInfo)
+
+	return GameJoinCookieJar{GameId: tgc.GameId,
+		PlayerId: createdPlayerInfo.PlayerId,
+		Token:    createdPlayerInfo.AuthorisationCookie}, nil
 }
