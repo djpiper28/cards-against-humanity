@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/djpiper28/cards-against-humanity/backend/network"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
 )
@@ -118,21 +119,19 @@ func (s *ServerTestSuite) TestCreateJoinAndLeaveMessagesAreSent() {
 	msgType, msg, err := conn.ReadMessage()
 	assert.NoError(t, err)
 
-	var onPlayerJoinMsg onPlayerJoinMsg
-	err = json.Unmarshal(msg, &onPlayerJoinMsg)
+	onPlayerJoinMsg, err := network.DecodeAs[network.RpcOnPlayerJoinMsg](msg)
 	assert.NoError(t, err)
-	assert.Equal(t, game.Ids.PlayerId, onPlayerJoinMsg.Data.Id, "The current user should have joined the game")
+	assert.Equal(t, game.Ids.PlayerId, onPlayerJoinMsg.Id, "The current user should have joined the game")
 
 	// Second message should be the state
 	msgType, msg, err = conn.ReadMessage()
 	assert.NoError(t, err)
 	assert.Equal(t, msgType, websocket.TextMessage)
 
-	var onJoinMsg onJoinRpcMsg
-	err = json.Unmarshal(msg, &onJoinMsg)
+	onJoinMsg, err := network.DecodeAs[network.RpcOnJoinMsg](msg)
 
 	assert.Nil(t, err, "Should be a join message")
-	assert.Equal(t, game.Ids.GameId, onJoinMsg.Data.State.Id)
+	assert.Equal(t, game.Ids.GameId, onJoinMsg.State.Id)
 
 	// Check that player create is sent
 	// Create the player
@@ -166,12 +165,11 @@ func (s *ServerTestSuite) TestCreateJoinAndLeaveMessagesAreSent() {
 	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
 	assert.Equal(t, msgType, websocket.TextMessage)
 
-	var onCreateMsg onPlayerCreateMsg
-	err = json.Unmarshal(msg, &onCreateMsg)
+	onCreateMsg, err := network.DecodeAs[network.RpcOnPlayerCreateMsg](msg)
 	assert.Nil(t, err)
 
-	assert.Equal(t, create.PlayerId, onCreateMsg.Data.Id)
-	assert.Equal(t, createPlayerReq.PlayerName, onCreateMsg.Data.Name)
+	assert.Equal(t, create.PlayerId, onCreateMsg.Id)
+	assert.Equal(t, createPlayerReq.PlayerName, onCreateMsg.Name)
 
 	// Check that player join is sent
 
@@ -188,11 +186,11 @@ func (s *ServerTestSuite) TestCreateJoinAndLeaveMessagesAreSent() {
 	assert.Nil(t, err, "Should be able to read the message")
 	assert.Equal(t, msgType, websocket.TextMessage)
 
-	err = json.Unmarshal(msg, &onPlayerJoinMsg)
+	onPlayerJoinMsg, err = network.DecodeAs[network.RpcOnPlayerJoinMsg](msg)
 	assert.Nil(t, err)
 
-	assert.Equal(t, create.PlayerId, onPlayerJoinMsg.Data.Id)
-	assert.Equal(t, createPlayerReq.PlayerName, onPlayerJoinMsg.Data.Name)
+	assert.Equal(t, create.PlayerId, onPlayerJoinMsg.Id)
+	assert.Equal(t, createPlayerReq.PlayerName, onPlayerJoinMsg.Name)
 
 	// Check taht the leave message is sent
 	newPlayerConn.Close()
@@ -201,9 +199,8 @@ func (s *ServerTestSuite) TestCreateJoinAndLeaveMessagesAreSent() {
 	assert.Nil(t, err, "Should be able to read the message")
 	assert.Equal(t, msgType, websocket.TextMessage)
 
-	var onDisconnectMsg onPlayerDisconnectMsg
-	err = json.Unmarshal(msg, &onDisconnectMsg)
+	onDisconnectMsg, err := network.DecodeAs[network.RpcOnPlayerDisconnectMsg](msg)
 	assert.Nil(t, err)
 
-	assert.Equal(t, create.PlayerId, onDisconnectMsg.Data.Id)
+	assert.Equal(t, create.PlayerId, onDisconnectMsg.Id)
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
@@ -32,10 +31,9 @@ func (s *ServerTestSuite) TestStartGameTooFewPlayers() {
 	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
 	assert.Equal(t, msgType, websocket.TextMessage)
 
-	var onPlayerJoinMsg onPlayerJoinMsg
-	err = json.Unmarshal(msg, &onPlayerJoinMsg)
+	onPlayerJoinMsg, err := network.DecodeAs[network.RpcOnPlayerJoinMsg](msg)
 	assert.Nil(t, err)
-	assert.Equal(t, game.Ids.PlayerId, onPlayerJoinMsg.Data.Id, "The current user should have joined the game")
+	assert.Equal(t, game.Ids.PlayerId, onPlayerJoinMsg.Id, "The current user should have joined the game")
 
 	// Second message should be the state
 
@@ -45,13 +43,11 @@ func (s *ServerTestSuite) TestStartGameTooFewPlayers() {
 	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
 	assert.Equal(t, msgType, websocket.TextMessage)
 
-	var onJoinMsg onJoinRpcMsg
-	err = json.Unmarshal(msg, &onJoinMsg)
-
+	onJoinMsg, err := network.DecodeAs[network.RpcOnJoinMsg](msg)
 	assert.Nil(t, err, "Should be a join message")
-	assert.Equal(t, game.Ids.GameId, onJoinMsg.Data.State.Id)
-	assert.Len(t, onJoinMsg.Data.State.Players, 1)
-	assert.Contains(t, onJoinMsg.Data.State.Players, gameLogic.Player{
+	assert.Equal(t, game.Ids.GameId, onJoinMsg.State.Id)
+	assert.Len(t, onJoinMsg.State.Players, 1)
+	assert.Contains(t, onJoinMsg.State.Players, gameLogic.Player{
 		Id:        game.Ids.PlayerId,
 		Name:      "Dave",
 		Points:    0,
@@ -66,9 +62,7 @@ func (s *ServerTestSuite) TestStartGameTooFewPlayers() {
 	assert.Nil(t, err, "Should be able to read the message")
 	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
 
-	var rpcMsg onCommandError
-	err = json.Unmarshal(msg, &rpcMsg)
-
+	rpcMsg, err := network.DecodeAs[network.RpcCommandErrorMsg](msg)
 	assert.Nil(t, err, "Should be a command error message")
-	assert.NotEmpty(t, rpcMsg.Data.Reason)
+	assert.NotEmpty(t, rpcMsg.Reason)
 }

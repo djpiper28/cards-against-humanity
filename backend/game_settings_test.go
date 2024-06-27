@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"time"
 
@@ -34,10 +33,9 @@ func (s *ServerTestSuite) TestChangeSettings() {
 	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
 	assert.Equal(t, msgType, websocket.TextMessage)
 
-	var onPlayerJoinMsg onPlayerJoinMsg
-	err = json.Unmarshal(msg, &onPlayerJoinMsg)
+	onPlayerJoinMsg, err := network.DecodeAs[network.RpcOnPlayerJoinMsg](msg)
 	assert.Nil(t, err)
-	assert.Equal(t, game.Ids.PlayerId, onPlayerJoinMsg.Data.Id, "The current user should have joined the game")
+	assert.Equal(t, game.Ids.PlayerId, onPlayerJoinMsg.Id, "The current user should have joined the game")
 
 	// Second message should be the state
 
@@ -47,13 +45,12 @@ func (s *ServerTestSuite) TestChangeSettings() {
 	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
 	assert.Equal(t, msgType, websocket.TextMessage)
 
-	var onJoinMsg onJoinRpcMsg
-	err = json.Unmarshal(msg, &onJoinMsg)
+	onJoinMsg, err := network.DecodeAs[network.RpcOnJoinMsg](msg)
 
 	assert.Nil(t, err, "Should be a join message")
-	assert.Equal(t, game.Ids.GameId, onJoinMsg.Data.State.Id)
-	assert.Len(t, onJoinMsg.Data.State.Players, 1)
-	assert.Contains(t, onJoinMsg.Data.State.Players, gameLogic.Player{
+	assert.Equal(t, game.Ids.GameId, onJoinMsg.State.Id)
+	assert.Len(t, onJoinMsg.State.Players, 1)
+	assert.Contains(t, onJoinMsg.State.Players, gameLogic.Player{
 		Id:        game.Ids.PlayerId,
 		Name:      "Dave",
 		Points:    0,
@@ -78,9 +75,7 @@ func (s *ServerTestSuite) TestChangeSettings() {
 	assert.NoError(t, err)
 	assert.Equal(t, msgType, websocket.TextMessage)
 
-	var onChangeSettings onChangeSettings
-	err = json.Unmarshal(msg, &onChangeSettings)
-
+	_, err = network.DecodeAs[network.RpcChangeSettingsMsg](msg)
 	assert.NoError(t, err)
 	assert.Equal(t, changeSettingsMsg, msg)
 }

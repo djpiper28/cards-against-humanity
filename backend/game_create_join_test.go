@@ -10,6 +10,7 @@ import (
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/djpiper28/cards-against-humanity/backend/gameRepo"
+	"github.com/djpiper28/cards-against-humanity/backend/network"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
@@ -56,59 +57,44 @@ func (s *ServerTestSuite) TestCommandError() {
 	t := s.T()
 	t.Parallel()
 
-	game := createTestGame(t)
-	url := WsBaseUrl + "/games/join"
-
-	dialer := websocket.DefaultDialer
-	dialer.HandshakeTimeout = time.Millisecond * 100
-
-	conn, _, err := dialer.Dial(url, game.Jar.Headers())
-	assert.Nil(t, err, "Should have connected to the ws server successfully")
-	defer conn.Close()
-	assert.NotNil(t, conn)
+	client, err := NewTestGameConnection()
+	assert.NoError(t, err)
 
 	// First message should be the player join broadcast, which we ignore
-	msgType, msg, err := conn.ReadMessage()
+	msgType, msg, err := client.Read()
 
 	assert.Nil(t, err, "Should be able to read (the initial game state)")
 	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
 	assert.Equal(t, msgType, websocket.TextMessage)
 
-	var onPlayerJoinMsg onPlayerJoinMsg
-	err = json.Unmarshal(msg, &onPlayerJoinMsg)
-	assert.Nil(t, err)
-	assert.Equal(t, game.Ids.PlayerId, onPlayerJoinMsg.Data.Id, "The current user should have joined the game")
+	onPlayerJoinMsg, err := network.DecodeAs[network.RpcOnPlayerJoinMsg](msg)
+	assert.Equal(t, client.PlayerId, onPlayerJoinMsg.Id, "The current user should have joined the game")
 
 	// Second message should be the state
-
-	msgType, msg, err = conn.ReadMessage()
+	msgType, msg, err = client.Read()
 
 	assert.Nil(t, err, "Should be able to read (the initial game state)")
 	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
 	assert.Equal(t, msgType, websocket.TextMessage)
 
-	var onJoinMsg onJoinRpcMsg
-	err = json.Unmarshal(msg, &onJoinMsg)
-
+	onJoinMsg, err := network.DecodeAs[network.RpcOnJoinMsg](msg)
 	assert.Nil(t, err, "Should be a join message")
-	assert.Equal(t, game.Ids.GameId, onJoinMsg.Data.State.Id)
-	assert.Len(t, onJoinMsg.Data.State.Players, 1)
-	assert.Contains(t, onJoinMsg.Data.State.Players, gameLogic.Player{
-		Id:        game.Ids.PlayerId,
+	assert.Equal(t, client.GameId, onJoinMsg.State.Id)
+	assert.Len(t, onJoinMsg.State.Players, 1)
+	assert.Contains(t, onJoinMsg.State.Players, gameLogic.Player{
+		Id:        client.PlayerId,
 		Name:      "Dave",
 		Points:    0,
 		Connected: true})
 
-	conn.WriteMessage(websocket.TextMessage, []byte(`{"type":1,"data":{"command":"start"}}`))
-	_, msg, err = conn.ReadMessage()
+	client.Write([]byte(`{"type":1,"data":{"command":"start"}}`))
+	_, msg, err = client.Read()
 	assert.Nil(t, err, "Should be able to read the message")
 	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
 
-	var rpcMsg onCommandError
-	err = json.Unmarshal(msg, &rpcMsg)
-
+	rpcMsg, err := network.DecodeAs[network.RpcCommandErrorMsg](msg)
 	assert.Nil(t, err, "Should be a command error message")
-	assert.NotEmpty(t, rpcMsg.Data.Reason)
+	assert.NotEmpty(t, rpcMsg.Reason)
 }
 
 func (s *ServerTestSuite) TestJoinGameEndpoint() {
@@ -129,10 +115,9 @@ func (s *ServerTestSuite) TestJoinGameEndpoint() {
 	assert.NoError(t, err)
 	assert.True(t, gameRepoGame.PlayersMap[client.PlayerId].Connected)
 
-	var onPlayerJoinMsg onPlayerJoinMsg
-	err = json.Unmarshal(msg, &onPlayerJoinMsg)
+	onPlayerJoinMsg, err := network.DecodeAs[network.RpcOnPlayerJoinMsg](msg)
 	assert.Nil(t, err)
-	assert.Equal(t, client.PlayerId, onPlayerJoinMsg.Data.Id, "The current user should have joined the game")
+	assert.Equal(t, client.PlayerId, onPlayerJoinMsg.Id, "The current user should have joined the game")
 
 	// Second message should be the state
 	msgType, msg, err = client.Read()
@@ -141,13 +126,12 @@ func (s *ServerTestSuite) TestJoinGameEndpoint() {
 	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
 	assert.Equal(t, msgType, websocket.TextMessage)
 
-	var onJoinMsg onJoinRpcMsg
-	err = json.Unmarshal(msg, &onJoinMsg)
+	onJoinMsg, err := network.DecodeAs[network.RpcOnJoinMsg](msg)
 
 	assert.Nil(t, err, "Should be a join message")
-	assert.Equal(t, client.GameId, onJoinMsg.Data.State.Id)
-	assert.Len(t, onJoinMsg.Data.State.Players, 1)
-	assert.Contains(t, onJoinMsg.Data.State.Players, gameLogic.Player{
+	assert.Equal(t, client.GameId, onJoinMsg.State.Id)
+	assert.Len(t, onJoinMsg.State.Players, 1)
+	assert.Contains(t, onJoinMsg.State.Players, gameLogic.Player{
 		Id:        client.PlayerId,
 		Name:      "Dave",
 		Points:    0,

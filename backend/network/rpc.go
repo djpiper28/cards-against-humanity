@@ -73,7 +73,7 @@ type RpcCommandHandlers struct {
 	PlayCardsHandler      func(msg RpcPlayCardsMsg) error
 }
 
-func decodeAs[T any](data []byte) (T, error) {
+func DecodeAs[T RpcMessage](data []byte) (T, error) {
 	type TProxy struct {
 		Type RpcMessageType `json:"type"`
 		Data T              `json:"data"`
@@ -97,7 +97,7 @@ func DecodeRpcMessage(data []byte, handlers RpcCommandHandlers) error {
 
 	switch cmd.Type {
 	case MsgChangeSettings:
-		command, err := decodeAs[RpcChangeSettingsMsg](data)
+		command, err := DecodeAs[RpcChangeSettingsMsg](data)
 		if err != nil {
 			return err
 		}
@@ -109,7 +109,7 @@ func DecodeRpcMessage(data []byte, handlers RpcCommandHandlers) error {
 	case MsgStartGame:
 		return handlers.StartGameHandler()
 	case MsgPlayCards:
-		command, err := decodeAs[RpcPlayCardsMsg](data)
+		command, err := DecodeAs[RpcPlayCardsMsg](data)
 		if err != nil {
 			return err
 		}

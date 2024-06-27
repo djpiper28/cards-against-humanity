@@ -12,7 +12,6 @@ import (
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/djpiper28/cards-against-humanity/backend/logger"
-	"github.com/djpiper28/cards-against-humanity/backend/network"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -123,30 +122,6 @@ func DefaultGameSettings() GameCreateSettings {
 		MaxPlayers:      settings.MaxPlayers,
 		PlayingToPoints: settings.PlayingToPoints,
 		CardPacks:       settings.CardPacks}
-}
-
-type onJoinRpcMsg struct {
-	Data network.RpcOnJoinMsg `json:"data"`
-}
-
-type onPlayerJoinMsg struct {
-	Data network.RpcOnPlayerJoinMsg `json:"data"`
-}
-
-type onPlayerCreateMsg struct {
-	Data network.RpcOnPlayerCreateMsg `json:"data"`
-}
-
-type onPlayerDisconnectMsg struct {
-	Data network.RpcOnPlayerDisconnectMsg `json:"data"`
-}
-
-type onChangeSettings struct {
-	Data network.RpcChangeSettingsMsg `json:"data"`
-}
-
-type onCommandError struct {
-	Data network.RpcCommandErrorMsg `json:"data"`
 }
 
 // A cookie jar and cookie header implementation for the ws dailer and http clients
