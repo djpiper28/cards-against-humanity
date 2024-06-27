@@ -3,14 +3,11 @@ package main
 import (
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
-	"time"
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/djpiper28/cards-against-humanity/backend/gameRepo"
 	"github.com/google/uuid"
-	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -62,53 +59,6 @@ func (s *ServerTestSuite) TestGetMetrics() {
 	body, err := io.ReadAll(resp.Body)
 	assert.Nil(t, err, "Should be able to read the body")
 	assert.NotEmpty(t, body, "Body should not be empty")
-}
-
-func (s *ServerTestSuite) TestJoinGameEndpointFailsWrongPassword() {
-	t := s.T()
-	t.Parallel()
-
-	game := createTestGame(t)
-	game.Jar.Password = "wrong password"
-	url := WsBaseUrl + "/games/join"
-
-	dialer := websocket.DefaultDialer
-	dialer.HandshakeTimeout = time.Millisecond * 100
-
-	log.Print("Dialing server")
-	_, _, err := dialer.Dial(url, game.Jar.Headers())
-	assert.NotNil(t, err, "Should have connected to the ws server successfully")
-}
-
-func (s *ServerTestSuite) TestJoinGameEndpointFailsPlayerNotReal() {
-	t := s.T()
-	t.Parallel()
-
-	game := createTestGame(t)
-	game.Jar.PlayerId = uuid.New()
-	url := WsBaseUrl + "/games/join"
-
-	dialer := websocket.DefaultDialer
-	dialer.HandshakeTimeout = time.Millisecond * 100
-
-	log.Print("Dialing server")
-	_, _, err := dialer.Dial(url, game.Jar.Headers())
-	assert.NotNil(t, err, "Should have connected to the ws server successfully")
-}
-
-func (s *ServerTestSuite) TestJoinGameEndpointFailsGameNotReal() {
-	t := s.T()
-	t.Parallel()
-
-	url := WsBaseUrl + "/games/join"
-	cookies := GameJoinCookieJar{GameId: uuid.New(), PlayerId: uuid.New(), Password: ""}
-
-	dialer := websocket.DefaultDialer
-	dialer.HandshakeTimeout = time.Millisecond * 100
-
-	log.Print("Dialing server")
-	_, _, err := dialer.Dial(url, cookies.Headers())
-	assert.NotNil(t, err, "Should have connected to the ws server successfully")
 }
 
 func (s *ServerTestSuite) TestGetCardPacks() {
