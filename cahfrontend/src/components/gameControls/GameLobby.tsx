@@ -2,17 +2,13 @@ import { Show, createEffect, createSignal, onMount } from "solid-js";
 import LoadingSlug from "../loading/LoadingSlug";
 import { gamePasswordCookie, gameState } from "../../gameState/gameState";
 import { GameSettings, GameStateInLobby } from "../../gameLogicTypes";
-import GameSettingsInput, { Settings } from "./GameSettingsInput";
-import GameSettingsView from "./GameSettingsView";
 import RoundedWhite from "../containers/RoundedWhite";
 import Header from "../typography/Header";
 import PlayerList from "../gameItems/PlayerList";
 import { GamePlayerList } from "../../gameState/gamePlayersList";
-import CardsSelector from "./CardsSelector";
 import { apiClient } from "../../apiClient";
 import { GameLogicCardPack } from "../../api";
 import {
-  MsgChangeSettings,
   RpcChangeSettingsMsg,
   RpcCommandErrorMsg,
   RpcRoundInformationMsg,
