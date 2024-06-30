@@ -13,6 +13,7 @@ import {
   MsgOnPlayerJoin,
   MsgOnPlayerLeave,
   MsgPing,
+  MsgPlayCards,
   MsgRoundInformation,
   MsgStartGame,
   RpcChangeSettingsMsg,
@@ -26,6 +27,7 @@ import {
   RpcOnPlayerDisconnectMsg,
   RpcOnPlayerJoinMsg,
   RpcOnPlayerLeaveMsg,
+  RpcPlayCardsMsg,
   RpcRoundInformationMsg,
 } from "../rpcTypes";
 import { WebSocketClient, toWebSocketClient } from "./websocketClient";
@@ -349,6 +351,21 @@ class GameState {
 
     this.wsClient.sendMessage(
       JSON.stringify(this.encodeMessage(MsgStartGame, {})),
+    );
+  }
+
+  public playCards(cards: number[]) {
+    console.log("Playing cards: ", cards);
+    if (!this.wsClient) {
+      throw new Error("Cannot play cards as websocket is not connected");
+    }
+
+    const msg: RpcPlayCardsMsg = {
+      cardIds: cards,
+    };
+
+    this.wsClient.sendMessage(
+      JSON.stringify(this.encodeMessage(MsgPlayCards, msg)),
     );
   }
 }

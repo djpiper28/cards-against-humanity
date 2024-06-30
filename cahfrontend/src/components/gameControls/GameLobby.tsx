@@ -62,7 +62,7 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
               .catch((e) => {
                 console.error(e);
                 props.setCommandError(
-                  "Unable to leave game. Please try again."
+                  "Unable to leave game. Please try again.",
                 );
               });
           }}
@@ -91,7 +91,7 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
               };
             })}
             selectedCardIds={props.roundState.yourPlays.map((x) =>
-              x.id.toString()
+              x.id.toString(),
             )}
           />
         </Show>
@@ -172,7 +172,7 @@ export default function GameLobby() {
         cardPacksList.sort((a, b) => {
           if (!a.name || !b.name) return 0;
           return a.name.localeCompare(b.name);
-        })
+        }),
       );
     } catch (err) {
       console.error(err);
@@ -203,7 +203,23 @@ export default function GameLobby() {
             newState.settings.cardPacks = ids;
             setState(newState);
           }}
-          setSelectedCardIds={console.log}
+          setSelectedCardIds={async (ids) => {
+            const rState = roundState()!;
+            if (ids.length > rState.blackCard.cardsToPlay) {
+              ids = ids.slice(1);
+            }
+
+            const newRoundState = structuredClone(rState);
+            newRoundState.yourPlays = ids.map((id) => {
+              return rState.yourHand.find((x) => x.id.toString() === id)!;
+            });
+            setRoundState(newRoundState);
+
+            // Do last not to block the UI updates
+            if (ids.length === rState.blackCard.cardsToPlay) {
+              gameState.playCards(ids.map((x) => parseInt(x)));
+            }
+          }}
           players={players()}
           cardPacks={packs()}
           commandError={commandError()}
