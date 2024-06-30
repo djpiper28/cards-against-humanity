@@ -22,7 +22,9 @@ import SubHeader from "../typography/SubHeader";
 import { GameLobbyState } from "../../gameState/gameLobbyState";
 import PlayerCards from "../gameItems/PlayerCards";
 import { LobbyLoadedProps } from "./gameLoadedProps";
-import { GameNotStartedView } from "./GameStartedView";
+import { GameNotStartedView } from "./GameNotStartedView";
+import { BlackCard } from "../gameItems/Card.stories";
+import Card from "../gameItems/Card";
 
 // Exported for testing reasons
 export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
@@ -60,7 +62,7 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
               .catch((e) => {
                 console.error(e);
                 props.setCommandError(
-                  "Unable to leave game. Please try again.",
+                  "Unable to leave game. Please try again."
                 );
               });
           }}
@@ -75,6 +77,11 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
         </Show>
 
         <Show when={isGameStarted() && props.roundState}>
+          <Card
+            isWhite={false}
+            cardText={props.roundState.blackCard.bodyText}
+            packName={`${props.roundState.blackCard.cardsToPlay} white cards to play`}
+          />
           <PlayerCards
             cards={props.roundState.yourHand.map((x) => {
               return {
@@ -84,7 +91,7 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
               };
             })}
             selectedCardIds={props.roundState.yourPlays.map((x) =>
-              x.id.toString(),
+              x.id.toString()
             )}
           />
         </Show>
@@ -165,7 +172,7 @@ export default function GameLobby() {
         cardPacksList.sort((a, b) => {
           if (!a.name || !b.name) return 0;
           return a.name.localeCompare(b.name);
-        }),
+        })
       );
     } catch (err) {
       console.error(err);

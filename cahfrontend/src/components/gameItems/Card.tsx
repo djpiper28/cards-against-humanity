@@ -15,7 +15,7 @@ export default function Card({ isWhite, cardText, packName }: Readonly<Props>) {
       data-testid={`${isWhite ? "white" : "black"}`}
     >
       <p class="font-bold text-lg">{cardText}</p>
-      <div class="text-xs">@{packName}</div>
+      <div class="text-xs">{packName}</div>
     </div>
   );
 }
