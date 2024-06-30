@@ -2,15 +2,19 @@ import { Settings } from "./GameSettingsInput";
 import { GameLogicCardPack } from "../../api";
 import { GamePlayerList } from "../../gameState/gamePlayersList";
 import { GameLobbyState } from "../../gameState/gameLobbyState";
+import { RpcRoundInformationMsg } from "../../rpcTypes";
 
 export interface LobbyLoadedProps {
   setSettings: (settings: Settings) => void;
   setSelectedPackIds: (ids: string[]) => void;
+  setSelectedCardIds: (ids: string[]) => void;
+  setCommandError: (error: string) => void;
+  setStateAsDirty: () => void;
+  navigate: (url: string) => void;
   players: GamePlayerList;
   commandError: string;
-  setCommandError: (error: string) => void;
   dirtyState: boolean;
   cardPacks: GameLogicCardPack[];
   state: GameLobbyState;
-  setStateAsDirty: () => void;
+  roundState: RpcRoundInformationMsg;
 }

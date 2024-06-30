@@ -24,11 +24,10 @@ import PlayerCards from "../gameItems/PlayerCards";
 import { LobbyLoadedProps } from "./gameLoadedProps";
 import { GameNotStartedView } from "./GameStartedView";
 
-function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
+// Exported for testing reasons
+export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
   const isGameOwner = () => props.state.ownerId === gameState.getPlayerId();
   const settings = () => props.state.settings;
-  const navigate = useNavigate();
-
   const isGameStarted = () => props.state.gameState !== GameStateInLobby;
 
   createEffect(() => {
@@ -56,7 +55,7 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
               .then(() => {
                 clearGameCookies();
                 console.log("Left game successfully");
-                navigate(indexUrl);
+                props.navigate(indexUrl);
               })
               .catch((e) => {
                 console.error(e);
@@ -84,7 +83,9 @@ function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
                 pack: "Your hand",
               };
             })}
-            selectedCardIds={[]}
+            selectedCardIds={props.roundState.yourPlays.map((x) =>
+              x.id.toString(),
+            )}
           />
         </Show>
 
@@ -195,12 +196,14 @@ export default function GameLobby() {
             newState.settings.cardPacks = ids;
             setState(newState);
           }}
+          setSelectedCardIds={console.log}
           players={players()}
           cardPacks={packs()}
           commandError={commandError()}
           setCommandError={setCommandError}
           dirtyState={dirtyState()}
           setStateAsDirty={() => setDirtyState(true)}
+          navigate={useNavigate()}
         />
       </Show>
 
