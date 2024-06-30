@@ -199,3 +199,51 @@ export const StartedNoCardsPlayed: Meta<LobbyLoadedProps> = {
     navigate: console.log,
   },
 };
+
+export const StartedCardPlayed: Meta<LobbyLoadedProps> = {
+  args: {
+    setSettings: () => console.log,
+    setSelectedPackIds: () => console.log,
+    setSelectedCardIds: () => console.log,
+    setCommandError: () => console.log,
+    setStateAsDirty: () => console.log,
+    players: [
+      {
+        id: "1",
+        name: "Player 1",
+        connected: true,
+        points: 0,
+      },
+      {
+        id: "2",
+        name: "Player 2",
+        connected: false,
+        points: 0,
+      },
+    ],
+    commandError: "",
+    dirtyState: false,
+    cardPacks: cardPacks,
+    state: {
+      ownerId: "",
+      settings: {
+        gamePassword: "",
+        maxPlayers: 5,
+        cardPacks: cardPacks.map((x) => x.id),
+        maxRounds: 10,
+        playingToPoints: 10,
+      },
+      creationTime: new Date(),
+      gameState: GameStateWhiteCardsBeingSelected,
+    },
+    roundState: {
+      yourHand: yourHand,
+      yourPlays: [yourHand[4]],
+      roundNumber: 1,
+      currentCardCzarId: "2",
+      blackCard: blackCard,
+      totalPlays: 0,
+    },
+    navigate: console.log,
+  },
+};
