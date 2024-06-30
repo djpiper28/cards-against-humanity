@@ -262,3 +262,11 @@ func TestPlayerPlaysCards(t *testing.T) {
 	assert.NoError(t, err)
 	assert.False(t, info.MovedToNextCardCzarPhase)
 }
+
+func TestPlayerPlaysCardsNotInGame(t *testing.T) {
+	t.Parallel()
+
+	repo := gameRepo.New()
+	_, err := repo.PlayerPlayCards(uuid.New(), uuid.New(), []int{1, 2, 3})
+	assert.Error(t, err)
+}

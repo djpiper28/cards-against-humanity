@@ -134,4 +134,8 @@ func (s *ServerTestSuite) TestStartGameEnoughPlayers() {
 	rpcMsg, err := network.DecodeAs[network.RpcRoundInformationMsg](msg)
 	assert.NoError(t, err)
 	assert.Len(t, rpcMsg.YourHand, gameLogic.HandSize)
+	assert.NotEmpty(t, rpcMsg.BlackCard)
+	assert.Empty(t, rpcMsg.YourPlays)
+	assert.Equal(t, 0, rpcMsg.TotalPlays)
+	assert.Equal(t, uint(1), rpcMsg.RoundNumber)
 }
