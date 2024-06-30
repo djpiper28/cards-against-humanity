@@ -58,11 +58,11 @@ export default function PlayerJoin() {
         cookieStorage.setItem(
           authenticationCookie,
           res.data.authentication,
-          cookieOptions
+          cookieOptions,
         );
 
         naviagte(
-          `${joinGameUrl}?${gameIdParamCookie}=${encodeURIComponent(gameId)}`
+          `${joinGameUrl}?${gameIdParamCookie}=${encodeURIComponent(gameId)}`,
         );
       })
       .catch((res) => {

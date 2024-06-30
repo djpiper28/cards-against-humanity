@@ -40,7 +40,7 @@ export default function Create() {
         cardPacksList.sort((a, b) => {
           if (!a.name || !b.name) return 0;
           return a.name.localeCompare(b.name);
-        })
+        }),
       );
     } catch (err) {
       console.error(err);
@@ -87,27 +87,27 @@ export default function Create() {
         cookieStorage.setItem(
           playerIdCookie,
           newGame.data.playerId ?? "error",
-          cookieOptions
+          cookieOptions,
         );
         cookieStorage.setItem(
           gameIdParamCookie,
           newGame.data.gameId ?? "error",
-          cookieOptions
+          cookieOptions,
         );
         cookieStorage.setItem(
           gamePasswordCookie,
           gameSettings().gamePassword,
-          cookieOptions
+          cookieOptions,
         );
         cookieStorage.setItem(
           authenticationCookie,
           newGame.data.authentication,
-          cookieOptions
+          cookieOptions,
         );
         navigate(
           `${joinGameUrl}?${gameIdParamCookie}=${encodeURIComponent(
-            newGame.data.gameId ?? "error"
-          )}`
+            newGame.data.gameId ?? "error",
+          )}`,
         );
       })
       .catch((err) => {

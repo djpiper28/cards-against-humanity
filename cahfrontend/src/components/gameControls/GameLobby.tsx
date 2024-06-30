@@ -25,105 +25,8 @@ import clearGameCookies from "../../gameState/clearGameCookies";
 import SubHeader from "../typography/SubHeader";
 import { GameLobbyState } from "../../gameState/gameLobbyState";
 import PlayerCards from "../gameItems/PlayerCards";
-
-interface LobbyLoadedProps {
-  setSettings: (settings: Settings) => void;
-  setSelectedPackIds: (ids: string[]) => void;
-  players: GamePlayerList;
-  commandError: string;
-  setCommandError: (error: string) => void;
-  dirtyState: boolean;
-  cardPacks: GameLogicCardPack[];
-  state: GameLobbyState;
-  roundState: RpcRoundInformationMsg;
-  setStateAsDirty: () => void;
-}
-
-function GameNotStartedView(props: Readonly<LobbyLoadedProps>) {
-  const updateSettings = () => {
-    const changeSettings: RpcChangeSettingsMsg = {
-      settings: {
-        ...props.state.settings,
-        cardPacks: props.state.settings.cardPacks,
-      },
-    };
-    gameState.sendRpcMessage(MsgChangeSettings, changeSettings);
-  };
-
-  const isGameOwner = () => props.state.ownerId === gameState.getPlayerId();
-  const settings = () => props.state.settings;
-  const dirtyState = () => props.dirtyState;
-
-  return (
-    <>
-      <Show when={isGameOwner()}>
-        <CardsSelector
-          cards={props.cardPacks}
-          selectedPackIds={settings().cardPacks}
-          setSelectedPackIds={(packs) => {
-            props.setStateAsDirty();
-            props.setSelectedPackIds(packs);
-            updateSettings();
-          }}
-        />
-        <GameSettingsInput
-          settings={settings()}
-          setSettings={(settings) => {
-            props.setStateAsDirty();
-            props.setSettings(settings);
-            updateSettings();
-          }}
-          errorMessage={props.commandError}
-        />
-        <p id="settings-saved">
-          <Show when={dirtyState()} fallback={"Settings are saved."}>
-            <div class="flex flex-row gap-2">
-              <p class="text-error-colour">Settings are NOT saved.</p>
-              <Button id="save-settings" onClick={updateSettings}>
-                Save
-              </Button>
-              <Button
-                id="reset-settings"
-                onClick={() => {
-                  gameState.emitState();
-                  props.setCommandError("");
-                }}
-              >
-                Reset
-              </Button>
-            </div>
-          </Show>
-        </p>
-      </Show>
-
-      <Show when={!isGameOwner()}>
-        <GameSettingsView settings={settings()} packs={props.cardPacks} />
-      </Show>
-
-      <Show when={isGameOwner()}>
-        <Show
-          when={!dirtyState()}
-          fallback={"Cannot start a game with unsaved changes."}
-        >
-          <Button
-            id="start-game"
-            onClick={async () => {
-              try {
-                await gameState.startGame();
-              } catch (e) {
-                props.setCommandError(
-                  "Unable to start game. Please try again.",
-                );
-              }
-            }}
-          >
-            Start Game
-          </Button>
-        </Show>
-      </Show>
-    </>
-  );
-}
+import { LobbyLoadedProps } from "./gameLoadedProps";
+import { GameNotStartedView } from "./GameStartedView";
 
 function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
   const isGameOwner = () => props.state.ownerId === gameState.getPlayerId();
@@ -234,7 +137,7 @@ export default function GameLobby() {
     gameState.onChangeSettings = (settings: RpcChangeSettingsMsg) => {
       setDirtyState(false);
 
-      const newState = structuredClone(state());
+      const newState = structuredClone(state()!);
       const data = settings.settings as GameSettings;
 
       newState.settings.maxRounds = data.maxRounds;
@@ -281,10 +184,10 @@ export default function GameLobby() {
     <>
       <Show when={!!state()}>
         <GameLobbyLoaded
-          state={state()}
-          roundState={roundState()}
+          state={state()!}
+          roundState={roundState()!}
           setSettings={(settings) => {
-            const newState = state();
+            const newState = state()!;
             newState.settings.maxRounds = settings.maxRounds;
             newState.settings.maxPlayers = settings.maxPlayers;
             newState.settings.playingToPoints = settings.playingToPoints;
@@ -292,7 +195,7 @@ export default function GameLobby() {
             setState(newState);
           }}
           setSelectedPackIds={(ids) => {
-            const newState = state();
+            const newState = state()!;
             newState.settings.cardPacks = ids;
             setState(newState);
           }}
