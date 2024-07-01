@@ -2,7 +2,6 @@
 import WebSocket from "isomorphic-ws";
 import { v4 } from "uuid";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import { wsBaseUrl } from "../apiClient";
 import {
   MsgChangeSettings,
@@ -15,7 +14,6 @@ import {
   RpcChangeSettingsMsg,
   RpcMessage,
 } from "../rpcTypes";
-
 import { gameState } from "./gameState";
 
 describe("Game state tests", () => {
