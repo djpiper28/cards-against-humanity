@@ -12,7 +12,7 @@ describe("Card", () => {
     };
     render(<Card {...card} />);
     expect(screen.getByText(card.cardText)).toBeDefined();
-    expect(screen.getByText("@" + card.packName)).toBeDefined();
+    expect(screen.getByText(card.packName)).toBeDefined();
     expect(screen.getByTestId("white")).toBeDefined();
   });
 });
