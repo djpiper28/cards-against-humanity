@@ -6,6 +6,7 @@ export interface Player {
   readonly name: string;
   readonly connected: boolean;
   readonly points: number;
+  readonly hasPlayed: boolean;
 }
 
 /**

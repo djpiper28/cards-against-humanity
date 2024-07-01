@@ -70,6 +70,7 @@ describe("Game state tests", () => {
       name: msg.data.name,
       connected: true,
       points: 0,
+      hasPlayed: false,
     });
   });
 
@@ -96,6 +97,7 @@ describe("Game state tests", () => {
       name: msg.data.name,
       connected: true,
       points: 0,
+      hasPlayed: false,
     });
 
     expect(gameState.onPlayerListChange).toBeCalledWith(gameState.playerList());
@@ -122,6 +124,7 @@ describe("Game state tests", () => {
       name: msg.data.name,
       connected: true,
       points: 0,
+      hasPlayed: false,
     });
     expect(gameState.playerList().length).toBe(1);
   });
@@ -144,6 +147,8 @@ describe("Game state tests", () => {
         id: msg.data.id,
         name: msg.data.name,
         connected: false,
+        points: 0,
+        hasPlayed: false,
       },
     ];
 
@@ -155,6 +160,7 @@ describe("Game state tests", () => {
       name: msg.data.name,
       connected: true,
       points: 0,
+      hasPlayed: false,
     });
   });
 
@@ -180,6 +186,7 @@ describe("Game state tests", () => {
       name: msg.data.name,
       connected: false,
       points: 0,
+      hasPlayed: false,
     });
     expect(gameState.onPlayerListChange).toBeCalledWith(gameState.playerList());
   });
@@ -217,6 +224,7 @@ describe("Game state tests", () => {
       name: joinMsg.data.name,
       connected: false,
       points: 0,
+      hasPlayed: false,
     });
     expect(gameState.onPlayerListChange).toBeCalledWith(gameState.playerList());
   });

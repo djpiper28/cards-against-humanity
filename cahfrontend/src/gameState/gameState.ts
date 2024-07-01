@@ -7,6 +7,7 @@ import {
   MsgChangeSettings,
   MsgCommandError,
   MsgNewOwner,
+  MsgOnCardPlayed,
   MsgOnJoin,
   MsgOnPlayerCreate,
   MsgOnPlayerDisconnect,
@@ -192,6 +193,7 @@ class GameState {
           name: player.name,
           connected: player.connected,
           points: player.points,
+          hasPlayed: /*player.hasPlayed*/ false,
         });
       }
     }
@@ -212,6 +214,7 @@ class GameState {
       name: msg.name,
       connected: true,
       points: player?.points ?? 0,
+      hasPlayed: /*player?.hasPlayed*/ false,
     });
 
     this.onPlayerListChange?.(this.playerList());
@@ -225,6 +228,7 @@ class GameState {
       name: msg.name,
       connected: false,
       points: player?.points ?? 0,
+      hasPlayed: false
     });
 
     this.onPlayerListChange?.(this.playerList());
@@ -239,6 +243,7 @@ class GameState {
       name: oldPlayer?.name ?? "error",
       connected: false,
       points: player?.points ?? 0,
+      hasPlayed: player?.hasPlayed ?? false
     });
 
     this.onPlayerListChange?.(this.playerList());
@@ -310,6 +315,9 @@ class GameState {
         return this.handleRoundInformation(
           rpcMessage.data as RpcRoundInformationMsg,
         );
+      case MsgOnCardPlayed:
+        // TODO: handle change
+        return;
       default:
         throw new Error(
           `Cannot handle RPC message as type is not valid ${rpcMessage.type}`,

@@ -189,6 +189,9 @@ func (g *Game) Info() GameInfo {
 		HasPassword: g.Settings.Password != ""}
 }
 
+type InitialRoundInfo struct {
+}
+
 // Information about a game you can see when you join. Settings - password + players
 type GameStateInfo struct {
 	Id           uuid.UUID    `json:"id"`
@@ -197,7 +200,7 @@ type GameStateInfo struct {
 	GameState    GameState    `json:"gameState"`
 	Players      []Player     `json:"players"`
 	GameOwnerId  uuid.UUID    `json:"gameOwnerId"`
-	RoundInfo    RoundInfo    `json:"roundInfo,omitempty"`
+	RoundInfo    InitialRoundInfo    `json:"roundInfo,omitempty"`
 }
 
 // The state of a game for player who has just joined a game
@@ -217,7 +220,9 @@ func (g *Game) StateInfo() GameStateInfo {
 	}
 
 	// error state does not matter
-	roundInfo, _ := g.roundInfo()
+	// roundInfo, _ := g.roundInfo()
+  // TODO: fix this lol
+  initialRoundInfo := InitialRoundInfo{}
 
 	return GameStateInfo{Id: g.Id,
 		Settings:     *g.Settings,
@@ -225,7 +230,7 @@ func (g *Game) StateInfo() GameStateInfo {
 		GameState:    g.GameState,
 		Players:      players,
 		GameOwnerId:  g.GameOwnerId,
-		RoundInfo:    roundInfo,
+		RoundInfo:    initialRoundInfo,
 	}
 }
 
