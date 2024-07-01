@@ -197,6 +197,7 @@ type GameStateInfo struct {
 	GameState    GameState    `json:"gameState"`
 	Players      []Player     `json:"players"`
 	GameOwnerId  uuid.UUID    `json:"gameOwnerId"`
+	RoundInfo    RoundInfo    `json:"roundInfo,omitempty"`
 }
 
 // The state of a game for player who has just joined a game
@@ -215,12 +216,16 @@ func (g *Game) StateInfo() GameStateInfo {
 		}
 	}
 
+	// error state does not matter
+	roundInfo, _ := g.roundInfo()
+
 	return GameStateInfo{Id: g.Id,
 		Settings:     *g.Settings,
 		CreationTime: g.CreationTime,
 		GameState:    g.GameState,
 		Players:      players,
 		GameOwnerId:  g.GameOwnerId,
+		RoundInfo:    roundInfo,
 	}
 }
 
@@ -316,6 +321,7 @@ type RoundInfo struct {
 }
 
 // Not thread safe
+// Error state: no round in progress
 func (g *Game) roundInfo() (RoundInfo, error) {
 	if g.GameState != GameStateWhiteCardsBeingSelected {
 		return RoundInfo{}, errors.New("The game is not in the white card selection phase")
@@ -343,6 +349,7 @@ func (g *Game) roundInfo() (RoundInfo, error) {
 	return info, nil
 }
 
+// Error state: no round in progress
 func (g *Game) RoundInfo() (RoundInfo, error) {
 	g.Lock.Lock()
 	defer g.Lock.Unlock()

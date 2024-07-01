@@ -237,6 +237,39 @@ func TestGameStateInfo(t *testing.T) {
 	assert.Equal(t, game.CreationTime, info.CreationTime)
 	assert.Equal(t, game.GameState, info.GameState)
 	assert.Equal(t, game.GameOwnerId, info.GameOwnerId)
+	assert.Empty(t, info.RoundInfo)
+}
+
+func TestGameStateInfoMidRound(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	game.GameState = gameLogic.GameStateWhiteCardsBeingSelected
+	assert.Nil(t, err, "There should not be an error with making the game", err)
+
+	info := game.StateInfo()
+
+	expectedPlayers := make([]gameLogic.Player, len(game.Players))
+	for i, pid := range game.Players {
+		expectedPlayers[i] = gameLogic.Player{
+			Id:        pid,
+			Name:      game.PlayersMap[pid].Name,
+			Connected: false,
+			Points:    0,
+		}
+	}
+
+	roundInfo, err := game.RoundInfo()
+	assert.NoError(t, err)
+
+	assert.Equal(t, game.Id, info.Id)
+	assert.Equal(t, *game.Settings, info.Settings)
+	assert.Equal(t, expectedPlayers, info.Players)
+	assert.Equal(t, game.CreationTime, info.CreationTime)
+	assert.Equal(t, game.GameState, info.GameState)
+	assert.Equal(t, game.GameOwnerId, info.GameOwnerId)
+	assert.Equal(t, roundInfo, info.RoundInfo)
 }
 
 func TestAddInvalidPlayer(t *testing.T) {
