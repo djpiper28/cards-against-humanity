@@ -73,6 +73,8 @@ class GameState {
       bodyText: "",
     },
     yourHand: [],
+    yourPlays: [],
+    totalPlays: 0,
   };
 
   // Events
@@ -113,6 +115,8 @@ class GameState {
         bodyText: "",
       },
       yourHand: [],
+      yourPlays: [],
+      totalPlays: 0,
     };
 
     this.onLobbyStateChange = undefined;
