@@ -23,7 +23,6 @@ import { GameLobbyState } from "../../gameState/gameLobbyState";
 import PlayerCards from "../gameItems/PlayerCards";
 import { LobbyLoadedProps } from "./gameLoadedProps";
 import { GameNotStartedView } from "./GameNotStartedView";
-import { BlackCard } from "../gameItems/Card.stories";
 import Card from "../gameItems/Card";
 
 // Exported for testing reasons
