@@ -190,22 +190,27 @@ func (g *Game) Info() GameInfo {
 }
 
 type InitialRoundInfo struct {
+	CardCzarId           uuid.UUID    `json:"czarId"`
+	RoundNumber          uint         `json:"roundNumber"`
+	BlackCard            *BlackCard   `json:"blackCard"`
+	PlayersWhoHavePlayed []uuid.UUID  `json:"playersWhoHavePlayed"`
+	YourHand             []*WhiteCard `json:"yourHand"`
 }
 
 // Information about a game you can see when you join. Settings - password + players
 type GameStateInfo struct {
-	Id           uuid.UUID    `json:"id"`
-	Settings     GameSettings `json:"settings"`
-	CreationTime time.Time    `json:"creationTime"`
-	GameState    GameState    `json:"gameState"`
-	Players      []Player     `json:"players"`
-	GameOwnerId  uuid.UUID    `json:"gameOwnerId"`
-	RoundInfo    InitialRoundInfo    `json:"roundInfo,omitempty"`
+	Id           uuid.UUID        `json:"id"`
+	Settings     GameSettings     `json:"settings"`
+	CreationTime time.Time        `json:"creationTime"`
+	GameState    GameState        `json:"gameState"`
+	Players      []Player         `json:"players"`
+	GameOwnerId  uuid.UUID        `json:"gameOwnerId"`
+	RoundInfo    InitialRoundInfo `json:"roundInfo,omitempty"`
 }
 
 // The state of a game for player who has just joined a game
 // or has become de-synced
-func (g *Game) StateInfo() GameStateInfo {
+func (g *Game) StateInfo(pid uuid.UUID) GameStateInfo {
 	g.Lock.Lock()
 	defer g.Lock.Unlock()
 
@@ -220,9 +225,24 @@ func (g *Game) StateInfo() GameStateInfo {
 	}
 
 	// error state does not matter
-	// roundInfo, _ := g.roundInfo()
-  // TODO: fix this lol
-  initialRoundInfo := InitialRoundInfo{}
+	initialRoundInfo := InitialRoundInfo{CardCzarId: g.CurrentCardCzarId,
+		RoundNumber:          g.CurrentRound,
+		BlackCard:            g.CurrentBlackCard,
+		PlayersWhoHavePlayed: make([]uuid.UUID, 0),
+		YourHand:             make([]*WhiteCard, 0),
+	}
+
+	for playerId, player := range g.PlayersMap {
+		if pid == playerId {
+			for _, card := range player.Hand {
+				initialRoundInfo.YourHand = append(initialRoundInfo.YourHand, card)
+			}
+		}
+
+		if len(player.CurrentPlay) > 0 {
+			initialRoundInfo.PlayersWhoHavePlayed = append(initialRoundInfo.PlayersWhoHavePlayed, playerId)
+		}
+	}
 
 	return GameStateInfo{Id: g.Id,
 		Settings:     *g.Settings,
