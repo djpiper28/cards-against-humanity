@@ -5,6 +5,7 @@ import SubHeader from "../typography/SubHeader";
 
 interface Props {
   players: GamePlayerList;
+  czarId: string;
 }
 
 export default function PlayerList(props: Readonly<Props>) {
@@ -32,6 +33,11 @@ export default function PlayerList(props: Readonly<Props>) {
             <Show when={player.hasPlayed}>
               <p class="font-bold" id={`player-has-played-${player.id}`}>
                 HAS PLAYED
+              </p>
+            </Show>
+            <Show when={player.id === props.czarId}>
+              <p class="font-bold" id={`player-has-played-${player.id}`}>
+                CARD CZAR
               </p>
             </Show>
           </div>

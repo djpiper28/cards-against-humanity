@@ -108,7 +108,10 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
           />
         </Show>
 
-        <PlayerList players={props.players} />
+        <PlayerList
+          players={props.players}
+          czarId={props.roundState.currentCardCzarId}
+        />
       </div>
     </RoundedWhite>
   );
