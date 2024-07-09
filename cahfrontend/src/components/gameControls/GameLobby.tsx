@@ -77,6 +77,7 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
 
         <Show when={isGameStarted() && props.roundState}>
           <Card
+            id={props.roundState.blackCard.id}
             isWhite={false}
             cardText={props.roundState.blackCard.bodyText}
             packName={`${props.roundState.blackCard.cardsToPlay} white cards to play`}

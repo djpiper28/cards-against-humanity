@@ -1,4 +1,5 @@
 export interface Props {
+  id: number | string;
   isWhite: boolean;
   cardText: string;
   packName: string;
@@ -10,6 +11,7 @@ export default function Card(props: Readonly<Props>) {
 
   return (
     <div
+      id={`card-${props.id}`}
       class={`${textColour} ${backgroundColour} rounded-2xl p-3 md:p6 flex flex-col justify-between h-60 w-52 border-2 text-left`}
       aria-label={`${props.isWhite ? "white" : "black"} card`}
       data-testid={`${props.isWhite ? "white" : "black"}`}

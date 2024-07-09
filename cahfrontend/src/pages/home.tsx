@@ -27,6 +27,7 @@ export default function Home() {
     <>
       <button class="w-min" onClick={() => navigate(createGameUrl)}>
         <Card
+          id={"create"}
           isWhite={false}
           cardText="Create a Game"
           packName="Click me to make a game"
@@ -39,7 +40,7 @@ export default function Home() {
       />
       <div class="flex flex-row flex-wrap gap-5">
         <For each={currentGames()}>
-          {(game, _) => (
+          {(game, index) => (
             <button
               onClick={() =>
                 navigate(
@@ -48,6 +49,7 @@ export default function Home() {
               }
             >
               <Card
+                id={index()}
                 isWhite={true}
                 cardText={`${game.playerCount}/${
                   game.maxPlayers

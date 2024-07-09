@@ -9,6 +9,7 @@ describe("Card", () => {
       cardText:
         "Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.",
       packName: "Poo poo",
+      id: 123,
     };
     render(<Card {...card} />);
     expect(screen.getByText(card.cardText)).toBeDefined();

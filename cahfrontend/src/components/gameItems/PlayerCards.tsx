@@ -39,7 +39,12 @@ export default function PlayerCards(props: Readonly<Props>) {
               ) : (
                 <></>
               )}
-              <Card isWhite={true} cardText={card.name} packName={card.pack} />
+              <Card
+                id={card.id}
+                isWhite={true}
+                cardText={card.name}
+                packName={card.pack}
+              />
             </>
           );
 

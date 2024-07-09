@@ -5,7 +5,7 @@ export default {
   component: CurrentRoundResults,
 } as Meta;
 
-export const InProgress = {
+export const InProgress: Meta = {
   args: {
     blackCard: {
       name: "What is Batman's guilty pleasure?",
@@ -48,7 +48,7 @@ export const InProgress = {
   },
 };
 
-export const RoundEnd = {
+export const RoundEnd: Meta = {
   args: {
     blackCard: {
       name: "What is Batman's guilty pleasure?",
@@ -91,7 +91,7 @@ export const RoundEnd = {
   },
 };
 
-export const RoundEndMultiCard = {
+export const RoundEndMultiCard: Meta = {
   args: {
     blackCard: {
       name: "_ + _ = profit",

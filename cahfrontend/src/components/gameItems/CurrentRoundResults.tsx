@@ -26,6 +26,7 @@ interface Props {
 interface PlayerPlayProps {
   play: PlayerPlay;
   showCards: boolean;
+  index: number;
 }
 
 function PlayerCard(props: Readonly<PlayerPlayProps>) {
@@ -33,8 +34,9 @@ function PlayerCard(props: Readonly<PlayerPlayProps>) {
     <div
       class={`flex flex-row gap-2 border-2 border-white rounded-2xl ${props.play.winner ? "border-blue-500" : ""}`}
     >
-      {props.play.whiteCards.map((card) => (
+      {props.play.whiteCards.map((card, index) => (
         <Card
+          id={props.index + index}
           cardText={props.showCards ? card.name : "Cards Against Humanity"}
           packName={props.showCards ? card.pack : ""}
           isWhite={true}
@@ -48,13 +50,14 @@ export default function CurrentRoundResults(props: Readonly<Props>) {
   return (
     <div class="flex flex-row gap-2">
       <Card
+        id="black-card"
         cardText={props.blackCard.name}
         packName={props.blackCard.pack}
         isWhite={false}
       />
       <div class="flex flex-row flex-wrap gap-2">
-        {props.plays.map((play) => (
-          <PlayerCard play={play} showCards={props.showCards} />
+        {props.plays.map((play, index) => (
+          <PlayerCard index={index} play={play} showCards={props.showCards} />
         ))}
       </div>
     </div>
