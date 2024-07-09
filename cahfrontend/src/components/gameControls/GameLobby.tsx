@@ -82,6 +82,9 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
             packName={`${props.roundState.blackCard.cardsToPlay} white cards to play`}
           />
           <PlayerCards
+            isCzar={
+              props.roundState.currentCardCzarId === gameState.getPlayerId()
+            }
             cards={props.roundState.yourHand.map((x) => {
               return {
                 id: x.id.toString(),

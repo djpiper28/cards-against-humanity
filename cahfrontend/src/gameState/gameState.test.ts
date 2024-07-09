@@ -21,10 +21,10 @@ describe("Game state tests", () => {
     const wsConstructor = vi.fn(function con() {
       return {
         send: vi.fn(),
-        onclose: vi.fn(),
         onopen: vi.fn(),
-        onmessage: vi.fn(),
         onerror: vi.fn(),
+        onclose: vi.fn(),
+        onmessage: vi.fn(),
       };
     });
 

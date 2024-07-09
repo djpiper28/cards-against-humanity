@@ -228,7 +228,7 @@ class GameState {
       name: msg.name,
       connected: false,
       points: player?.points ?? 0,
-      hasPlayed: false
+      hasPlayed: false,
     });
 
     this.onPlayerListChange?.(this.playerList());
@@ -243,7 +243,7 @@ class GameState {
       name: oldPlayer?.name ?? "error",
       connected: false,
       points: player?.points ?? 0,
-      hasPlayed: player?.hasPlayed ?? false
+      hasPlayed: player?.hasPlayed ?? false,
     });
 
     this.onPlayerListChange?.(this.playerList());
