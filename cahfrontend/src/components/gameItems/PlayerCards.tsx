@@ -27,7 +27,7 @@ export default function PlayerCards(props: Readonly<Props>) {
            **/
           const cardNumber = () => props.selectedCardIds.indexOf(card.id) + 1;
 
-          const cardComp = (
+          const cardComp = () => (
             <>
               {isSelected() ? (
                 <div
@@ -43,10 +43,9 @@ export default function PlayerCards(props: Readonly<Props>) {
             </>
           );
 
-          if (props.isCzar) {
-            return cardComp;
-          }
-          return (
+          return props.isCzar ? (
+            cardComp()
+          ) : (
             <button
               class={
                 isSelected()
@@ -55,7 +54,7 @@ export default function PlayerCards(props: Readonly<Props>) {
               }
               onClick={() => props.onSelectCard?.(card.id)}
             >
-              {cardComp}
+              {cardComp()}
             </button>
           );
         }}

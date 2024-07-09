@@ -76,7 +76,6 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
         </Show>
 
         <Show when={isGameStarted() && props.roundState}>
-          {JSON.stringify(props.roundState, null, 2)}
           <Card
             isWhite={false}
             cardText={props.roundState.blackCard.bodyText}
