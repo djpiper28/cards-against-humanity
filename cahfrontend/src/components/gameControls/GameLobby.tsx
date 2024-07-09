@@ -95,12 +95,16 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
             selectedCardIds={props.roundState.yourPlays.map((x) =>
               x.id.toString(),
             )}
-            onSelectCard={(id) =>
+            onSelectCard={(id) => {
               props.setSelectedCardIds([
                 ...props.roundState.yourPlays.map((x) => x.id.toString()),
                 id,
-              ])
-            }
+              ]);
+              gameState.playCards([
+                ...props.roundState.yourPlays.map((x) => x.id),
+                parseInt(id),
+              ]);
+            }}
           />
         </Show>
 
