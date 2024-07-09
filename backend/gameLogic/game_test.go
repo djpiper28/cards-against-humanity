@@ -559,6 +559,8 @@ func TestStartGameSuccess(t *testing.T) {
 	assert.Equal(t, info.CurrentBlackCard, game.CurrentBlackCard)
 	assert.Equal(t, info.CurrentCardCzarId, game.CurrentCardCzarId)
 	assert.Equal(t, info.RoundNumber, game.CurrentRound)
+  assert.NotEmpty(t, info.CurrentBlackCard)
+  assert.NotEmpty(t, info.CurrentCardCzarId)
 }
 
 func TestAddingPlayerToGameInProgress(t *testing.T) {

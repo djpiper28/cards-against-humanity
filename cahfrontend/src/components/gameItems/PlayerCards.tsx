@@ -18,57 +18,48 @@ interface Props {
 export default function PlayerCards(props: Readonly<Props>) {
   const playerCardComp = (
     <div class="flex flex-row flex-wrap gap-2 justify-start">
-      {() => {
-        return (
-          <For each={props.cards}>
-            {(card) => {
-              const isSelected = () =>
-                !!props.selectedCardIds.find((x) => x === card.id);
-              /**
-               * Natural counting: 1 bound index.
-               **/
-              const cardNumber = () =>
-                props.selectedCardIds.indexOf(card.id) + 1;
+      <For each={props.cards}>
+        {(card) => {
+          const isSelected = () =>
+            !!props.selectedCardIds.find((x) => x === card.id);
+          /**
+           * Natural counting: 1 bound index.
+           **/
+          const cardNumber = () => props.selectedCardIds.indexOf(card.id) + 1;
 
-              const cardComp = (
-                <>
-                  {isSelected() ? (
-                    <div
-                      class="absolute px-1 py-0.5 bg-blue-500 rounded-br-xl"
-                      id={`selected-${cardNumber()}-${card.id}`}
-                    >
-                      <p class="font-bold text-white">{cardNumber()}</p>
-                    </div>
-                  ) : (
-                    <></>
-                  )}
-                  <Card
-                    isWhite={true}
-                    cardText={card.name}
-                    packName={card.pack}
-                  />
-                </>
-              );
-
-              if (props.isCzar) {
-                return cardComp;
-              }
-              return (
-                <button
-                  class={
-                    isSelected()
-                      ? "border-4 border-blue-500 rounded-2xl bg-white"
-                      : ""
-                  }
-                  onClick={() => props.isCzar && props.onSelectCard?.(card.id)}
+          const cardComp = (
+            <>
+              {isSelected() ? (
+                <div
+                  class="absolute px-1 py-0.5 bg-blue-500 rounded-br-xl"
+                  id={`selected-${cardNumber()}-${card.id}`}
                 >
-                  {cardComp}
-                </button>
-              );
-            }}
-          </For>
-        );
-      }}
+                  <p class="font-bold text-white">{cardNumber()}</p>
+                </div>
+              ) : (
+                <></>
+              )}
+              <Card isWhite={true} cardText={card.name} packName={card.pack} />
+            </>
+          );
+
+          if (props.isCzar) {
+            return cardComp;
+          }
+          return (
+            <button
+              class={
+                isSelected()
+                  ? "border-4 border-blue-500 rounded-2xl bg-white"
+                  : ""
+              }
+              onClick={() => props.onSelectCard?.(card.id)}
+            >
+              {cardComp}
+            </button>
+          );
+        }}
+      </For>
     </div>
   );
 
