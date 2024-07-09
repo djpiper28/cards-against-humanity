@@ -129,9 +129,14 @@ const emptyState: GameLobbyState = {
 
 export default function GameLobby() {
   const [state, setState] = createSignal<GameLobbyState | undefined>(undefined);
-  const [roundState, setRoundState] = createSignal<
-    RpcRoundInformationMsg | undefined
-  >(undefined);
+  const [roundState, setRoundState] = createSignal<RpcRoundInformationMsg>({
+    yourHand: [],
+    yourPlays: [],
+    blackCard: { bodyText: "", cardsToPlay: 0, id: 0 },
+    currentCardCzarId: "",
+    roundNumber: 1,
+    totalPlays: 0,
+  });
   const [players, setPlayers] = createSignal<GamePlayerList>([]);
 
   const [packs, setPacks] = createSignal<GameLogicCardPack[]>([]);
@@ -167,7 +172,8 @@ export default function GameLobby() {
       setCommandError(error.reason);
     };
     gameState.onRoundStateChange = (state?: RpcRoundInformationMsg) => {
-      setRoundState(state);
+      console.log("Round state change detected");
+      setRoundState(state!);
     };
   };
 

@@ -1,7 +1,9 @@
 import {
+  BlackCard,
   GameStateInfo,
   GameStateWhiteCardsBeingSelected,
   Player,
+  WhiteCard,
 } from "../gameLogicTypes";
 import {
   MsgChangeSettings,
@@ -170,7 +172,7 @@ class GameState {
   public emitState() {
     this.onLobbyStateChange?.(structuredClone(this.lobbyState));
     this.onPlayerListChange?.(this.playerList());
-    this.onRoundStateChange?.(structuredClone(this.roundState));
+    // this.onRoundStateChange?.(structuredClone(this.roundState));
   }
 
   public isOwner(): boolean {
@@ -198,8 +200,34 @@ class GameState {
       }
     }
 
+    const errorWhiteCard: WhiteCard = {
+      id: 0,
+      bodyText: "Cannot load this card :(",
+    };
+    const errorBlackCard: BlackCard = {
+      id: 0,
+      bodyText: "Cannot load this card :(",
+      cardsToPlay: 1,
+    };
+
     this.onLobbyStateChange?.(this.lobbyState);
     this.onPlayerListChange?.(this.playerList());
+
+    const roundState = {
+      yourPlays: state.roundInfo.yourPlays.map(
+        (x) =>
+          state.roundInfo.yourHand.find((y) => y?.id === x) ?? {
+            ...errorWhiteCard,
+            id: x,
+          },
+      ),
+      yourHand: state.roundInfo.yourHand.map((x) => x ?? errorWhiteCard),
+      roundNumber: state.roundInfo.roundNumber,
+      currentCardCzarId: state.roundInfo.czarId,
+      blackCard: state.roundInfo.blackCard ?? errorBlackCard,
+      totalPlays: state.roundInfo.playersWhoHavePlayed.length,
+    };
+    this.onRoundStateChange?.(roundState);
   }
 
   public playerList(): GamePlayerList {

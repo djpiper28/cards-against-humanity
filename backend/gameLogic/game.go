@@ -195,6 +195,7 @@ type InitialRoundInfo struct {
 	BlackCard            *BlackCard   `json:"blackCard"`
 	PlayersWhoHavePlayed []uuid.UUID  `json:"playersWhoHavePlayed"`
 	YourHand             []*WhiteCard `json:"yourHand"`
+	YourPlays            []int        `json:"yourPlays"`
 }
 
 // Information about a game you can see when you join. Settings - password + players
@@ -205,7 +206,7 @@ type GameStateInfo struct {
 	GameState    GameState        `json:"gameState"`
 	Players      []Player         `json:"players"`
 	GameOwnerId  uuid.UUID        `json:"gameOwnerId"`
-	RoundInfo    InitialRoundInfo `json:"roundInfo,omitempty"`
+	RoundInfo    InitialRoundInfo `json:"roundInfo"`
 }
 
 // The state of a game for player who has just joined a game
@@ -230,12 +231,17 @@ func (g *Game) StateInfo(pid uuid.UUID) GameStateInfo {
 		BlackCard:            g.CurrentBlackCard,
 		PlayersWhoHavePlayed: make([]uuid.UUID, 0),
 		YourHand:             make([]*WhiteCard, 0),
+		YourPlays:            make([]int, 0),
 	}
 
 	for playerId, player := range g.PlayersMap {
 		if pid == playerId {
 			for _, card := range player.Hand {
 				initialRoundInfo.YourHand = append(initialRoundInfo.YourHand, card)
+			}
+
+			for _, card := range player.CurrentPlay {
+				initialRoundInfo.YourPlays = append(initialRoundInfo.YourPlays, card.Id)
 			}
 		}
 

@@ -170,31 +170,6 @@ func (c *WsConnection) listenAndHandle() error {
 		return err
 	}
 
-	// Send the round information if applicable
-	info, err := game.RoundInfo()
-	if err == nil {
-		roundInfo := RpcRoundInformationMsg{
-			CurrentCardCzarId: info.CurrentCardCzarId,
-			YourHand:          make([]gameLogic.WhiteCard, len(info.PlayerHands[c.PlayerId])),
-			RoundNumber:       info.RoundNumber,
-			BlackCard:         *info.CurrentBlackCard,
-		}
-
-		for i, val := range info.PlayerHands[c.PlayerId] {
-			roundInfo.YourHand[i] = *val
-		}
-
-		roundInfoMsg, err := EncodeRpcMessage(roundInfo)
-		if err != nil {
-			return err
-		}
-
-		err = c.Send(roundInfoMsg)
-		if err != nil {
-			return err
-		}
-	}
-
 	// Start listening and handling
 	for {
 		msg, err := c.conn.Receive()
