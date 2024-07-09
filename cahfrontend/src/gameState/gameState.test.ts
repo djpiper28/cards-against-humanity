@@ -7,6 +7,7 @@ import {
   MsgChangeSettings,
   MsgCommandError,
   MsgNewOwner,
+  MsgOnCardPlayed,
   MsgOnPlayerCreate,
   MsgOnPlayerDisconnect,
   MsgOnPlayerJoin,
@@ -369,5 +370,50 @@ describe("Game state tests", () => {
 
     gameState.playerId = newOwnerMsg.data.id;
     expect(gameState.isOwner()).toBe(true);
+  });
+
+  it("Should default to showing that players have not played", () => {
+    const gid = v4();
+    const pid = v4();
+    gameState.setupState(gid, pid, "");
+
+    const joinMsg: RpcMessage = {
+      type: MsgOnPlayerCreate,
+      data: {
+        id: v4(),
+        name: "Player 1",
+      },
+    };
+
+    gameState.handleRpcMessage(JSON.stringify(joinMsg));
+
+    expect(gameState.playerList()[0].hasPlayed).toBe(false);
+  });
+
+  it("Should show a player has played after rpc message", () => {
+    const gid = v4();
+    const pid = v4();
+    gameState.setupState(gid, pid, "");
+
+    const joinMsg: RpcMessage = {
+      type: MsgOnPlayerCreate,
+      data: {
+        id: v4(),
+        name: "Player 1",
+      },
+    };
+
+    gameState.handleRpcMessage(JSON.stringify(joinMsg));
+
+    const playedMsg: RpcMessage = {
+      type: MsgOnCardPlayed,
+      data: {
+        playerId: joinMsg.data.id,
+      },
+    };
+
+    gameState.handleRpcMessage(JSON.stringify(playedMsg));
+
+    expect(gameState.playerList()[0].hasPlayed).toBe(true);
   });
 });
