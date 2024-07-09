@@ -20,7 +20,10 @@ export default function PlayerList(props: Readonly<Props>) {
             <p class="font-bold" id={`player-name-${player.id}`}>
               {player.name}
             </p>
-            <p class="font-mono" id={`player-status-${player.id}`}>
+            <p
+              class={`font-mono ${player.connected ? "text-black" : "text-red-700 font-bold"}`}
+              id={`player-status-${player.id}`}
+            >
               {player.connected ? "CONNECTED" : "DISCONNECTED"}
             </p>
             <p class="font-bold" id={`player-points-${player.id}`}>
