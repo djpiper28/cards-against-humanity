@@ -559,8 +559,8 @@ func TestStartGameSuccess(t *testing.T) {
 	assert.Equal(t, info.CurrentBlackCard, game.CurrentBlackCard)
 	assert.Equal(t, info.CurrentCardCzarId, game.CurrentCardCzarId)
 	assert.Equal(t, info.RoundNumber, game.CurrentRound)
-  assert.NotEmpty(t, info.CurrentBlackCard)
-  assert.NotEmpty(t, info.CurrentCardCzarId)
+	assert.NotEmpty(t, info.CurrentBlackCard)
+	assert.NotEmpty(t, info.CurrentCardCzarId)
 }
 
 func TestAddingPlayerToGameInProgress(t *testing.T) {
@@ -872,17 +872,20 @@ func TestPlayingCardCausesCzarJudingPhase(t *testing.T) {
 	assert.Equal(t, game.PlayersMap[pid].CurrentPlay, []*gameLogic.WhiteCard{game.PlayersMap[pid].Hand[cardId]})
 	assert.False(t, resp.MovedToNextCardCzarPhase)
 
+	// Check czar cannot play
+	pid = game.Players[2]
+	resp, err = game.PlayCards(pid, []int{cardId})
+	assert.Error(t, err)
+	assert.Nil(t, game.PlayersMap[pid].CurrentPlay)
+	assert.False(t, resp.MovedToNextCardCzarPhase)
+
+	// Play final play
 	pid = game.Players[1]
 	resp, err = game.PlayCards(pid, []int{cardId})
 	assert.NoError(t, err)
-	assert.Equal(t, game.PlayersMap[pid].CurrentPlay, []*gameLogic.WhiteCard{game.PlayersMap[pid].Hand[cardId]})
-	assert.False(t, resp.MovedToNextCardCzarPhase)
 
-	pid = game.Players[2]
-	resp, err = game.PlayCards(pid, []int{cardId})
-	assert.NoError(t, err)
-	assert.NotNil(t, game.PlayersMap[pid].CurrentPlay)
-	assert.Empty(t, game.PlayersMap[pid].CurrentPlay)
+	// Game should have continued
+	assert.Equal(t, game.PlayersMap[pid].CurrentPlay, []*gameLogic.WhiteCard{})
 	assert.True(t, resp.MovedToNextCardCzarPhase)
 
 	for _, plays := range resp.CzarJudingPhaseInfo.AllPlays {

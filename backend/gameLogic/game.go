@@ -432,6 +432,7 @@ func (g *Game) StartGame() (RoundInfo, error) {
 	}
 	g.CardDeck = deck
 	g.CurrentRound = 1
+	g.CurrentCardCzarId = g.Players[len(g.Players)-1]
 
 	err = g.newCards()
 	if err != nil {
@@ -552,8 +553,10 @@ type PlayCardsResult struct {
 // Not thread safe.
 func (g *Game) playersHaveAllPlayed() bool {
 	allPlayersPlayed := true
-	for _, player := range g.PlayersMap {
-		if len(player.CurrentPlay) == 0 {
+	for pid, player := range g.PlayersMap {
+		if g.CurrentCardCzarId == pid {
+			continue
+		} else if len(player.CurrentPlay) == 0 {
 			allPlayersPlayed = false
 			break
 		}
