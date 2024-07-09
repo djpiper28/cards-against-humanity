@@ -219,7 +219,8 @@ func TestGameStateInfo(t *testing.T) {
 	game, err := gameLogic.NewGame(settings, "Dave")
 	assert.Nil(t, err, "There should not be an error with making the game", err)
 
-	info := game.StateInfo()
+	pid := game.Players[0]
+	info := game.StateInfo(pid)
 
 	expectedPlayers := make([]gameLogic.Player, len(game.Players))
 	for i, pid := range game.Players {
@@ -237,7 +238,11 @@ func TestGameStateInfo(t *testing.T) {
 	assert.Equal(t, game.CreationTime, info.CreationTime)
 	assert.Equal(t, game.GameState, info.GameState)
 	assert.Equal(t, game.GameOwnerId, info.GameOwnerId)
-	assert.Empty(t, info.RoundInfo)
+	assert.Len(t, info.RoundInfo.YourHand, 0)
+	assert.Len(t, info.RoundInfo.PlayersWhoHavePlayed, 0)
+	assert.Empty(t, info.RoundInfo.BlackCard)
+	assert.Empty(t, info.RoundInfo.CardCzarId)
+	assert.Empty(t, info.RoundInfo.RoundNumber)
 }
 
 func TestGameStateInfoMidRound(t *testing.T) {
@@ -248,7 +253,8 @@ func TestGameStateInfoMidRound(t *testing.T) {
 	game.GameState = gameLogic.GameStateWhiteCardsBeingSelected
 	assert.Nil(t, err, "There should not be an error with making the game", err)
 
-	info := game.StateInfo()
+	pid := game.Players[0]
+	info := game.StateInfo(pid)
 
 	expectedPlayers := make([]gameLogic.Player, len(game.Players))
 	for i, pid := range game.Players {

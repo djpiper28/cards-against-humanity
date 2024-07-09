@@ -159,7 +159,7 @@ func (c *WsConnection) listenAndHandle() error {
 	GlobalConnectionManager.Broadcast(gid, message)
 
 	// Send the initial state
-	state := RpcOnJoinMsg(RpcOnJoinMsg{State: game.StateInfo()})
+	state := RpcOnJoinMsg(RpcOnJoinMsg{State: game.StateInfo(c.PlayerId)})
 	initialState, err := EncodeRpcMessage(state)
 	if err != nil {
 		return err
