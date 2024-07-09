@@ -25,6 +25,7 @@ import {
   RpcMessageBody,
   RpcMessageType,
   RpcNewOwnerMsg,
+  RpcOnCardPlayedMsg,
   RpcOnJoinMsg,
   RpcOnPlayerCreateMsg,
   RpcOnPlayerDisconnectMsg,
@@ -211,7 +212,6 @@ class GameState {
     };
 
     this.onLobbyStateChange?.(this.lobbyState);
-    this.onPlayerListChange?.(this.playerList());
 
     const roundState = {
       yourPlays: state.roundInfo.yourPlays.map(
@@ -228,6 +228,11 @@ class GameState {
       totalPlays: state.roundInfo.playersWhoHavePlayed.length,
     };
     this.onRoundStateChange?.(roundState);
+
+    state.roundInfo.playersWhoHavePlayed.forEach((pid) => {
+      this.handleOnPlayerPlay({ playerId: pid });
+    });
+    this.onPlayerListChange?.(this.playerList());
   }
 
   public playerList(): GamePlayerList {
@@ -264,11 +269,10 @@ class GameState {
 
   private handleOnPlayerDisconnect(msg: RpcOnPlayerDisconnectMsg) {
     const player = this.players.find((x: Player) => x.id === msg.id);
-    const oldPlayer = this.players.find((x: Player) => x.id === msg.id);
     this.players = this.players.filter((x: Player) => x.id !== msg.id);
     this.players.push({
       id: msg.id,
-      name: oldPlayer?.name ?? "error",
+      name: player?.name ?? "error",
       connected: false,
       points: player?.points ?? 0,
       hasPlayed: player?.hasPlayed ?? false,
@@ -279,6 +283,19 @@ class GameState {
 
   private handleOnPlayerLeave(msg: RpcOnPlayerLeaveMsg) {
     this.players = this.players.filter((x: Player) => x.id !== msg.id);
+    this.onPlayerListChange?.(this.playerList());
+  }
+
+  private handleOnPlayerPlay(msg: RpcOnCardPlayedMsg) {
+    const player = this.players.find((x: Player) => x.id === msg.playerId);
+    this.players = this.players.filter((x: Player) => x.id !== msg.playerId);
+    this.players.push({
+      id: player?.id ?? msg.playerId,
+      name: player?.name ?? "error",
+      connected: player?.connected ?? false,
+      points: player?.points ?? 0,
+      hasPlayed: true,
+    });
     this.onPlayerListChange?.(this.playerList());
   }
 
@@ -344,8 +361,8 @@ class GameState {
           rpcMessage.data as RpcRoundInformationMsg,
         );
       case MsgOnCardPlayed:
-        // TODO: handle change
-        return;
+        console.log("Handling card played message");
+        return this.handleOnPlayerPlay(rpcMessage.data as RpcOnCardPlayedMsg);
       default:
         throw new Error(
           `Cannot handle RPC message as type is not valid ${rpcMessage.type}`,

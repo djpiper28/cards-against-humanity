@@ -1,6 +1,6 @@
 import { GamePlayerList } from "../../gameState/gamePlayersList";
 import RoundedWhite from "../containers/RoundedWhite";
-import { For } from "solid-js";
+import { For, Show } from "solid-js";
 import SubHeader from "../typography/SubHeader";
 
 interface Props {
@@ -26,6 +26,11 @@ export default function PlayerList(props: Readonly<Props>) {
             <p class="font-bold" id={`player-points-${player.id}`}>
               {player.points} points
             </p>
+            <Show when={player.hasPlayed}>
+              <p class="font-bold" id={`player-has-played-${player.id}`}>
+                HAS PLAYED
+              </p>
+            </Show>
           </div>
         )}
       </For>
