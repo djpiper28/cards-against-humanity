@@ -10,7 +10,7 @@ import (
 
 // The page for joining a game, when trying to access admin settings in the lobby use this page
 type JoinGamePage struct {
-	Page *rod.Page
+	PlayerJoinGame
 }
 
 const PlayerIdCookie = "playerId"
@@ -22,7 +22,7 @@ func GetJoinGameUrl() string {
 func NewJoinGamePage(b *rod.Browser, gameId string) JoinGamePage {
 	url := GetJoinGameUrl() + "?gameId=" + gameId
 	log.Printf("Join Game page: %s", url)
-	return JoinGamePage{Page: b.MustPage(url).MustWaitStable()}
+	return JoinGamePage{PlayerJoinGame{Page: b.MustPage(url).MustWaitStable()}}
 }
 
 func (page *JoinGamePage) InLobbyAdmin() bool {
@@ -121,10 +121,6 @@ func (j *JoinGamePage) IsAdmin() bool {
 	return GetById(j.Page, "start-game") != nil
 }
 
-func (p *JoinGamePage) Disconnect() {
-	p.Page.Timeout(Timeout).MustNavigate(GetBasePage()).MustWaitStable()
-}
-
-func (p *JoinGamePage) ReConnect() {
-	p.Page.Timeout(Timeout).MustNavigate(GetJoinGameUrl()).MustWaitStable()
+func (p *JoinGamePage) Start() {
+	p.Page.Timeout(Timeout).MustElement(cssSelectorForId("start-game")).MustClick()
 }

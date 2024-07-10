@@ -68,3 +68,25 @@ func (p *PlayerJoinGame) Disconnect() {
 func (p *PlayerJoinGame) ReConnect() {
 	p.Page.Timeout(Timeout * 5).MustNavigate(GetJoinGameUrl()).MustWaitStable()
 }
+
+type Card struct {
+	Id   string
+	Text string
+}
+
+func (p *PlayerJoinGame) Cards() ([]Card, error) {
+	cards := make([]Card, 0)
+	for _, node := range p.Page.Timeout(Timeout).MustElement(cssSelectorForId("card-list")).MustDescribe().Children {
+		el := p.Page.MustElementFromNode(node)
+
+		cards = append(cards, Card{
+			Id:   *el.MustAttribute("id"),
+			Text: el.MustElement("p").MustText(),
+		})
+	}
+
+	if len(cards) == 0 {
+		return nil, errors.New("No cards found")
+	}
+	return cards, nil
+}

@@ -35,7 +35,7 @@ func TestCreateGamePageDefaultInput(t *testing.T) {
 	time.Sleep(Timeout)
 	assert.True(t, strings.Contains(page.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
 
-	lobbyPage := JoinGamePage{Page: page.Page}
+	lobbyPage := JoinGamePage{PlayerJoinGame{page.Page}}
 
 	assert.True(t, lobbyPage.InLobbyAdmin())
 	assert.Equal(t, lobbyPage.AdminMaxPlayers().MustText(), "6")

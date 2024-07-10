@@ -49,7 +49,7 @@ func TestGamesShowTheSameInitialSettings(t *testing.T) {
 	time.Sleep(Timeout)
 	assert.True(t, strings.Contains(createPage.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
 
-	adminLobbyPage := JoinGamePage{Page: createPage.Page}
+	adminLobbyPage := JoinGamePage{PlayerJoinGame{createPage.Page}}
 
 	assert.True(t, adminLobbyPage.InLobbyAdmin())
 	assert.True(t, adminLobbyPage.IsAdmin())
@@ -69,7 +69,7 @@ func TestGamesShowTheSameInitialSettings(t *testing.T) {
 
 	playerPage.Join()
 
-	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
+	playerLobbyPage := JoinGamePage{PlayerJoinGame{playerPage.Page}}
 
 	assert.True(t, playerLobbyPage.InLobbyAdmin())
 
@@ -104,7 +104,7 @@ func TestChangingSettingsSyncsBetweenClients(t *testing.T) {
 	time.Sleep(Timeout)
 	assert.True(t, strings.Contains(createPage.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
 
-	adminLobbyPage := JoinGamePage{Page: createPage.Page}
+	adminLobbyPage := JoinGamePage{PlayerJoinGame{createPage.Page}}
 
 	assert.True(t, adminLobbyPage.InLobbyAdmin())
 
@@ -119,7 +119,7 @@ func TestChangingSettingsSyncsBetweenClients(t *testing.T) {
 
 	playerPage.Join()
 
-	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
+	playerLobbyPage := JoinGamePage{PlayerJoinGame{playerPage.Page}}
 
 	assert.True(t, playerLobbyPage.InLobbyAdmin())
 
@@ -179,7 +179,7 @@ func TestPlayerDisconnectReConnectWithNoSearchParamsInJoinLink(t *testing.T) {
 	time.Sleep(Timeout)
 	assert.True(t, strings.Contains(createPage.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
 
-	adminLobbyPage := JoinGamePage{Page: createPage.Page}
+	adminLobbyPage := JoinGamePage{PlayerJoinGame{createPage.Page}}
 
 	assert.True(t, adminLobbyPage.InLobbyAdmin())
 
@@ -198,7 +198,7 @@ func TestPlayerDisconnectReConnectWithNoSearchParamsInJoinLink(t *testing.T) {
 
 	playerPage.Join()
 
-	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
+	playerLobbyPage := JoinGamePage{PlayerJoinGame{playerPage.Page}}
 	assert.True(t, playerLobbyPage.InLobbyAdmin())
 
 	playerId := playerLobbyPage.PlayerId()
@@ -241,7 +241,7 @@ func TestPlayerLeavesGame(t *testing.T) {
 	time.Sleep(Timeout)
 	assert.True(t, strings.Contains(createPage.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
 
-	adminLobbyPage := JoinGamePage{Page: createPage.Page}
+	adminLobbyPage := JoinGamePage{PlayerJoinGame{createPage.Page}}
 
 	assert.True(t, adminLobbyPage.InLobbyAdmin())
 
@@ -256,7 +256,7 @@ func TestPlayerLeavesGame(t *testing.T) {
 
 	playerPage.Join()
 
-	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
+	playerLobbyPage := JoinGamePage{PlayerJoinGame{playerPage.Page}}
 	assert.True(t, playerLobbyPage.InLobbyAdmin())
 
 	playerId := playerLobbyPage.PlayerId()
@@ -282,7 +282,7 @@ func TestOwnerLeavingGameTransfersOwnership(t *testing.T) {
 	time.Sleep(Timeout)
 	assert.True(t, strings.Contains(createPage.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
 
-	adminLobbyPage := JoinGamePage{Page: createPage.Page}
+	adminLobbyPage := JoinGamePage{PlayerJoinGame{createPage.Page}}
 
 	assert.True(t, adminLobbyPage.InLobbyAdmin())
 
@@ -297,7 +297,7 @@ func TestOwnerLeavingGameTransfersOwnership(t *testing.T) {
 
 	playerPage.Join()
 
-	playerLobbyPage := JoinGamePage{Page: playerPage.Page}
+	playerLobbyPage := JoinGamePage{PlayerJoinGame{playerPage.Page}}
 	assert.True(t, playerLobbyPage.InLobbyAdmin())
 
 	time.Sleep(Timeout)

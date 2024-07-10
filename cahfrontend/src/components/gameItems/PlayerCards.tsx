@@ -17,7 +17,7 @@ interface Props {
 
 export default function PlayerCards(props: Readonly<Props>) {
   const playerCardComp = (
-    <div class="flex flex-row flex-wrap gap-2 justify-start">
+    <div id="card-list" class="flex flex-row flex-wrap gap-2 justify-start">
       <For each={props.cards}>
         {(card) => {
           const isSelected = () =>
