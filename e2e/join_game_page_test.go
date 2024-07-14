@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/go-rod/rod"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -307,4 +309,62 @@ func TestOwnerLeavingGameTransfersOwnership(t *testing.T) {
 	time.Sleep(Timeout)
 	assert.NotContains(t, playerLobbyPage.PlayersInGame(), playerId)
 	assert.True(t, playerLobbyPage.IsAdmin())
+}
+
+func TestStartingGame(t *testing.T) {
+	t.Parallel()
+	browser := GetBrowser()
+	defer browser.Close()
+
+	createPage := NewCreateGamePage(browser)
+	assert.NotNil(t, createPage, "Page should render and not be nil")
+	createPage.InsertDefaultValidSettings()
+
+	log.Print("Creating game")
+	createPage.CreateGame()
+
+	time.Sleep(Timeout)
+	assert.True(t, strings.Contains(createPage.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
+
+	adminLobbyPage := JoinGamePage{PlayerJoinGame{createPage.Page}}
+
+	assert.True(t, adminLobbyPage.InLobbyAdmin())
+
+	browsers := make([]*rod.Browser, 0)
+	const playerCount = 3
+	for i := 0; i < playerCount; i++ {
+		// Connect with another client then assert that the settings remain equal
+		playerBrowser := GetBrowser()
+		browsers = append(browsers, playerBrowser)
+		defer playerBrowser.Close()
+		playerPage := NewPlayerGamePage(playerBrowser, adminLobbyPage)
+
+		assert.True(t, playerPage.InPlayerJoinPage())
+		playerPage.PlayerName(fmt.Sprintf("Player %d", i))
+		playerPage.Password(DefaultPassword)
+
+		playerPage.Join()
+
+		assert.True(t, playerPage.InLobbyPlayer())
+		screenshotError(playerPage.Page)
+	}
+
+	time.Sleep(Timeout)
+	adminLobbyPage.Start()
+	time.Sleep(Timeout)
+
+	cards, err := adminLobbyPage.Cards()
+	assert.NoError(t, err)
+	assert.Len(t, cards, 7)
+
+	for i := 0; i < playerCount; i++ {
+		playerPage := NewPlayerGamePage(browsers[i], adminLobbyPage)
+		cards, err := playerPage.Cards()
+		assert.NoError(t, err)
+		assert.Len(t, cards, 7)
+
+		if i == playerCount-1 {
+			assert.True(t, playerPage.IsCzar())
+		}
+	}
 }

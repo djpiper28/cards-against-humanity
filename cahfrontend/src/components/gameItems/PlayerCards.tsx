@@ -27,6 +27,7 @@ export default function PlayerCards(props: Readonly<Props>) {
            **/
           const cardNumber = () => props.selectedCardIds.indexOf(card.id) + 1;
 
+          const id = `card-${card.id}`;
           const cardComp = () => (
             <>
               {isSelected() ? (
@@ -52,6 +53,7 @@ export default function PlayerCards(props: Readonly<Props>) {
             cardComp()
           ) : (
             <button
+              id={id}
               class={
                 isSelected()
                   ? "border-4 border-blue-500 rounded-2xl bg-white"
@@ -70,7 +72,10 @@ export default function PlayerCards(props: Readonly<Props>) {
   if (props.isCzar) {
     return (
       <div class="relative flex w-fit">
-        <div class="absolute flex top-0 left-0 right-0 bottom-0 z-10 justify-center items-center text-center bg-[#aaaaaa30] rounded-2xl">
+        <div
+          id="czar"
+          class="absolute flex top-0 left-0 right-0 bottom-0 z-10 justify-center items-center text-center bg-[#aaaaaa30] rounded-2xl"
+        >
           <Header text="You are the Card Czar" />
         </div>
         <div class="static">{playerCardComp}</div>

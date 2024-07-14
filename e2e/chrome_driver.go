@@ -35,6 +35,8 @@ var errorPngLock sync.Mutex
 func screenshotError(p *rod.Page) {
 	errorPngLock.Lock()
 	defer errorPngLock.Unlock()
+
+	log.Printf("Saving screenshot to error.png")
 	p.MustScreenshotFullPage("error.png")
 }
 

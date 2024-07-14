@@ -31,8 +31,7 @@ func UpgradeFromJoinPage(p JoinGamePage) (PlayerJoinGame, error) {
 }
 
 func NewPlayerGamePage(b *rod.Browser, adminJoinPage JoinGamePage) PlayerJoinGame {
-	ret := PlayerJoinGame{Page: b.MustPage(adminJoinPage.Page.MustInfo().URL).MustWaitStable()}
-	return ret
+	return PlayerJoinGame{Page: b.MustPage(adminJoinPage.Page.MustInfo().URL).MustWaitStable()}
 }
 
 func (p *PlayerJoinGame) InPlayerJoinPage() bool {
@@ -41,7 +40,9 @@ func (p *PlayerJoinGame) InPlayerJoinPage() bool {
 
 func (p *PlayerJoinGame) InLobbyPlayer() bool {
 	if !strings.Contains(p.Page.MustInfo().URL, GetJoinGameUrl()) {
-		log.Printf("Cannot be in lobby - not under %s", GetJoinGameUrl())
+		log.Printf("Cannot be in lobby - not under %s - instead under %s",
+			GetJoinGameUrl(),
+			p.Page.MustInfo().URL)
 		return false
 	}
 	return GetById(p.Page, "leave-game") != nil
@@ -75,18 +76,46 @@ type Card struct {
 }
 
 func (p *PlayerJoinGame) Cards() ([]Card, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Printf("Error: %s", err)
+			screenshotError(p.Page)
+		}
+	}()
+
+	isCzar := p.IsCzar()
+
 	cards := make([]Card, 0)
-	for _, node := range p.Page.Timeout(Timeout).MustElement(cssSelectorForId("card-list")).MustDescribe().Children {
+	for _, node := range p.Page.Timeout(Timeout).
+		MustElement(cssSelectorForId("card-list")).
+		MustDescribe().Children {
 		el := p.Page.MustElementFromNode(node)
 
-		cards = append(cards, Card{
-			Id:   *el.MustAttribute("id"),
-			Text: el.MustElement("p").MustText(),
-		})
+		var card Card
+		if isCzar {
+			card = Card{
+				Id:   *el.MustAttribute("id"),
+				Text: el.MustElement("p:nth-child(1)").MustText(),
+			}
+		} else {
+			card = Card{
+				Id:   *el.MustAttribute("id"),
+				Text: el.MustElement("div:nth-child(1) > p:nth-child(1)").MustText(),
+			}
+		}
+
+		log.Printf("Found card: %s", card.Text)
+		cards = append(cards, card)
 	}
 
 	if len(cards) == 0 {
+		screenshotError(p.Page)
 		return nil, errors.New("No cards found")
 	}
 	return cards, nil
+}
+
+func (p *PlayerJoinGame) IsCzar() bool {
+	_, err := p.Page.Timeout(Timeout).Element(cssSelectorForId("czar"))
+	return err == nil
 }
