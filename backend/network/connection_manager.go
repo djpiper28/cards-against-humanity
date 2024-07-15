@@ -248,7 +248,7 @@ func (g *ConnectionManager) MoveToCzarJudgingPhase(gid uuid.UUID, info gameLogic
 	for pid, conn := range game.playerConnectionMap {
 		func(pid uuid.UUID, conn *WsConnection) {
 			defer wg.Done()
-			moveToNextPhaseMsg := RpcOnCzarJudgingPhase{
+			moveToNextPhaseMsg := RpcOnCzarJudgingPhaseMsg{
 				AllPlays: info.AllPlays,
 				NewHand:  info.PlayerHands[pid],
 			}

@@ -239,6 +239,6 @@ type RpcOnCzarJudgingPhaseMsg struct {
 	NewHand []*gameLogic.WhiteCard `json:"newHand"`
 }
 
-func (msg RpcOnCzarJudgingPhase) Type() RpcMessageType {
+func (msg RpcOnCzarJudgingPhaseMsg) Type() RpcMessageType {
 	return MsgOnCzarJudgingPhase
 }
