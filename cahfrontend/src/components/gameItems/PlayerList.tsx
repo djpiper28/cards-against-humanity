@@ -2,6 +2,7 @@ import { GamePlayerList } from "../../gameState/gamePlayersList";
 import RoundedWhite from "../containers/RoundedWhite";
 import { For, Show } from "solid-js";
 import SubHeader from "../typography/SubHeader";
+import { gameState } from "../../gameState/gameState";
 
 interface Props {
   players: GamePlayerList;
@@ -38,6 +39,11 @@ export default function PlayerList(props: Readonly<Props>) {
             <Show when={player.id === props.czarId}>
               <p class="font-bold" id={`player-has-played-${player.id}`}>
                 CARD CZAR
+              </p>
+            </Show>
+            <Show when={player.id === gameState.getPlayerId()}>
+              <p class="font-light" id="player-you">
+                (you)
               </p>
             </Show>
           </div>

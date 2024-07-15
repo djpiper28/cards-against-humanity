@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-rod/rod"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -327,17 +326,17 @@ func TestStartingGame(t *testing.T) {
 	assert.True(t, strings.Contains(createPage.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
 
 	adminLobbyPage := JoinGamePage{PlayerJoinGame{createPage.Page}}
-
 	assert.True(t, adminLobbyPage.InLobbyAdmin())
 
-	browsers := make([]*rod.Browser, 0)
-	const playerCount = 3
+	const playerCount = 4
+	pages := make([]*PlayerJoinGame, 0)
+
 	for i := 0; i < playerCount; i++ {
 		// Connect with another client then assert that the settings remain equal
 		playerBrowser := GetBrowser()
-		browsers = append(browsers, playerBrowser)
 		defer playerBrowser.Close()
 		playerPage := NewPlayerGamePage(playerBrowser, adminLobbyPage)
+		pages = append(pages, &playerPage)
 
 		assert.True(t, playerPage.InPlayerJoinPage())
 		playerPage.PlayerName(fmt.Sprintf("Player %d", i))
@@ -346,25 +345,24 @@ func TestStartingGame(t *testing.T) {
 		playerPage.Join()
 
 		assert.True(t, playerPage.InLobbyPlayer())
-		screenshotError(playerPage.Page)
 	}
 
-	time.Sleep(Timeout)
 	adminLobbyPage.Start()
-	time.Sleep(Timeout)
 
 	cards, err := adminLobbyPage.Cards()
 	assert.NoError(t, err)
 	assert.Len(t, cards, 7)
+	assert.False(t, adminLobbyPage.IsCzar())
 
 	for i := 0; i < playerCount; i++ {
-		playerPage := NewPlayerGamePage(browsers[i], adminLobbyPage)
-		cards, err := playerPage.Cards()
+		cards, err := pages[i].Cards()
 		assert.NoError(t, err)
 		assert.Len(t, cards, 7)
 
 		if i == playerCount-1 {
-			assert.True(t, playerPage.IsCzar())
+			assert.True(t, pages[i].IsCzar(), fmt.Sprintf("Player %d should be the czar", i))
+		} else {
+			assert.False(t, pages[i].IsCzar(), fmt.Sprintf("Player %d should not be the czar", i))
 		}
 	}
 }

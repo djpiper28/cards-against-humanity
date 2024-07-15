@@ -1,5 +1,6 @@
 import { Meta } from "storybook-solidjs";
 import PlayerCards from "./PlayerCards";
+import { gameState } from "../../gameState/gameState";
 
 export default {
   component: PlayerCards,
@@ -54,7 +55,7 @@ export const Primary: Meta = {
   args: {
     selectedCardIds: ["1", "3"],
     cards: cards,
-    isCzar: false,
+    czarId: gameState.getPlayerId() + "NOT",
   },
 };
 
@@ -62,6 +63,6 @@ export const Czar: Meta = {
   args: {
     selectedCardIds: [],
     cards: cards,
-    isCzar: true,
+    czarId: gameState.getPlayerId(),
   },
 };
