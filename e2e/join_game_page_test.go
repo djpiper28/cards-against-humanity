@@ -366,3 +366,75 @@ func TestStartingGame(t *testing.T) {
 		}
 	}
 }
+
+func TestJoiningMidGameGivesYouAHand(t *testing.T) {
+	t.Parallel()
+	browser := GetBrowser()
+	defer browser.Close()
+
+	createPage := NewCreateGamePage(browser)
+	assert.NotNil(t, createPage, "Page should render and not be nil")
+	createPage.InsertDefaultValidSettings()
+
+	log.Print("Creating game")
+	createPage.CreateGame()
+
+	time.Sleep(Timeout)
+	assert.True(t, strings.Contains(createPage.Page.Timeout(Timeout).MustInfo().URL, "game/join?gameId="))
+
+	adminLobbyPage := JoinGamePage{PlayerJoinGame{createPage.Page}}
+	assert.True(t, adminLobbyPage.InLobbyAdmin())
+
+	const playerCount = 4
+	pages := make([]*PlayerJoinGame, 0)
+
+	for i := 0; i < playerCount; i++ {
+		// Connect with another client then assert that the settings remain equal
+		playerBrowser := GetBrowser()
+		defer playerBrowser.Close()
+		playerPage := NewPlayerGamePage(playerBrowser, adminLobbyPage)
+		pages = append(pages, &playerPage)
+
+		assert.True(t, playerPage.InPlayerJoinPage())
+		playerPage.PlayerName(fmt.Sprintf("Player %d", i))
+		playerPage.Password(DefaultPassword)
+
+		playerPage.Join()
+
+		assert.True(t, playerPage.InLobbyPlayer())
+	}
+
+	adminLobbyPage.Start()
+
+	playerBrowser := GetBrowser()
+	defer playerBrowser.Close()
+	playerPage := NewPlayerGamePage(playerBrowser, adminLobbyPage)
+
+	assert.True(t, playerPage.InPlayerJoinPage())
+	playerPage.PlayerName(fmt.Sprintf("Player %d", playerCount))
+	playerPage.Password(DefaultPassword)
+
+	playerPage.Join()
+
+	assert.True(t, playerPage.InLobbyPlayer())
+	cards, err := playerPage.Cards()
+	assert.NoError(t, err)
+	assert.Len(t, cards, 7)
+
+	cards, err = adminLobbyPage.Cards()
+	assert.NoError(t, err)
+	assert.Len(t, cards, 7)
+	assert.False(t, adminLobbyPage.IsCzar())
+
+	for i := 0; i < playerCount; i++ {
+		cards, err := pages[i].Cards()
+		assert.NoError(t, err)
+		assert.Len(t, cards, 7)
+
+		if i == playerCount-1 {
+			assert.True(t, pages[i].IsCzar(), fmt.Sprintf("Player %d should be the czar", i))
+		} else {
+			assert.False(t, pages[i].IsCzar(), fmt.Sprintf("Player %d should not be the czar", i))
+		}
+	}
+}
