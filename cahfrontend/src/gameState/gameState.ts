@@ -10,6 +10,7 @@ import {
   MsgCommandError,
   MsgNewOwner,
   MsgOnCardPlayed,
+  MsgOnCzarJudgingPhase,
   MsgOnJoin,
   MsgOnPlayerCreate,
   MsgOnPlayerDisconnect,
@@ -26,6 +27,8 @@ import {
   RpcMessageType,
   RpcNewOwnerMsg,
   RpcOnCardPlayedMsg,
+  RpcOnCzarJudgingPhase,
+  RpcOnCzarJudgingPhaseMsg,
   RpcOnJoinMsg,
   RpcOnPlayerCreateMsg,
   RpcOnPlayerDisconnectMsg,
@@ -87,6 +90,7 @@ class GameState {
   public onPlayerListChange?: (players: GamePlayerList) => void;
   public onCommandError?: (error: RpcCommandErrorMsg) => void;
   public onChangeSettings?: (settings: RpcChangeSettingsMsg) => void;
+  public onCardPlaysChanged?: (plays: WhiteCard[][]) => void;
   public onError?: (error: string) => void;
 
   // Logic lmao
@@ -315,6 +319,29 @@ class GameState {
     this.onRoundStateChange?.(this.roundState);
   }
 
+  private handleOnCzarJudgingPhase(data: RpcOnCzarJudgingPhaseMsg) {
+    this.roundState.yourHand = data.newHand.map((x) => {
+      return {
+        id: x?.id ?? -1,
+        bodyText: x?.bodyText ?? "Cannot load this card :(",
+      };
+    });
+
+    this.lobbyState.gameState = GameStateWhiteCardsBeingSelected;
+    this.onLobbyStateChange?.(structuredClone(this.lobbyState));
+    this.onRoundStateChange?.(this.roundState);
+    this.onCardPlaysChanged?.(
+      data.allPlays.map((x) =>
+        x.map((card) => {
+          return {
+            id: card?.id ?? -1,
+            bodyText: card?.bodyText ?? "Cannot load this card :(",
+          };
+        }),
+      ),
+    );
+  }
+
   /**
    * Handles an RPC message from the server. When testing call the private method and ignore the "error".
    */
@@ -363,6 +390,11 @@ class GameState {
       case MsgOnCardPlayed:
         console.log("Handling card played message");
         return this.handleOnPlayerPlay(rpcMessage.data as RpcOnCardPlayedMsg);
+      case MsgOnCzarJudgingPhase:
+        console.log("Handling czar judging phase message");
+        return this.handleOnCzarJudgingPhase(
+          rpcMessage.data as RpcOnCzarJudgingPhaseMsg,
+        );
       default:
         throw new Error(
           `Cannot handle RPC message as type is not valid ${rpcMessage.type}`,
