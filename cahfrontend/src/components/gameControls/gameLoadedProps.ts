@@ -3,6 +3,7 @@ import { GameLogicCardPack } from "../../api";
 import { GamePlayerList } from "../../gameState/gamePlayersList";
 import { GameLobbyState } from "../../gameState/gameLobbyState";
 import { RpcRoundInformationMsg } from "../../rpcTypes";
+import { WhiteCard } from "../../gameLogicTypes";
 
 export interface LobbyLoadedProps {
   setSettings: (settings: Settings) => void;
@@ -17,4 +18,5 @@ export interface LobbyLoadedProps {
   cardPacks: GameLogicCardPack[];
   state: GameLobbyState;
   roundState: RpcRoundInformationMsg;
+  allPlays: WhiteCard[][];
 }

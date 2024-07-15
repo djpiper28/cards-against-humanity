@@ -233,10 +233,10 @@ func (msg RpcOnCardPlayedMsg) Type() RpcMessageType {
 }
 
 type RpcOnCzarJudgingPhaseMsg struct {
-  // An anonymous list of all of the plays that have been made by all players
+	// An anonymous list of all of the plays that have been made by all players
 	AllPlays [][]*gameLogic.WhiteCard `json:"allPlays"`
-  // Your new hand (player specific), if you are the card czar, this is just your hand.
-	NewHand  []*gameLogic.WhiteCard   `json:"newHand"`
+	// Your new hand (player specific), if you are the card czar, this is just your hand.
+	NewHand []*gameLogic.WhiteCard `json:"newHand"`
 }
 
 func (msg RpcOnCzarJudgingPhase) Type() RpcMessageType {

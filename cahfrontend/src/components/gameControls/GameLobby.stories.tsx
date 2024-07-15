@@ -3,12 +3,13 @@ import { GameLobbyLoaded } from "./GameLobby";
 import {
   BlackCard,
   CardPack,
+  GameStateCzarJudgingCards,
   GameStateInLobby,
   GameStateWhiteCardsBeingSelected,
   WhiteCard,
 } from "../../gameLogicTypes";
 import { LobbyLoadedProps } from "./gameLoadedProps";
-import { P } from "@solid-devtools/debugger/dist/index-9809b963";
+import { gameState } from "../../gameState/gameState";
 
 export default {
   component: GameLobbyLoaded,
@@ -86,6 +87,7 @@ export const NotStartedNoCardsSelected: Meta<LobbyLoadedProps> = {
       totalPlays: 0,
     },
     navigate: console.log,
+    allPlays: [],
   },
 };
 
@@ -140,6 +142,7 @@ export const NotStartedCardsSelected: Meta<LobbyLoadedProps> = {
       totalPlays: 0,
     },
     navigate: console.log,
+    allPlays: [],
   },
 };
 
@@ -227,6 +230,7 @@ export const StartedNoCardsPlayed: Meta<LobbyLoadedProps> = {
       totalPlays: 0,
     },
     navigate: console.log,
+    allPlays: [],
   },
 };
 
@@ -277,6 +281,7 @@ export const StartedCardPlayed: Meta<LobbyLoadedProps> = {
       totalPlays: 0,
     },
     navigate: console.log,
+    allPlays: [],
   },
 };
 
@@ -327,5 +332,153 @@ export const CardSelectionCardCzar: Meta<LobbyLoadedProps> = {
       totalPlays: 0,
     },
     navigate: console.log,
+    allPlays: [],
+  },
+};
+
+const allPlays: WhiteCard[][] = [
+  [
+    {
+      id: 1,
+      bodyText: "Slapping Nigel Farage over and over",
+    },
+  ],
+  [
+    {
+      id: 2,
+      bodyText: "Deez nuts",
+    },
+  ],
+  [
+    {
+      id: 3,
+      bodyText: "Margret Thatcher's disapproving face",
+    },
+  ],
+  [
+    {
+      id: 4,
+      bodyText: "The Queen",
+    },
+  ],
+  [
+    {
+      id: 5,
+      bodyText: "The British Empire",
+    },
+  ],
+  [
+    {
+      id: 6,
+      bodyText: "Garteth Southgate not swapping out the penalty takers",
+    },
+  ],
+  [
+    {
+      id: 7,
+      bodyText: "The NHS",
+    },
+  ],
+];
+
+export const CzarJudgingPhase: Meta<LobbyLoadedProps> = {
+  args: {
+    setSettings: () => console.log,
+    setSelectedPackIds: () => console.log,
+    setSelectedCardIds: () => console.log,
+    setCommandError: () => console.log,
+    setStateAsDirty: () => console.log,
+    players: [
+      {
+        id: "1",
+        name: "Player 1",
+        connected: true,
+        points: 0,
+        hasPlayed: false,
+      },
+      {
+        id: "2",
+        name: "Player 2",
+        connected: false,
+        points: 0,
+        hasPlayed: true,
+      },
+    ],
+    commandError: "",
+    dirtyState: false,
+    cardPacks: cardPacks,
+    state: {
+      ownerId: "",
+      settings: {
+        gamePassword: "",
+        maxPlayers: 5,
+        cardPacks: cardPacks.map((x) => x.id),
+        maxRounds: 10,
+        playingToPoints: 10,
+      },
+      creationTime: new Date(),
+      gameState: GameStateCzarJudgingCards,
+    },
+    roundState: {
+      yourHand: yourHand,
+      yourPlays: [],
+      roundNumber: 1,
+      currentCardCzarId: gameState.getPlayerId(),
+      blackCard: blackCard,
+      totalPlays: 0,
+    },
+    navigate: console.log,
+    allPlays: allPlays,
+  },
+};
+
+export const PlayerInCzarJudgingPhase: Meta<LobbyLoadedProps> = {
+  args: {
+    setSettings: () => console.log,
+    setSelectedPackIds: () => console.log,
+    setSelectedCardIds: () => console.log,
+    setCommandError: () => console.log,
+    setStateAsDirty: () => console.log,
+    players: [
+      {
+        id: "1",
+        name: "Player 1",
+        connected: true,
+        points: 0,
+        hasPlayed: false,
+      },
+      {
+        id: "2",
+        name: "Player 2",
+        connected: false,
+        points: 0,
+        hasPlayed: true,
+      },
+    ],
+    commandError: "",
+    dirtyState: false,
+    cardPacks: cardPacks,
+    state: {
+      ownerId: "",
+      settings: {
+        gamePassword: "",
+        maxPlayers: 5,
+        cardPacks: cardPacks.map((x) => x.id),
+        maxRounds: 10,
+        playingToPoints: 10,
+      },
+      creationTime: new Date(),
+      gameState: GameStateCzarJudgingCards,
+    },
+    roundState: {
+      yourHand: yourHand,
+      yourPlays: [],
+      roundNumber: 1,
+      currentCardCzarId: gameState.getPlayerId() + "NOT",
+      blackCard: blackCard,
+      totalPlays: 0,
+    },
+    navigate: console.log,
+    allPlays: allPlays,
   },
 };

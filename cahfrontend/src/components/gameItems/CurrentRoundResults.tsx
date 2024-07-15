@@ -1,31 +1,14 @@
+import { BlackCard, WhiteCard } from "../../gameLogicTypes";
+import { For } from "solid-js";
 import Card from "./Card";
 
-interface WhiteCards {
-  id: string;
-  name: string;
-  pack: string;
-}
-
 interface PlayerPlay {
-  whiteCards: WhiteCards[];
+  whiteCards: WhiteCard[];
   winner: boolean;
-}
-
-interface BlackCard {
-  name: string;
-  pack: string;
-  cardsToPlay: number;
-}
-
-interface Props {
-  blackCard: BlackCard;
-  plays: PlayerPlay[];
-  showCards: boolean;
 }
 
 interface PlayerPlayProps {
   play: PlayerPlay;
-  showCards: boolean;
   index: number;
 }
 
@@ -37,8 +20,8 @@ function PlayerCard(props: Readonly<PlayerPlayProps>) {
       {props.play.whiteCards.map((card, index) => (
         <Card
           id={props.index + index}
-          cardText={props.showCards ? card.name : "Cards Against Humanity"}
-          packName={props.showCards ? card.pack : ""}
+          cardText={card.bodyText}
+          packName={`Player ${props.index + 1}`}
           isWhite={true}
         />
       ))}
@@ -46,20 +29,25 @@ function PlayerCard(props: Readonly<PlayerPlayProps>) {
   );
 }
 
+interface Props {
+  blackCard: BlackCard;
+  plays: PlayerPlay[];
+}
+
 export default function CurrentRoundResults(props: Readonly<Props>) {
   return (
-    <div class="flex flex-row gap-2">
+    <div class="flex flex-row gap-2 flex-wrap">
       <Card
         id="black-card"
-        cardText={props.blackCard.name}
-        packName={props.blackCard.pack}
+        cardText={props.blackCard.bodyText}
+        packName="Black card"
         isWhite={false}
       />
-      <div class="flex flex-row flex-wrap gap-2">
-        {props.plays.map((play, index) => (
-          <PlayerCard index={index} play={play} showCards={props.showCards} />
-        ))}
-      </div>
+      <For each={props.plays}>
+        {(play, index) => {
+          return <PlayerCard play={play} index={index()} />;
+        }}
+      </For>
     </div>
   );
 }

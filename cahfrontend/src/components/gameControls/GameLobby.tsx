@@ -1,7 +1,12 @@
 import { Show, createEffect, createSignal, onMount } from "solid-js";
 import LoadingSlug from "../loading/LoadingSlug";
 import { gamePasswordCookie, gameState } from "../../gameState/gameState";
-import { GameSettings, GameStateInLobby } from "../../gameLogicTypes";
+import {
+  GameSettings,
+  GameStateCzarJudgingCards,
+  GameStateInLobby,
+  WhiteCard,
+} from "../../gameLogicTypes";
 import RoundedWhite from "../containers/RoundedWhite";
 import Header from "../typography/Header";
 import PlayerList from "../gameItems/PlayerList";
@@ -24,12 +29,15 @@ import PlayerCards from "../gameItems/PlayerCards";
 import { LobbyLoadedProps } from "./gameLoadedProps";
 import { GameNotStartedView } from "./GameNotStartedView";
 import Card from "../gameItems/Card";
+import CurrentRoundResults from "../gameItems/CurrentRoundResults";
 
 // Exported for testing reasons
 export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
   const isGameOwner = () => props.state.ownerId === gameState.getPlayerId();
   const settings = () => props.state.settings;
   const isGameStarted = () => props.state.gameState !== GameStateInLobby;
+  const isCzarJudgingPhase = () =>
+    props.state.gameState === GameStateCzarJudgingCards;
 
   createEffect(() => {
     cookieStorage.setItem(gamePasswordCookie, settings().gamePassword);
@@ -76,12 +84,30 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
         </Show>
 
         <Show when={isGameStarted() && props.roundState}>
-          <Card
-            id={props.roundState.blackCard.id}
-            isWhite={false}
-            cardText={props.roundState.blackCard.bodyText}
-            packName={`${props.roundState.blackCard.cardsToPlay} white cards to play`}
-          />
+          <Show when={isCzarJudgingPhase()}>
+            <SubHeader
+              text={`${props.roundState.currentCardCzarId === gameState.getPlayerId() ? "Chose a winning play" : "Waiting for the czar to judge"}:`}
+            />
+            <CurrentRoundResults
+              blackCard={props.roundState.blackCard}
+              plays={props.allPlays.map((x, i) => {
+                return {
+                  index: i,
+                  whiteCards: x,
+                  winner: false,
+                };
+              })}
+            />
+          </Show>
+          <Show when={!isCzarJudgingPhase()}>
+            <Card
+              id={props.roundState.blackCard.id}
+              isWhite={false}
+              cardText={props.roundState.blackCard.bodyText}
+              packName={`${props.roundState.blackCard.cardsToPlay} white cards to play`}
+            />
+          </Show>
+          <SubHeader text="Your hand:" />
           <PlayerCards
             czarId={props.roundState.currentCardCzarId}
             cards={props.roundState.yourHand.map((x) => {
@@ -144,6 +170,7 @@ export default function GameLobby() {
   const [packs, setPacks] = createSignal<GameLogicCardPack[]>([]);
   const [errorMessage, setErrorMessage] = createSignal("");
   const [commandError, setCommandError] = createSignal("");
+  const [allPlays, setAllPlays] = createSignal<WhiteCard[][]>([]);
 
   const [dirtyState, setDirtyState] = createSignal(false);
 
@@ -176,6 +203,10 @@ export default function GameLobby() {
     gameState.onRoundStateChange = (state?: RpcRoundInformationMsg) => {
       console.log("Round state change detected");
       setRoundState(state!);
+    };
+    gameState.onCardPlaysChanged = (allPlays) => {
+      console.log("All plays changed");
+      setAllPlays(allPlays);
     };
   };
 
@@ -247,6 +278,7 @@ export default function GameLobby() {
           dirtyState={dirtyState()}
           setStateAsDirty={() => setDirtyState(true)}
           navigate={useNavigate()}
+          allPlays={allPlays()}
         />
       </Show>
 
