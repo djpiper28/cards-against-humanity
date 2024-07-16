@@ -1,6 +1,6 @@
 module github.com/djpiper28/cards-against-humanity/e2e
 
-go 1.22
+go 1.21
 
 require (
 	github.com/go-rod/rod v0.116.2
