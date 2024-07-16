@@ -21,8 +21,8 @@ importers:
         specifier: ^1.2.2
         version: 1.2.2(solid-js@1.8.17)
       '@solidjs/router':
-        specifier: ^0.14.1
-        version: 0.14.1(solid-js@1.8.17)
+        specifier: ^0.9.0
+        version: 0.9.1(solid-js@1.8.17)
       '@testing-library/jest-dom':
         specifier: ^6.4.6
         version: 6.4.6(vitest@2.0.3(@types/node@20.14.2)(jsdom@24.1.0)(terser@5.31.1))
@@ -71,7 +71,7 @@ importers:
     devDependencies:
       '@solidjs/testing-library':
         specifier: ^0.8.8
-        version: 0.8.8(@solidjs/router@0.14.1(solid-js@1.8.17))(solid-js@1.8.17)
+        version: 0.8.8(@solidjs/router@0.9.1(solid-js@1.8.17))(solid-js@1.8.17)
       '@storybook/addon-essentials':
         specifier: ^8.3.0-alpha.1
         version: 8.3.0-alpha.1(storybook@8.3.0-alpha.1(@babel/preset-env@7.24.7(@babel/core@7.24.7)))
@@ -1600,10 +1600,10 @@ packages:
     peerDependencies:
       solid-js: ^1.6.12
 
-  '@solidjs/router@0.14.1':
-    resolution: {integrity: sha512-GumQ4jbt5xDngLypAndC4EjapY/3DP0G8Az4YWEVQHdCtjHwB8IOm32eEBxE9lKpOffbtXV0r/0X0mofHJ1m5w==}
+  '@solidjs/router@0.9.1':
+    resolution: {integrity: sha512-kRY75piOQsyoH75E/RP6lr7uVGFCjeeCCCJx7Z2D1Vc6+I1yFQjLCvE+6agXGwqDoWi6vbETP1g7gmp/L1mNLg==}
     peerDependencies:
-      solid-js: ^1.8.6
+      solid-js: ^1.8.4
 
   '@solidjs/testing-library@0.8.8':
     resolution: {integrity: sha512-47J9Aw+iG45Fs5Kxu/IJmkaaucpF7qhDazW+iXeNssAYI0FH+4MeM/SfYRhPbIMH/hBpMh/XjbK1Wpyu9PcSwg==}
@@ -6002,16 +6002,16 @@ snapshots:
     dependencies:
       solid-js: 1.8.17
 
-  '@solidjs/router@0.14.1(solid-js@1.8.17)':
+  '@solidjs/router@0.9.1(solid-js@1.8.17)':
     dependencies:
       solid-js: 1.8.17
 
-  '@solidjs/testing-library@0.8.8(@solidjs/router@0.14.1(solid-js@1.8.17))(solid-js@1.8.17)':
+  '@solidjs/testing-library@0.8.8(@solidjs/router@0.9.1(solid-js@1.8.17))(solid-js@1.8.17)':
     dependencies:
       '@testing-library/dom': 10.1.0
       solid-js: 1.8.17
     optionalDependencies:
-      '@solidjs/router': 0.14.1(solid-js@1.8.17)
+      '@solidjs/router': 0.9.1(solid-js@1.8.17)
 
   '@storybook/addon-actions@8.3.0-alpha.1(storybook@8.3.0-alpha.1(@babel/preset-env@7.24.7(@babel/core@7.24.7)))':
     dependencies:
