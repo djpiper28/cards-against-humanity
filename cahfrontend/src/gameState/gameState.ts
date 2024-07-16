@@ -27,7 +27,6 @@ import {
   RpcMessageType,
   RpcNewOwnerMsg,
   RpcOnCardPlayedMsg,
-  RpcOnCzarJudgingPhase,
   RpcOnCzarJudgingPhaseMsg,
   RpcOnJoinMsg,
   RpcOnPlayerCreateMsg,
@@ -316,7 +315,7 @@ class GameState {
     this.roundState = data;
     this.lobbyState.gameState = GameStateWhiteCardsBeingSelected;
     this.onLobbyStateChange?.(structuredClone(this.lobbyState));
-    this.onRoundStateChange?.(this.roundState);
+    this.onRoundStateChange?.(structuredClone(this.roundState));
   }
 
   private handleOnCzarJudgingPhase(data: RpcOnCzarJudgingPhaseMsg) {
@@ -329,7 +328,7 @@ class GameState {
 
     this.lobbyState.gameState = GameStateWhiteCardsBeingSelected;
     this.onLobbyStateChange?.(structuredClone(this.lobbyState));
-    this.onRoundStateChange?.(this.roundState);
+    this.onRoundStateChange?.(structuredClone(this.roundState));
     this.onCardPlaysChanged?.(
       data.allPlays.map((x) =>
         x.map((card) => {
