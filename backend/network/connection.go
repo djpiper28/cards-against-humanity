@@ -291,7 +291,6 @@ func (c *WsConnection) listenAndHandle() error {
 			},
 		})
 
-
 		microSeconds := time.Since(startTime).Microseconds()
 		go gameRepo.AddCommandExecuted(int(time.Since(startTime).Microseconds()))
 

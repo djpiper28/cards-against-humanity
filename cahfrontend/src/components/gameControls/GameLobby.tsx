@@ -121,18 +121,26 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
               x.id.toString(),
             )}
             onSelectCard={(id) => {
-              if (id == props.roundState.yourPlays[props.roundState.yourPlays.length -1]?.id.toString()) {
+              if (
+                props.roundState.yourPlays
+                  .map((x) => x.id.toString())
+                  .find((x) => x === id)
+              ) {
+                console.log("Cannot play a card that is selected.");
                 return;
               }
 
-              props.setSelectedCardIds([
-                ...props.roundState.yourPlays.map((x) => x.id.toString()),
+              const plays = [
                 id,
-              ]);
-              gameState.playCards([
-                ...props.roundState.yourPlays.map((x) => x.id),
-                parseInt(id),
-              ]);
+                ...props.roundState.yourPlays.map((x) => x.id.toString()),
+              ];
+
+              if (plays.length > props.roundState.blackCard.cardsToPlay) {
+                plays.pop();
+              }
+
+              props.setSelectedCardIds(plays);
+              gameState.playCards(plays.map((x) => parseInt(x)));
             }}
           />
         </Show>
