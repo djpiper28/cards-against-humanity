@@ -18,16 +18,28 @@ type Metrics struct {
 
 	// Handled by the game repo layer
 
-	TotalGames      int `metrics:"total_games"`
-	TotalUsers      int `metrics:"total_users"`
-	UsersInGames    int `metrics:"users_in_games"`
-	UsersConnected  int `metrics:"users_connected"`
-	GamesInProgress int `metrics:"games_in_progress"`
+	TotalGames             int `metrics:"total_games"`
+	TotalUsers             int `metrics:"total_users"`
+	UsersInGames           int `metrics:"users_in_games"`
+	UsersConnected         int `metrics:"users_connected"`
+	GamesInProgress        int `metrics:"games_in_progress"`
+	TotalGamePurges        int `metrics:"total_game_purges"`
+	TotalGamePurgeDuration int `metrics:"total_game_purge_duration"`
+	TotalGamesPurged       int `metrics:"total_games_purged"`
 
 	lock sync.Mutex
 }
 
 var metrics Metrics
+
+func AddGamePurgeData(duration int, gamesPurged int) {
+  metrics.lock.Lock()
+  defer metrics.lock.Unlock()
+
+  metrics.TotalGamePurges++
+  metrics.TotalGamePurgeDuration += duration
+  metrics.TotalGamesPurged += gamesPurged
+}
 
 func AddGame() {
 	metrics.lock.Lock()

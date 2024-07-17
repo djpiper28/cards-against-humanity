@@ -279,6 +279,8 @@ func (gr *GameRepo) PlayerPlayCards(gameId, playerId uuid.UUID, cardIds []int) (
 }
 
 func (gr *GameRepo) EndOldGames() []uuid.UUID {
+	start := time.Now()
+
 	endedGames := make([]uuid.UUID, 0)
 	games := gr.GetGames()
 	for _, game := range games {
@@ -296,6 +298,8 @@ func (gr *GameRepo) EndOldGames() []uuid.UUID {
 	}
 
 	count := len(endedGames)
+	go AddGamePurgeData(int(time.Since(start).Microseconds()), count)
+
 	if count > 0 {
 		logger.Logger.Info("Ending old games", "count", count)
 	}
