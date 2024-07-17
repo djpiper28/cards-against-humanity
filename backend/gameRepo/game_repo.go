@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	MaxGameAge    = time.Minute * 20
-  // Allow for enough time for players to reconnect in the case of a network drop
+	MaxGameAge = time.Minute * 20
+	// Allow for enough time for players to reconnect in the case of a network drop
 	MaxGameWithNoPlayersAge = time.Minute * 2
 )
 
@@ -51,7 +51,7 @@ func (gr *GameRepo) RemoveGame(gameId uuid.UUID) error {
 	gr.lock.Lock()
 	defer gr.lock.Unlock()
 
-	return gr.RemoveGame(gameId)
+	return gr.removeGame(gameId)
 }
 
 // Not thread safe, to be used internally
@@ -285,14 +285,15 @@ func (gr *GameRepo) EndOldGames() []uuid.UUID {
 	games := gr.GetGames()
 	for _, game := range games {
 		remove := false
-		if game.TimeSinceLastAction() > MaxGameAge {
+    lastActionTime := game.TimeSinceLastAction()
+		if lastActionTime > MaxGameAge {
 			remove = true
-		} else if game.Metrics().PlayersConnected == 0 && game.TimeSinceLastAction() > MaxGameWithNoPlayersAge {
+		} else if game.Metrics().PlayersConnected == 0 && lastActionTime > MaxGameWithNoPlayersAge {
 			remove = true
 		}
 
 		if remove {
-			gr.removeGame(game.Id)
+			gr.RemoveGame(game.Id)
 			endedGames = append(endedGames, game.Id)
 		}
 	}

@@ -33,12 +33,12 @@ type Metrics struct {
 var metrics Metrics
 
 func AddGamePurgeData(duration int, gamesPurged int) {
-  metrics.lock.Lock()
-  defer metrics.lock.Unlock()
+	metrics.lock.Lock()
+	defer metrics.lock.Unlock()
 
-  metrics.TotalGamePurges++
-  metrics.TotalGamePurgeDuration += duration
-  metrics.TotalGamesPurged += gamesPurged
+	metrics.TotalGamePurges++
+	metrics.TotalGamePurgeDuration += duration
+	metrics.TotalGamesPurged += gamesPurged
 }
 
 func AddGame() {

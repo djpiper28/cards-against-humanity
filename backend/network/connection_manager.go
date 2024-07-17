@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/djpiper28/cards-against-humanity/backend/gameRepo"
@@ -18,7 +19,26 @@ type GameConnection struct {
 }
 
 // Manages all of the connections
-var GlobalConnectionManager = &ConnectionManager{GameConnectionMap: make(map[uuid.UUID]*GameConnection)}
+var GlobalConnectionManager = New()
+
+func gameRemovalDaemon(manager *ConnectionManager) {
+	for {
+		games := gameRepo.Repo.EndOldGames()
+		for _, game := range games {
+			err := manager.RemoveGame(game)
+			if err != nil {
+				logger.Logger.Error("Cannot remove game", "gid", game, "err", err)
+			}
+		}
+		time.Sleep(time.Second)
+	}
+}
+
+func New() *ConnectionManager {
+	manager := &ConnectionManager{GameConnectionMap: make(map[uuid.UUID]*GameConnection)}
+	go gameRemovalDaemon(manager)
+	return manager
+}
 
 type ConnectionManager struct {
 	// Maps a game ID to the game connection pool
