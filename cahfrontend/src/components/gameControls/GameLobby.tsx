@@ -121,6 +121,10 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
               x.id.toString(),
             )}
             onSelectCard={(id) => {
+              if (id == props.roundState.yourPlays[0]?.id.toString()) {
+                return;
+              }
+
               props.setSelectedCardIds([
                 ...props.roundState.yourPlays.map((x) => x.id.toString()),
                 id,
