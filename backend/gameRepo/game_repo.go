@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	MaxGameInProgressAge    = time.Hour * 3
-	MaxGameInLobbyAge       = time.Minute * 15
-	MaxGameWithNoPlayersAge = time.Second * 2
+	MaxGameAge    = time.Minute * 20
+  // Allow for enough time for players to reconnect in the case of a network drop
+	MaxGameWithNoPlayersAge = time.Minute * 2
 )
 
 type GameRepo struct {
@@ -285,7 +285,7 @@ func (gr *GameRepo) EndOldGames() []uuid.UUID {
 	games := gr.GetGames()
 	for _, game := range games {
 		remove := false
-		if game.TimeSinceLastAction() > MaxGameInProgressAge {
+		if game.TimeSinceLastAction() > MaxGameAge {
 			remove = true
 		} else if game.Metrics().PlayersConnected == 0 && game.TimeSinceLastAction() > MaxGameWithNoPlayersAge {
 			remove = true

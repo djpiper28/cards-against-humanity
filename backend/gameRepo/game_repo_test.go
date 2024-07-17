@@ -348,8 +348,8 @@ func TestGamesOlderThanMaxAgeAreEnded(t *testing.T) {
 	game, err := repo.GetGame(gid)
 	assert.NoError(t, err)
 
-	game.LastAction = game.LastAction.Add(-(gameRepo.MaxGameInLobbyAge + 1))
-	assert.True(t, game.TimeSinceLastAction() > gameRepo.MaxGameInLobbyAge)
+	game.LastAction = game.LastAction.Add(-(gameRepo.MaxGameAge + 1))
+	assert.True(t, game.TimeSinceLastAction() > gameRepo.MaxGameAge)
 
 	gamesEnded := repo.EndOldGames()
 	assert.Len(t, gamesEnded, 1)
@@ -408,7 +408,7 @@ func BenchmarkEndGames(b *testing.B) {
 					b.FailNow()
 				}
 
-				game.LastAction = game.LastAction.Add(-(gameRepo.MaxGameInLobbyAge + 1))
+				game.LastAction = game.LastAction.Add(-(gameRepo.MaxGameAge + 1))
 			}
 
 			b.ResetTimer()
