@@ -16,11 +16,14 @@ export default function About() {
           for strangers.
         </p>
 
-        <h2 class="text-xl font-bold">How to Play</h2>
+        <h2 class="text-xl font-bold">How To Play</h2>
         <ul class="list-disc ps-5">
           <li>
-            Go to the <a href={createGameUrl}>create game page</a> and select
-            some card packs, and a username. Then click create game.
+            Go to the{" "}
+            <a class="text-blue-500 underline" href={createGameUrl}>
+              create game page
+            </a>{" "}
+            and select some card packs, and a username. Then click create game.
           </li>
           <li>Share the link to your friends.</li>
           <li>
@@ -30,9 +33,24 @@ export default function About() {
           <li>When your players have all joined, you can start the game.</li>
         </ul>
 
-        <h2 class="text-xl font-bold">Contributing</h2>
+        <h2 class="text-xl font-bold">Game Safety</h2>
         <span>
-          The project is open source and you can contribute by going go the{" "}
+          To help reduce the amount of trolling, it is advised to{" "}
+          <span class="font-bold">set a password</span> on your game, and play
+          with friends. If you are playing with strangers, you can kick them
+          from the game. No game chat is currently provided for your safety.
+          <p class="opacity-0"> (and because I am lazy)</p>
+          <span>
+            Reasonable efforts have been made to stop hackers and cheaters,
+            however the hackers gonna hack... If you find a bug or a way to
+            exploit the system, please do tell me so I can fix it.
+          </span>
+        </span>
+
+        <h2 class="text-xl font-bold">Reporting Issues And Contributing</h2>
+        <span>
+          The project is open source and you can report issues or contribute by
+          going go the{" "}
           <a
             href="https://github.com/djpiper28/cards-against-humanity"
             class="w-8 text-blue-600"
