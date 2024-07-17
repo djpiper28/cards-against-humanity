@@ -43,7 +43,7 @@ func (gr *GameRepo) CreateGame(gameSettings *gameLogic.GameSettings, playerName 
 	go AddGame()
 	go AddUser()
 
-	logger.Logger.Info("Created game for", playerName)
+	logger.Logger.Info("Created game for", "player", playerName)
 	return gid, game.GameOwnerId, nil
 }
 
@@ -295,5 +295,9 @@ func (gr *GameRepo) EndOldGames() []uuid.UUID {
 		}
 	}
 
+	count := len(endedGames)
+	if count > 0 {
+		logger.Logger.Info("Ending old games", "count", count)
+	}
 	return endedGames
 }

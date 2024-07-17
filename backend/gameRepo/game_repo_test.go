@@ -1,6 +1,7 @@
 package gameRepo_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
@@ -377,27 +378,41 @@ func TestGamesYoungerThanMaxAgeAreNotEnded(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func BenchEndOldGames(b testing.B) {
-	b.ReportAllocs()
-	b.ReportMetric(float64(b.N), "games")
+var table = []struct {
+	input int
+}{
+	{input: 100},
+	{input: 500},
+	{input: 1000},
+	{input: 5000},
+}
 
-	repo := gameRepo.New()
-	settings := gameLogic.DefaultGameSettings()
+func BenchmarkEndGames(b *testing.B) {
+	for _, v := range table {
+		b.Run(fmt.Sprintf("input_size_%d", v.input), func(b *testing.B) {
 
-	for i := 0; i < b.N; i++ {
-		gid, _, err := repo.CreateGame(settings, "Dave")
-		if err != nil {
-			b.FailNow()
-		}
+			b.ReportAllocs()
+			b.ReportMetric(float64(b.N), "games")
 
-		game, err := repo.GetGame(gid)
-		if err != nil {
-			b.FailNow()
-		}
+			repo := gameRepo.New()
+			settings := gameLogic.DefaultGameSettings()
 
-		game.LastAction = game.LastAction.Add(-(gameRepo.MaxGameInLobbyAge + 1))
+			for i := 0; i < b.N; i++ {
+				gid, _, err := repo.CreateGame(settings, "Dave")
+				if err != nil {
+					b.FailNow()
+				}
+
+				game, err := repo.GetGame(gid)
+				if err != nil {
+					b.FailNow()
+				}
+
+				game.LastAction = game.LastAction.Add(-(gameRepo.MaxGameInLobbyAge + 1))
+			}
+
+			b.ResetTimer()
+			repo.EndOldGames()
+		})
 	}
-
-	b.ResetTimer()
-	repo.EndOldGames()
 }
