@@ -76,7 +76,7 @@ func AddCommandExecuted(duration int) {
 	metrics.lock.Lock()
 	defer metrics.lock.Unlock()
 	metrics.TotalCommandsExecuted++
-  metrics.TotalCommandDuraion = duration
+  metrics.TotalCommandDuraion += duration
 }
 
 func AddMessageSent() {
