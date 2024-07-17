@@ -285,7 +285,7 @@ func (gr *GameRepo) EndOldGames() []uuid.UUID {
 	games := gr.GetGames()
 	for _, game := range games {
 		remove := false
-    lastActionTime := game.TimeSinceLastAction()
+		lastActionTime := game.TimeSinceLastAction()
 		if lastActionTime > MaxGameAge {
 			remove = true
 		} else if game.Metrics().PlayersConnected == 0 && lastActionTime > MaxGameWithNoPlayersAge {
@@ -293,7 +293,6 @@ func (gr *GameRepo) EndOldGames() []uuid.UUID {
 		}
 
 		if remove {
-			gr.RemoveGame(game.Id)
 			endedGames = append(endedGames, game.Id)
 		}
 	}
@@ -303,6 +302,12 @@ func (gr *GameRepo) EndOldGames() []uuid.UUID {
 
 	if count > 0 {
 		logger.Logger.Info("Ending old games", "count", count)
+	}
+
+	gr.lock.Lock()
+	defer gr.lock.Unlock()
+	for _, removeedGameId := range endedGames {
+		gr.removeGame(removeedGameId)
 	}
 	return endedGames
 }

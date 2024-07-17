@@ -199,6 +199,7 @@ export default function GameLobby() {
     };
     gameState.onCommandError = (error: RpcCommandErrorMsg) => {
       setCommandError(error.reason);
+      setErrorMessage(error.reason);
     };
     gameState.onRoundStateChange = (state?: RpcRoundInformationMsg) => {
       console.log("Round state change detected");
