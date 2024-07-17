@@ -125,6 +125,9 @@ const (
 )
 
 type Game struct {
+	// Used to determine if the game should be shutdown
+	LastAction time.Time
+
 	Id         uuid.UUID
 	Players    []uuid.UUID
 	PlayersMap map[uuid.UUID]*Player
@@ -159,13 +162,18 @@ func NewGame(gameSettings *GameSettings, hostPlayerName string) (*Game, error) {
 	players := make([]uuid.UUID, 1)
 	players[0] = hostPlayer.Id
 
-	return &Game{Id: uuid.New(),
+	return &Game{LastAction: time.Now(),
+    Id: uuid.New(),
 		PlayersMap:   playersMap,
 		Players:      players,
 		GameOwnerId:  hostPlayer.Id,
 		Settings:     gameSettings,
 		CreationTime: time.Now(),
 		GameState:    GameStateInLobby}, nil
+}
+
+func (g *Game) updateLastAction() {
+  g.LastAction = time.Now()
 }
 
 // Information that the client sees about a game
@@ -289,6 +297,7 @@ func (g *Game) AddPlayer(playerName string) (uuid.UUID, error) {
 	if g.GameState != GameStateInLobby {
 		g.newCards()
 	}
+  g.updateLastAction()
 	return player.Id, nil
 }
 
@@ -338,6 +347,7 @@ func (g *Game) RemovePlayer(playerToRemoveId uuid.UUID) (PlayerRemovalResult, er
 		res.CzarJudingPhaseInfo = czarJudgingPhaseInfo
 	}
 
+  g.updateLastAction()
 	// TODO: If there are below the minimum amount of players move to the lobby
 	return res, nil
 }
@@ -444,6 +454,7 @@ func (g *Game) StartGame() (RoundInfo, error) {
 	if err != nil {
 		return RoundInfo{}, err
 	}
+  g.updateLastAction()
 	return g.roundInfo()
 }
 
@@ -481,6 +492,7 @@ func (g *Game) ChangeSettings(newSettings GameSettings) error {
 	}
 
 	g.Settings = &newSettings
+  g.updateLastAction()
 	return nil
 }
 
@@ -642,5 +654,13 @@ func (g *Game) PlayCards(playerId uuid.UUID, cardIds []int) (PlayCardsResult, er
 		ret.CzarJudingPhaseInfo = info
 	}
 
+  g.updateLastAction()
 	return ret, nil
+}
+
+func (g *Game) TimeSinceLastAction() time.Duration {
+  g.Lock.Lock()
+  defer g.Lock.Unlock()
+
+  return time.Since(g.LastAction)
 }

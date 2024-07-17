@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/google/uuid"
@@ -128,68 +127,23 @@ func TestNewGame(t *testing.T) {
 
 	name := "Dave"
 	game, err := gameLogic.NewGame(settings, name)
-	if err != nil {
-		t.Log(fmt.Sprintf("The game should be valid and created %s", err))
-		t.FailNow()
-	}
+  assert.NoError(t, err)
+  assert.NotNil(t, game)
 
-	if game == nil {
-		t.Log("Game should not be nil")
-		t.FailNow()
-	}
-
-	if game.Settings != settings {
-		t.Log("Setting in the game were not set, this is bad")
-		t.FailNow()
-	}
-
-	var nilTime time.Time
-	if game.CreationTime == nilTime {
-		t.Log("The time was not set")
-		t.FailNow()
-	}
-
-	var nilUuid uuid.UUID
-	if game.CurrentCardCzarId != nilUuid {
-		t.Log("The czar should not be set yet")
-		t.FailNow()
-	}
-
-	if game.Players == nil {
-		t.Log("Player map not set")
-		t.FailNow()
-	}
-
-	if game.GameOwnerId == nilUuid {
-		t.Log("Game owner not set")
-		t.FailNow()
-	}
+  assert.Equal(t, settings, game.Settings)
+  assert.NotEmpty(t, game.CreationTime)
+  assert.Empty(t, game.CurrentCardCzarId)
+  assert.NotNil(t, game.Players)
+  assert.NotEmpty(t, game.GameOwnerId)
 
 	_, found := game.PlayersMap[game.GameOwnerId]
-	if !found {
-		t.Log("The owner is not in the game")
-		t.FailNow()
-	}
-
-	if len(game.Players) != 1 {
-		t.Log("There should be a player in the list")
-		t.FailNow()
-	}
-
-	if game.Players[0] != game.GameOwnerId {
-		t.Log("Player is not in the player turn list")
-		t.FailNow()
-	}
-
-	if game.CurrentRound != 0 {
-		t.Log("The current round should be set to 0")
-		t.FailNow()
-	}
-
-	if nilUuid == game.Id {
-		t.Log("Game ID was not set")
-		t.FailNow()
-	}
+  assert.True(t, found)
+	assert.Len(t, game.Players, 1)
+	assert.Equal(t, game.Players[0], game.GameOwnerId)
+  assert.Equal(t, uint(0), game.CurrentRound)
+	assert.NotEmpty(t, game.Id)
+  assert.NotEmpty(t, game.LastAction)
+  assert.NotEmpty(t, game.TimeSinceLastAction())
 }
 
 func TestGameInfo(t *testing.T) {
