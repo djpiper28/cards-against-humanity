@@ -121,7 +121,7 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
               x.id.toString(),
             )}
             onSelectCard={(id) => {
-              if (id == props.roundState.yourPlays[0]?.id.toString()) {
+              if (id == props.roundState.yourPlays[props.roundState.yourPlays.length -1]?.id.toString()) {
                 return;
               }
 
