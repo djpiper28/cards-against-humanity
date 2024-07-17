@@ -178,8 +178,6 @@ func (c *WsConnection) listenAndHandle() error {
 			return errors.New("Cannot read from websocket")
 		}
 
-		go gameRepo.AddCommandExecuted()
-
 		handler := UnknownCommand
 		startTime := time.Now()
 		err = DecodeRpcMessage(msg, RpcCommandHandlers{
@@ -293,8 +291,9 @@ func (c *WsConnection) listenAndHandle() error {
 			},
 		})
 
-		endTime := time.Now()
-		microSeconds := endTime.Sub(startTime).Microseconds()
+
+		microSeconds := time.Since(startTime).Microseconds()
+		go gameRepo.AddCommandExecuted(int(time.Since(startTime).Milliseconds()))
 
 		if handler != PingCommand {
 			logger.Logger.Infof("Command Handler \"%s\" | %s | %dµs",

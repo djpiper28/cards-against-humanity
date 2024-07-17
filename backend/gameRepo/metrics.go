@@ -13,6 +13,7 @@ type Metrics struct {
 	TotalWsErrors         int `metrics:"total_ws_errors"`
 	TotalMessagesSent     int `metrics:"total_messages_sent"`
 	TotalUnknownCommands  int `metrics:"total_unknown_commands"`
+  TotalCommandDuraion int `metrics:"total_command_duration"`
 	TotalCommandsExecuted int `metrics:"total_commands_executed"`
 	TotalCommandsFailed   int `metrics:"total_commands_failed"`
 
@@ -71,10 +72,11 @@ func AddWsError() {
 	metrics.TotalWsErrors++
 }
 
-func AddCommandExecuted() {
+func AddCommandExecuted(duration int) {
 	metrics.lock.Lock()
 	defer metrics.lock.Unlock()
 	metrics.TotalCommandsExecuted++
+  metrics.TotalCommandDuraion = duration
 }
 
 func AddMessageSent() {
