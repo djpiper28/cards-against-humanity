@@ -127,23 +127,23 @@ func TestNewGame(t *testing.T) {
 
 	name := "Dave"
 	game, err := gameLogic.NewGame(settings, name)
-  assert.NoError(t, err)
-  assert.NotNil(t, game)
+	assert.NoError(t, err)
+	assert.NotNil(t, game)
 
-  assert.Equal(t, settings, game.Settings)
-  assert.NotEmpty(t, game.CreationTime)
-  assert.Empty(t, game.CurrentCardCzarId)
-  assert.NotNil(t, game.Players)
-  assert.NotEmpty(t, game.GameOwnerId)
+	assert.Equal(t, settings, game.Settings)
+	assert.NotEmpty(t, game.CreationTime)
+	assert.Empty(t, game.CurrentCardCzarId)
+	assert.NotNil(t, game.Players)
+	assert.NotEmpty(t, game.GameOwnerId)
 
 	_, found := game.PlayersMap[game.GameOwnerId]
-  assert.True(t, found)
+	assert.True(t, found)
 	assert.Len(t, game.Players, 1)
 	assert.Equal(t, game.Players[0], game.GameOwnerId)
-  assert.Equal(t, uint(0), game.CurrentRound)
+	assert.Equal(t, uint(0), game.CurrentRound)
 	assert.NotEmpty(t, game.Id)
-  assert.NotEmpty(t, game.LastAction)
-  assert.NotEmpty(t, game.TimeSinceLastAction())
+	assert.NotEmpty(t, game.LastAction)
+	assert.NotEmpty(t, game.TimeSinceLastAction())
 }
 
 func TestGameInfo(t *testing.T) {
@@ -153,7 +153,9 @@ func TestGameInfo(t *testing.T) {
 	game, err := gameLogic.NewGame(settings, "Dave")
 	assert.Nil(t, err, "There should not be an error with making the game", err)
 
+	oldTime := game.LastAction
 	info := game.Info()
+	assert.Equal(t, oldTime, game.LastAction)
 
 	assert.Equal(t, game.Id, info.Id, "Game IDs should be equal")
 	assert.Equal(t, 1, info.PlayerCount, "There should only be one player")
