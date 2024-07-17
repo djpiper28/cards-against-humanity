@@ -13,7 +13,7 @@ type Metrics struct {
 	TotalWsErrors         int `metrics:"total_ws_errors"`
 	TotalMessagesSent     int `metrics:"total_messages_sent"`
 	TotalUnknownCommands  int `metrics:"total_unknown_commands"`
-  TotalCommandDuraion int `metrics:"total_command_duration"`
+	TotalCommandDuration  int `metrics:"total_command_duration_us"`
 	TotalCommandsExecuted int `metrics:"total_commands_executed"`
 	TotalCommandsFailed   int `metrics:"total_commands_failed"`
 
@@ -25,7 +25,7 @@ type Metrics struct {
 	UsersConnected         int `metrics:"users_connected"`
 	GamesInProgress        int `metrics:"games_in_progress"`
 	TotalGamePurges        int `metrics:"total_game_purges"`
-	TotalGamePurgeDuration int `metrics:"total_game_purge_duration"`
+	TotalGamePurgeDuration int `metrics:"total_game_purge_duration_ms"`
 	TotalGamesPurged       int `metrics:"total_games_purged"`
 
 	lock sync.Mutex
@@ -76,7 +76,7 @@ func AddCommandExecuted(duration int) {
 	metrics.lock.Lock()
 	defer metrics.lock.Unlock()
 	metrics.TotalCommandsExecuted++
-  metrics.TotalCommandDuraion += duration
+	metrics.TotalCommandDuration += duration
 }
 
 func AddMessageSent() {

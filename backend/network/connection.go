@@ -293,7 +293,7 @@ func (c *WsConnection) listenAndHandle() error {
 
 
 		microSeconds := time.Since(startTime).Microseconds()
-		go gameRepo.AddCommandExecuted(int(time.Since(startTime).Milliseconds()))
+		go gameRepo.AddCommandExecuted(int(time.Since(startTime).Microseconds()))
 
 		if handler != PingCommand {
 			logger.Logger.Infof("Command Handler \"%s\" | %s | %dµs",
