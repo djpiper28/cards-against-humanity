@@ -163,7 +163,7 @@ func NewGame(gameSettings *GameSettings, hostPlayerName string) (*Game, error) {
 	players[0] = hostPlayer.Id
 
 	return &Game{LastAction: time.Now(),
-    Id: uuid.New(),
+		Id:           uuid.New(),
 		PlayersMap:   playersMap,
 		Players:      players,
 		GameOwnerId:  hostPlayer.Id,
@@ -173,7 +173,7 @@ func NewGame(gameSettings *GameSettings, hostPlayerName string) (*Game, error) {
 }
 
 func (g *Game) updateLastAction() {
-  g.LastAction = time.Now()
+	g.LastAction = time.Now()
 }
 
 // Information that the client sees about a game
@@ -297,7 +297,7 @@ func (g *Game) AddPlayer(playerName string) (uuid.UUID, error) {
 	if g.GameState != GameStateInLobby {
 		g.newCards()
 	}
-  g.updateLastAction()
+	g.updateLastAction()
 	return player.Id, nil
 }
 
@@ -347,7 +347,7 @@ func (g *Game) RemovePlayer(playerToRemoveId uuid.UUID) (PlayerRemovalResult, er
 		res.CzarJudingPhaseInfo = czarJudgingPhaseInfo
 	}
 
-  g.updateLastAction()
+	g.updateLastAction()
 	// TODO: If there are below the minimum amount of players move to the lobby
 	return res, nil
 }
@@ -454,7 +454,7 @@ func (g *Game) StartGame() (RoundInfo, error) {
 	if err != nil {
 		return RoundInfo{}, err
 	}
-  g.updateLastAction()
+	g.updateLastAction()
 	return g.roundInfo()
 }
 
@@ -492,7 +492,7 @@ func (g *Game) ChangeSettings(newSettings GameSettings) error {
 	}
 
 	g.Settings = &newSettings
-  g.updateLastAction()
+	g.updateLastAction()
 	return nil
 }
 
@@ -654,13 +654,13 @@ func (g *Game) PlayCards(playerId uuid.UUID, cardIds []int) (PlayCardsResult, er
 		ret.CzarJudingPhaseInfo = info
 	}
 
-  g.updateLastAction()
+	g.updateLastAction()
 	return ret, nil
 }
 
 func (g *Game) TimeSinceLastAction() time.Duration {
-  g.Lock.Lock()
-  defer g.Lock.Unlock()
+	g.Lock.Lock()
+	defer g.Lock.Unlock()
 
-  return time.Since(g.LastAction)
+	return time.Since(g.LastAction)
 }

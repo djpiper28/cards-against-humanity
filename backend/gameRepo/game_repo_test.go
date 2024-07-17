@@ -22,11 +22,6 @@ func TestNew(t *testing.T) {
 	t.Parallel()
 
 	repo := gameRepo.New()
-	if repo.GameAgeMap == nil {
-		t.Log("The game age map is nil")
-		t.FailNow()
-	}
-
 	if repo.GameMap == nil {
 		t.Log("The game map is nil")
 		t.FailNow()
@@ -46,12 +41,6 @@ func TestCreateGameFail(t *testing.T) {
 	_, found := repo.GameMap[id]
 	if found {
 		t.Log("The game should not be in the map")
-		t.FailNow()
-	}
-
-	_, found = repo.GameAgeMap[id]
-	if found {
-		t.Log("The game should not be in the age map")
 		t.FailNow()
 	}
 }
@@ -74,11 +63,6 @@ func TestCreateGame(t *testing.T) {
 	}
 
 	assert.Equal(t, pid, game.GameOwnerId, "Game owner should be the returned player ID")
-
-	if game.CreationTime != repo.GameAgeMap[id] {
-		t.Log("The age map does not have the game in it")
-		t.FailNow()
-	}
 }
 
 func TestGetGames(t *testing.T) {
@@ -269,4 +253,151 @@ func TestPlayerPlaysCardsNotInGame(t *testing.T) {
 	repo := gameRepo.New()
 	_, err := repo.PlayerPlayCards(uuid.New(), uuid.New(), []int{1, 2, 3})
 	assert.Error(t, err)
+}
+
+func TestGamesWithNoPlayersOlderThanMaxEmptyAgeAreRemoved(t *testing.T) {
+	t.Parallel()
+
+	repo := gameRepo.New()
+	settings := gameLogic.DefaultGameSettings()
+
+	gid, pid, err := repo.CreateGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	game, err := repo.GetGame(gid)
+	assert.NoError(t, err)
+
+	game.LastAction = game.LastAction.Add(-(gameRepo.MaxGameWithNoPlayersAge + 1))
+	assert.True(t, game.TimeSinceLastAction() > gameRepo.MaxGameWithNoPlayersAge)
+
+	player, found := game.PlayersMap[pid]
+	assert.True(t, found)
+	player.Connected = false
+
+	gid2, pid, err := repo.CreateGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	game, err = repo.GetGame(gid2)
+	assert.NoError(t, err)
+
+	game.LastAction = game.LastAction.Add(-(gameRepo.MaxGameWithNoPlayersAge + 1))
+	assert.True(t, game.TimeSinceLastAction() > gameRepo.MaxGameWithNoPlayersAge)
+
+	player, found = game.PlayersMap[pid]
+	assert.True(t, found)
+	player.Connected = false
+
+	gamesEnded := repo.EndOldGames()
+	assert.Len(t, gamesEnded, 2)
+	assert.Contains(t, gamesEnded, gid)
+	assert.Contains(t, gamesEnded, gid2)
+
+	_, err = repo.GetGame(gid)
+	assert.Error(t, err)
+
+	_, err = repo.GetGame(gid2)
+	assert.Error(t, err)
+}
+
+func TestGamesWithNoPlayersYoungerThanMaxEmptyAgeAreNotRemoved(t *testing.T) {
+	t.Parallel()
+
+	repo := gameRepo.New()
+	settings := gameLogic.DefaultGameSettings()
+
+	gid, pid, err := repo.CreateGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	game, err := repo.GetGame(gid)
+	assert.NoError(t, err)
+
+	player, found := game.PlayersMap[pid]
+	assert.True(t, found)
+	player.Connected = false
+
+	gid2, pid, err := repo.CreateGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	game, err = repo.GetGame(gid2)
+	assert.NoError(t, err)
+
+	player, found = game.PlayersMap[pid]
+	assert.True(t, found)
+	player.Connected = false
+
+	gamesEnded := repo.EndOldGames()
+	assert.Len(t, gamesEnded, 0)
+
+	_, err = repo.GetGame(gid)
+	assert.NoError(t, err)
+
+	_, err = repo.GetGame(gid2)
+	assert.NoError(t, err)
+}
+
+func TestGamesOlderThanMaxAgeAreEnded(t *testing.T) {
+	t.Parallel()
+
+	repo := gameRepo.New()
+	settings := gameLogic.DefaultGameSettings()
+
+	gid, _, err := repo.CreateGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	game, err := repo.GetGame(gid)
+	assert.NoError(t, err)
+
+	game.LastAction = game.LastAction.Add(-(gameRepo.MaxGameInLobbyAge + 1))
+	assert.True(t, game.TimeSinceLastAction() > gameRepo.MaxGameInLobbyAge)
+
+	gamesEnded := repo.EndOldGames()
+	assert.Len(t, gamesEnded, 1)
+	assert.Contains(t, gamesEnded, gid)
+
+	_, err = repo.GetGame(gid)
+	assert.Error(t, err)
+}
+
+func TestGamesYoungerThanMaxAgeAreNotEnded(t *testing.T) {
+	t.Parallel()
+
+	repo := gameRepo.New()
+	settings := gameLogic.DefaultGameSettings()
+
+	gid, _, err := repo.CreateGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	_, err = repo.GetGame(gid)
+	assert.NoError(t, err)
+
+	gamesEnded := repo.EndOldGames()
+	assert.Len(t, gamesEnded, 0)
+
+	_, err = repo.GetGame(gid)
+	assert.NoError(t, err)
+}
+
+func BenchEndOldGames(b testing.B) {
+	b.ReportAllocs()
+	b.ReportMetric(float64(b.N), "games")
+
+	repo := gameRepo.New()
+	settings := gameLogic.DefaultGameSettings()
+
+	for i := 0; i < b.N; i++ {
+		gid, _, err := repo.CreateGame(settings, "Dave")
+		if err != nil {
+			b.FailNow()
+		}
+
+		game, err := repo.GetGame(gid)
+		if err != nil {
+			b.FailNow()
+		}
+
+		game.LastAction = game.LastAction.Add(-(gameRepo.MaxGameInLobbyAge + 1))
+	}
+
+	b.ResetTimer()
+	repo.EndOldGames()
 }

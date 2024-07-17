@@ -18,14 +18,12 @@ const (
 )
 
 type GameRepo struct {
-	GameMap    map[uuid.UUID]*gameLogic.Game
-	GameAgeMap map[uuid.UUID]time.Time
-	lock       sync.RWMutex
+	GameMap map[uuid.UUID]*gameLogic.Game
+	lock    sync.RWMutex
 }
 
 func New() *GameRepo {
-	return &GameRepo{GameMap: make(map[uuid.UUID]*gameLogic.Game),
-		GameAgeMap: make(map[uuid.UUID]time.Time)}
+	return &GameRepo{GameMap: make(map[uuid.UUID]*gameLogic.Game)}
 }
 
 // Creates a game and return the game ID, player ID and any errors
@@ -41,7 +39,6 @@ func (gr *GameRepo) CreateGame(gameSettings *gameLogic.GameSettings, playerName 
 
 	gid := game.Id
 	gr.GameMap[gid] = game
-	gr.GameAgeMap[gid] = game.CreationTime
 
 	go AddGame()
 	go AddUser()
@@ -65,7 +62,6 @@ func (gr *GameRepo) removeGame(gameId uuid.UUID) error {
 	}
 
 	delete(gr.GameMap, gameId)
-	delete(gr.GameAgeMap, gameId)
 	return nil
 }
 
@@ -280,4 +276,24 @@ func (gr *GameRepo) PlayerPlayCards(gameId, playerId uuid.UUID, cardIds []int) (
 	}
 
 	return info, nil
+}
+
+func (gr *GameRepo) EndOldGames() []uuid.UUID {
+	endedGames := make([]uuid.UUID, 0)
+	games := gr.GetGames()
+	for _, game := range games {
+		remove := false
+		if game.TimeSinceLastAction() > MaxGameInProgressAge {
+			remove = true
+		} else if game.Metrics().PlayersConnected == 0 && game.TimeSinceLastAction() > MaxGameWithNoPlayersAge {
+			remove = true
+		}
+
+		if remove {
+			gr.removeGame(game.Id)
+			endedGames = append(endedGames, game.Id)
+		}
+	}
+
+	return endedGames
 }

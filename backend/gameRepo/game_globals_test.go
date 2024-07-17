@@ -9,6 +9,5 @@ import (
 
 func TestGameRepoInitialised(t *testing.T) {
 	assert.NotNil(t, gameRepo.Repo, "Game Repo should not be nil")
-	assert.NotNil(t, gameRepo.Repo.GameAgeMap)
 	assert.NotNil(t, gameRepo.Repo.GameMap)
 }
