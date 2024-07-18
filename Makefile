@@ -51,7 +51,7 @@ test-backend: backend
 
 .PHONY: start-docker-compose
 start-docker-compose:
-	docker-compose up --build --detach
+	docker-compose --progress plain up --build --detach
 
 # Everything is tested within docker, so this can be started imediately
 .PHONY: test-e2e
