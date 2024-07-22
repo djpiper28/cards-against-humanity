@@ -6,7 +6,8 @@ Cards Against Humanity website written in Golang.
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=djpiper28_cards-against-humanity&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=djpiper28_cards-against-humanity)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=djpiper28_cards-against-humanity&metric=coverage)](https://sonarcloud.io/summary/new_code?id=djpiper28_cards-against-humanity)
-[![Go](https://github.com/djpiper28/cards-against-humanity/actions/workflows/coverage.yml/badge.svg)](https://github.com/djpiper28/cards-against-humanity/actions/workflows/coverage.yml)
+[![Tests](https://github.com/djpiper28/cards-against-humanity/actions/workflows/tests.yml/badge.svg)](https://github.com/djpiper28/cards-against-humanity/actions/workflows/tests.yml)
+[![Coverage](https://github.com/djpiper28/cards-against-humanity/actions/workflows/coverage.yml/badge.svg)](https://github.com/djpiper28/cards-against-humanity/actions/workflows/coverage.yml)
 [![e2e](https://github.com/djpiper28/cards-against-humanity/actions/workflows/e2e.yml/badge.svg)](https://github.com/djpiper28/cards-against-humanity/actions/workflows/e2e.yml)
 
 ## Dev Stuff
