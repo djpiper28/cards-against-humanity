@@ -414,11 +414,9 @@ func (g *Game) newCards() error {
 			return errors.New(fmt.Sprintf("Cannot create game: %s", err))
 		}
 
-		cardIndexSlice := make(map[int]*WhiteCard)
 		for _, card := range cards {
-			cardIndexSlice[card.Id] = card
+			g.PlayersMap[pid].Hand[card.Id] = card
 		}
-		g.PlayersMap[pid].Hand = cardIndexSlice
 	}
 
 	return nil
