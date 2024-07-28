@@ -117,10 +117,16 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
                 pack: "Your hand",
               };
             })}
-            selectedCardIds={props.roundState.yourPlays.map((x) =>
-              x.id.toString(),
-            )}
+            selectedCardIds={
+              isCzarJudgingPhase()
+                ? []
+                : props.roundState.yourPlays.map((x) => x.id.toString())
+            }
             onSelectCard={(id) => {
+              if (isCzarJudgingPhase()) {
+                return;
+              }
+
               if (
                 props.roundState.yourPlays
                   .map((x) => x.id.toString())
