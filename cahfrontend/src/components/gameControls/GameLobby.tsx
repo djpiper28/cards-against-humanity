@@ -217,7 +217,7 @@ export default function GameLobby() {
       console.log("Round state change detected");
       setRoundState(state!);
     };
-    gameState.onCardPlaysChanged = (allPlays) => {
+    gameState.onAllPlaysChanged = (allPlays) => {
       console.log("All plays changed");
       setAllPlays(allPlays);
     };

@@ -8,14 +8,17 @@ import {
   MsgCommandError,
   MsgNewOwner,
   MsgOnCardPlayed,
+  MsgOnCzarJudgingPhase,
   MsgOnPlayerCreate,
   MsgOnPlayerDisconnect,
   MsgOnPlayerJoin,
   MsgOnPlayerLeave,
   RpcChangeSettingsMsg,
   RpcMessage,
+  RpcOnCzarJudgingPhaseMsg,
 } from "../rpcTypes";
 import { gameState } from "./gameState";
+import { GameStateCzarJudgingCards, WhiteCard } from "../gameLogicTypes";
 
 describe("Game state tests", () => {
   vi.mock("isomorphic-ws", () => {
@@ -415,5 +418,98 @@ describe("Game state tests", () => {
     gameState.handleRpcMessage(JSON.stringify(playedMsg));
 
     expect(gameState.playerList()[0].hasPlayed).toBe(true);
+  });
+
+  it("Should handle moving to czar judging phase", () => {
+    const gid = v4();
+    const pid = v4();
+    gameState.setupState(gid, pid, "");
+
+    gameState.onLobbyStateChange = vi.fn();
+    gameState.onRoundStateChange = vi.fn();
+    gameState.onAllPlaysChanged = vi.fn();
+
+    const allPlays: WhiteCard[][] = [
+      [
+        {
+          id: 1,
+          bodyText: "uwu 1",
+        },
+        {
+          id: 2,
+          bodyText: "uwu 2",
+        },
+      ],
+      [
+        {
+          id: 3,
+          bodyText: "owo 1",
+        },
+        {
+          id: 4,
+          bodyText: "owo 2",
+        },
+      ],
+      [
+        {
+          id: 5,
+          bodyText: "0w0 1",
+        },
+        {
+          id: 6,
+          bodyText: "0w0 2",
+        },
+      ],
+    ];
+    const newHand: WhiteCard[] = [
+      {
+        id: 1,
+        bodyText: "uwu 1",
+      },
+      {
+        id: 2,
+        bodyText: "uwu 2",
+      },
+      {
+        id: 3,
+        bodyText: "uwu 3",
+      },
+      {
+        id: 4,
+        bodyText: "uwu 4",
+      },
+      {
+        id: 5,
+        bodyText: "uwu 5",
+      },
+      {
+        id: 6,
+        bodyText: "uwu 6",
+      },
+      {
+        id: 7,
+        bodyText: "uwu 7",
+      },
+    ];
+
+    const data: RpcOnCzarJudgingPhaseMsg = {
+      allPlays: allPlays,
+      newHand: newHand,
+    };
+
+    const czarJudgingMsg: RpcMessage = {
+      type: MsgOnCzarJudgingPhase,
+      data: data,
+    };
+
+    gameState.handleRpcMessage(JSON.stringify(czarJudgingMsg));
+
+    expect(gameState.onLobbyStateChange).toHaveBeenCalled();
+    expect(gameState.lobbyState.gameState).toBe(GameStateCzarJudgingCards);
+
+    expect(gameState.onRoundStateChange).toHaveBeenCalled();
+    expect(gameState.roundState.yourHand).toEqual(newHand);
+
+    expect(gameState.onAllPlaysChanged).toHaveBeenCalledWith(allPlays);
   });
 });

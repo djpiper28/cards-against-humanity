@@ -24,7 +24,7 @@ const (
 
 	MaxPasswordLength = 50
 
-	MinPlayers = 3
+	MinPlayers = 2
 	MaxPlayers = 20
 
 	MinCardPacks = 1

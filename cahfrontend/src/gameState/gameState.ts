@@ -1,5 +1,6 @@
 import {
   BlackCard,
+  GameStateCzarJudgingCards,
   GameStateInfo,
   GameStateWhiteCardsBeingSelected,
   Player,
@@ -89,7 +90,7 @@ class GameState {
   public onPlayerListChange?: (players: GamePlayerList) => void;
   public onCommandError?: (error: RpcCommandErrorMsg) => void;
   public onChangeSettings?: (settings: RpcChangeSettingsMsg) => void;
-  public onCardPlaysChanged?: (plays: WhiteCard[][]) => void;
+  public onAllPlaysChanged?: (plays: WhiteCard[][]) => void;
   public onError?: (error: string) => void;
 
   // Logic lmao
@@ -326,10 +327,10 @@ class GameState {
       };
     });
 
-    this.lobbyState.gameState = GameStateWhiteCardsBeingSelected;
+    this.lobbyState.gameState = GameStateCzarJudgingCards;
     this.onLobbyStateChange?.(structuredClone(this.lobbyState));
     this.onRoundStateChange?.(structuredClone(this.roundState));
-    this.onCardPlaysChanged?.(
+    this.onAllPlaysChanged?.(
       data.allPlays.map((x) =>
         x.map((card) => {
           return {
