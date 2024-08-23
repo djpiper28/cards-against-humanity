@@ -13,6 +13,7 @@ interface Props {
   czarId: string;
   cards: GameCard[];
   selectedCardIds: string[];
+  isJudging: boolean;
   onSelectCard?: (cardId: string) => void;
 }
 
@@ -73,22 +74,27 @@ export default function PlayerCards(props: Readonly<Props>) {
     </div>
   );
 
+  const isCzar = () => props.czarId === gameState.getPlayerId();
+  const blockCardPlays = () => isCzar() || props.isJudging;
   return (
     <>
-      <Show when={props.czarId === gameState.getPlayerId()}>
+      <Show when={blockCardPlays()}>
         <div class="relative flex w-fit">
           <div
             id="czar"
-            class="absolute flex top-0 left-0 right-0 bottom-0 z-10 justify-center items-center text-center bg-[#aaaaaa30] rounded-2xl"
+            class="absolute flex flex-col gap-3 top-0 left-0 right-0 bottom-0 z-10 justify-center items-center text-center bg-[#bababa30] rounded-2xl"
           >
-            <Header text="You are the Card Czar" />
+            <Show when={isCzar()}>
+              <Header text="You are the Card Czar." />
+            </Show>
+            <Show when={props.isJudging}>
+              <Header text="Judging in progress..." />
+            </Show>
           </div>
           <div class="static">{playerCardComp()}</div>
         </div>
       </Show>
-      <Show when={props.czarId !== gameState.getPlayerId()}>
-        {playerCardComp()}
-      </Show>
+      <Show when={!blockCardPlays()}>{playerCardComp()}</Show>
     </>
   );
 }

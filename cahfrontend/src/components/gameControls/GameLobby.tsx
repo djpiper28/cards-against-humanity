@@ -110,6 +110,7 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
           <SubHeader text="Your hand:" />
           <PlayerCards
             czarId={props.roundState.currentCardCzarId}
+            isJudging={isCzarJudgingPhase()}
             cards={props.roundState.yourHand.map((x) => {
               return {
                 id: x.id.toString(),
