@@ -422,6 +422,21 @@ func (g *Game) newCards() error {
 	return nil
 }
 
+func (g *Game) newCzar() uuid.UUID {
+	var newCzarId uuid.UUID
+	currentCzarIndex := len(g.Players)-2
+	for i, pid := range g.Players {
+		if pid == g.CurrentCardCzarId {
+			currentCzarIndex = i
+			break
+		}
+	}
+
+	newCzarId = g.Players[(currentCzarIndex+1)%len(g.Players)]
+	g.CurrentCardCzarId = newCzarId
+	return newCzarId
+}
+
 func (g *Game) StartGame() (RoundInfo, error) {
 	g.Lock.Lock()
 	defer g.Lock.Unlock()
@@ -446,7 +461,7 @@ func (g *Game) StartGame() (RoundInfo, error) {
 	}
 	g.CardDeck = deck
 	g.CurrentRound = 1
-	g.CurrentCardCzarId = g.Players[len(g.Players)-1]
+	g.newCzar()
 
 	err = g.newCards()
 	if err != nil {
@@ -661,4 +676,75 @@ func (g *Game) TimeSinceLastAction() time.Duration {
 	defer g.Lock.Unlock()
 
 	return time.Since(g.LastAction)
+}
+
+type CzarSelectCardResult struct {
+	NewCzarId    uuid.UUID `json:"newCzardId"`
+	WinnerId     uuid.UUID `json:"winnerId"`
+	NewBlackCard BlackCard `json:"newBlackCard"`
+	// If there are no more black cards then the game is over
+	GameEnded bool `json:"gameEnded"`
+}
+
+func IsPlayEqual(playersPlays []*WhiteCard, otherPlays []int) bool {
+	if len(playersPlays) != len(otherPlays) {
+		return false
+	}
+
+	for _, card := range playersPlays {
+		found := false
+		for _, otherCard := range otherPlays {
+			if otherCard == card.Id {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (g *Game) CzarSelectCards(pid uuid.UUID, cards []int) (CzarSelectCardResult, error) {
+	g.Lock.Lock()
+	defer g.Lock.Unlock()
+
+	if g.CurrentCardCzarId != pid {
+		return CzarSelectCardResult{}, errors.New(fmt.Sprintf("%s is not the card czar", pid))
+	}
+
+	if len(cards) != int(g.CurrentBlackCard.CardsToPlay) {
+		return CzarSelectCardResult{}, errors.New(fmt.Sprintf("Expected %d cards, found %d", g.CurrentBlackCard.CardsToPlay, len(cards)))
+	}
+
+	// Find the player who won
+	var winnerId uuid.UUID
+	for _, player := range g.PlayersMap {
+		if IsPlayEqual(player.CurrentPlay, cards) {
+			winnerId = player.Id
+			break
+		}
+	}
+
+	var nullId uuid.UUID
+	if winnerId == nullId {
+		return CzarSelectCardResult{}, errors.New("Cannot find a player that has played those cards")
+	}
+
+	// Produce result
+	newBlackCard, cardDrawErr := g.CardDeck.GetNewBlackCard()
+	if cardDrawErr != nil {
+		logger.Logger.Errorf("Cannot get a new card for the next round %s", cardDrawErr)
+	}
+	g.CurrentBlackCard = newBlackCard
+
+	newCzarId := g.newCzar()
+
+	return CzarSelectCardResult{WinnerId: winnerId,
+		NewBlackCard: *newBlackCard,
+		NewCzarId:    newCzarId,
+		GameEnded:    cardDrawErr != nil}, nil
 }
