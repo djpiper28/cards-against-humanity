@@ -556,7 +556,7 @@ func (g *Game) moveToCzarJudgingPhase() (CzarJudingPhaseInfo, error) {
 	err := g.newCards()
 	if err != nil {
 		logger.Logger.Warn("Cannot give players new cards, after judging the game will end.")
-		return CzarJudingPhaseInfo{}, nil 
+		return CzarJudingPhaseInfo{}, nil
 	}
 
 	// Copy out players hands
@@ -719,7 +719,9 @@ func (g *Game) CzarSelectCards(pid uuid.UUID, cards []int) (CzarSelectCardResult
 	}
 
 	if len(cards) != int(g.CurrentBlackCard.CardsToPlay) {
-		return CzarSelectCardResult{}, errors.New(fmt.Sprintf("Expected %d cards, found %d", g.CurrentBlackCard.CardsToPlay, len(cards)))
+		return CzarSelectCardResult{}, errors.New(fmt.Sprintf("Expected %d cards, found %d",
+			g.CurrentBlackCard.CardsToPlay,
+			len(cards)))
 	}
 
 	// Find the player who won
