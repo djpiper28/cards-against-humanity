@@ -311,3 +311,15 @@ func (gr *GameRepo) EndOldGames() []uuid.UUID {
 	}
 	return endedGames
 }
+
+func (gr *GameRepo) CzarSelectsCard(gameId, pid uuid.UUID, cards []int) (gameLogic.CzarSelectCardResult, error) {
+	gr.lock.RLock()
+	defer gr.lock.RUnlock()
+
+	game, found := gr.GameMap[gameId]
+	if !found {
+		return gameLogic.CzarSelectCardResult{}, errors.New("Cannot find game")
+	}
+
+	return game.CzarSelectCards(pid, cards)
+}
