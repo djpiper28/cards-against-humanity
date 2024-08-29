@@ -381,10 +381,10 @@ func TestGamesYoungerThanMaxAgeAreNotEnded(t *testing.T) {
 var table = []struct {
 	input int
 }{
+	{input: 10},
+	{input: 50},
 	{input: 100},
 	{input: 500},
-	{input: 1000},
-	{input: 5000},
 }
 
 func BenchmarkEndGames(b *testing.B) {
@@ -415,4 +415,13 @@ func BenchmarkEndGames(b *testing.B) {
 			repo.EndOldGames()
 		})
 	}
+}
+
+func TestCzarSelectsCardGameIdLookupFails(t *testing.T) {
+	t.Parallel()
+
+	repo := gameRepo.New()
+	_, err := repo.CzarSelectsCard(uuid.New(), uuid.New(), []int{})
+
+	assert.Error(t, err)
 }
