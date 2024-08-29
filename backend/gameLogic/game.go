@@ -3,7 +3,6 @@ package gameLogic
 import (
 	"errors"
 	"fmt"
-	"log"
 	"math/rand"
 	"sync"
 	"time"
@@ -406,7 +405,6 @@ func (g *Game) newCards() error {
 	}
 
 	g.CurrentBlackCard = blackCard
-	g.GameState = GameStateWhiteCardsBeingSelected
 
 	for pid, p := range g.PlayersMap {
 		cards, err := g.CardDeck.GetNewWhiteCards(uint(HandSize - len(p.Hand)))
@@ -424,7 +422,7 @@ func (g *Game) newCards() error {
 
 func (g *Game) newCzar() uuid.UUID {
 	var newCzarId uuid.UUID
-	currentCzarIndex := len(g.Players)-2
+	currentCzarIndex := len(g.Players) - 2
 	for i, pid := range g.Players {
 		if pid == g.CurrentCardCzarId {
 			currentCzarIndex = i
@@ -462,6 +460,7 @@ func (g *Game) StartGame() (RoundInfo, error) {
 	g.CardDeck = deck
 	g.CurrentRound = 1
 	g.newCzar()
+	g.GameState = GameStateWhiteCardsBeingSelected
 
 	err = g.newCards()
 	if err != nil {
@@ -552,13 +551,12 @@ func (g *Game) moveToCzarJudgingPhase() (CzarJudingPhaseInfo, error) {
 		}
 
 		player.Hand = newHand
-		player.CurrentPlay = make([]*WhiteCard, 0)
 	}
 
 	err := g.newCards()
 	if err != nil {
-		log.Print("Cannot give players new cards, after judging the game will end.")
-		return CzarJudingPhaseInfo{}, err
+		logger.Logger.Warn("Cannot give players new cards, after judging the game will end.")
+		return CzarJudingPhaseInfo{}, nil 
 	}
 
 	// Copy out players hands
@@ -712,6 +710,10 @@ func (g *Game) CzarSelectCards(pid uuid.UUID, cards []int) (CzarSelectCardResult
 	g.Lock.Lock()
 	defer g.Lock.Unlock()
 
+	if g.GameState != GameStateCzarJudgingCards {
+		return CzarSelectCardResult{}, errors.New("Not in judging phase")
+	}
+
 	if g.CurrentCardCzarId != pid {
 		return CzarSelectCardResult{}, errors.New(fmt.Sprintf("%s is not the card czar", pid))
 	}
@@ -743,6 +745,7 @@ func (g *Game) CzarSelectCards(pid uuid.UUID, cards []int) (CzarSelectCardResult
 
 	newCzarId := g.newCzar()
 
+	g.updateLastAction()
 	return CzarSelectCardResult{WinnerId: winnerId,
 		NewBlackCard: *newBlackCard,
 		NewCzarId:    newCzarId,

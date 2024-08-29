@@ -841,7 +841,6 @@ func TestPlayingCardCausesCzarJudingPhase(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Game should have continued
-	assert.Equal(t, game.PlayersMap[pid].CurrentPlay, []*gameLogic.WhiteCard{})
 	assert.True(t, resp.MovedToNextCardCzarPhase)
 
 	for _, plays := range resp.CzarJudingPhaseInfo.AllPlays {
@@ -883,3 +882,140 @@ func TestPlayingCardInWrongGameStateFails(t *testing.T) {
 
 // TODO: Check that when a player leaves and all other players have played the judging starts
 // TODO: Check that when a player leaves and there are too few players the game ends
+
+func TestJudgingInWrongPhaseFails(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	_, err = game.CzarSelectCards(game.Players[0], []int{0, 1})
+	assert.Error(t, err)
+}
+
+func TestJudgingWithPlayerWhoIsNotCzarFails(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 1")
+	assert.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 2")
+	assert.NoError(t, err)
+
+	startGameInfo, err := game.StartGame()
+	assert.NoError(t, err)
+
+	var lastPlay []int
+	for i, pid := range game.Players {
+		if pid == game.CurrentCardCzarId {
+			continue
+		}
+
+		cards := make([]int, 0)
+		for i := 0; i < int(game.CurrentBlackCard.CardsToPlay); i++ {
+			cards = append(cards, startGameInfo.PlayerHands[pid][i].Id)
+		}
+
+		lastPlay = cards
+		res, err := game.PlayCards(pid, cards)
+		assert.NoError(t, err)
+
+		if i == len(game.Players) - 1 {
+			assert.True(t, res.MovedToNextCardCzarPhase)
+		}
+	}
+
+	assert.NotEqual(t, game.CurrentCardCzarId, game.Players[0])
+	_, err = game.CzarSelectCards(game.Players[0], lastPlay)
+	assert.Error(t, err)
+}
+
+func TestJudgingWithPlayerInvalidPlaysFails(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 1")
+	assert.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 2")
+	assert.NoError(t, err)
+
+	startGameInfo, err := game.StartGame()
+	assert.NoError(t, err)
+
+	var lastPlay []int
+	for i, pid := range game.Players {
+		if pid == game.CurrentCardCzarId {
+			continue
+		}
+
+		cards := make([]int, 0)
+		for i := 0; i < int(game.CurrentBlackCard.CardsToPlay); i++ {
+			cards = append(cards, startGameInfo.PlayerHands[pid][i].Id)
+		}
+
+		lastPlay = cards
+		res, err := game.PlayCards(pid, cards)
+		assert.NoError(t, err)
+
+		if i == len(game.Players) - 1 {
+			assert.True(t, res.MovedToNextCardCzarPhase)
+		}
+	}
+
+	assert.Equal(t, gameLogic.GameStateCzarJudgingCards, game.GameState)
+
+	lastPlay[0] += 1
+	_, err = game.CzarSelectCards(game.CurrentCardCzarId, lastPlay)
+	assert.Error(t, err)
+}
+
+func TestJudgingSuccess(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 1")
+	assert.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 2")
+	assert.NoError(t, err)
+
+	startGameInfo, err := game.StartGame()
+	assert.NoError(t, err)
+
+	var lastPlay []int
+	for i, pid := range game.Players {
+		if pid == game.CurrentCardCzarId {
+			continue
+		}
+
+		cards := make([]int, 0)
+		for i := 0; i < int(game.CurrentBlackCard.CardsToPlay); i++ {
+			cards = append(cards, startGameInfo.PlayerHands[pid][i].Id)
+		}
+
+		lastPlay = cards
+		res, err := game.PlayCards(pid, cards)
+		assert.NoError(t, err)
+
+		if i == len(game.Players) - 1 {
+			assert.True(t, res.MovedToNextCardCzarPhase)
+		}
+	}
+
+	assert.Equal(t, gameLogic.GameStateCzarJudgingCards, game.GameState)
+
+	_, err = game.CzarSelectCards(game.CurrentCardCzarId, lastPlay)
+	assert.NoError(t, err)
+}
