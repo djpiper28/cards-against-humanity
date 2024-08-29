@@ -995,6 +995,7 @@ func TestJudgingSuccess(t *testing.T) {
 	assert.NoError(t, err)
 
 	var lastPlay []int
+	var winnerId uuid.UUID
 	for i, pid := range game.Players {
 		if pid == game.CurrentCardCzarId {
 			continue
@@ -1006,6 +1007,8 @@ func TestJudgingSuccess(t *testing.T) {
 		}
 
 		lastPlay = cards
+		winnerId = pid
+
 		res, err := game.PlayCards(pid, cards)
 		assert.NoError(t, err)
 
@@ -1016,6 +1019,21 @@ func TestJudgingSuccess(t *testing.T) {
 
 	assert.Equal(t, gameLogic.GameStateCzarJudgingCards, game.GameState)
 
-	_, err = game.CzarSelectCards(game.CurrentCardCzarId, lastPlay)
+	oldCzar := game.CurrentCardCzarId
+	oldBlackCard := game.CurrentBlackCard
+
+	res, err := game.CzarSelectCards(oldCzar, lastPlay)
 	assert.NoError(t, err)
+
+	assert.False(t, res.GameEnded)
+
+	assert.NotEqual(t, oldCzar, game.CurrentCardCzarId)
+	assert.NotEmpty(t, game.CurrentCardCzarId)
+	assert.Equal(t, game.CurrentCardCzarId, res.NewCzarId)
+
+	assert.NotEqual(t, oldBlackCard, game.CurrentBlackCard)
+	assert.NotEmpty(t, game.CurrentBlackCard)
+	assert.Equal(t, game.CurrentBlackCard, res.NewBlackCard)
+
+	assert.Equal(t, res.WinnerId, winnerId)
 }

@@ -679,7 +679,7 @@ func (g *Game) TimeSinceLastAction() time.Duration {
 type CzarSelectCardResult struct {
 	NewCzarId    uuid.UUID `json:"newCzardId"`
 	WinnerId     uuid.UUID `json:"winnerId"`
-	NewBlackCard BlackCard `json:"newBlackCard"`
+	NewBlackCard *BlackCard `json:"newBlackCard"`
 	// If there are no more black cards then the game is over
 	GameEnded bool `json:"gameEnded"`
 }
@@ -749,7 +749,7 @@ func (g *Game) CzarSelectCards(pid uuid.UUID, cards []int) (CzarSelectCardResult
 
 	g.updateLastAction()
 	return CzarSelectCardResult{WinnerId: winnerId,
-		NewBlackCard: *newBlackCard,
+		NewBlackCard: newBlackCard,
 		NewCzarId:    newCzarId,
 		GameEnded:    cardDrawErr != nil}, nil
 }
