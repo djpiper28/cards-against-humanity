@@ -425,3 +425,51 @@ func TestCzarSelectsCardGameIdLookupFails(t *testing.T) {
 
 	assert.Error(t, err)
 }
+
+func TestCzarSleectsCardSuccess(t *testing.T) {
+	t.Parallel()
+
+	repo := gameRepo.New()
+
+	settings := gameLogic.DefaultGameSettings()
+	gid, _, err := repo.CreateGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	game, err := repo.GetGame(gid)
+	assert.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 1")
+	assert.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 2")
+	assert.NoError(t, err)
+
+	startGameInfo, err := game.StartGame()
+	assert.NoError(t, err)
+
+	var lastPlay []int
+	for i, pid := range game.Players {
+		if pid == game.CurrentCardCzarId {
+			continue
+		}
+
+		cards := make([]int, 0)
+		for i := 0; i < int(game.CurrentBlackCard.CardsToPlay); i++ {
+			cards = append(cards, startGameInfo.PlayerHands[pid][i].Id)
+		}
+
+		lastPlay = cards
+
+		res, err := game.PlayCards(pid, cards)
+		assert.NoError(t, err)
+
+		if i == len(game.Players)-1 {
+			assert.True(t, res.MovedToNextCardCzarPhase)
+		}
+	}
+
+	assert.Equal(t, gameLogic.GameStateCzarJudgingCards, game.GameState)
+
+	_, err = repo.CzarSelectsCard(gid, game.CurrentCardCzarId, lastPlay)
+	assert.NoError(t, err)
+}
