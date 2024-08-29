@@ -118,7 +118,7 @@ const (
 	GameStateInLobby GameState = iota + 1
 	GameStateWhiteCardsBeingSelected
 	GameStateCzarJudgingCards
-	GameStateDisplayingWinningCard
+	// GameStateDisplayingWinningCard
 	// Not used in normal game play, used to denote unchanged or error game states
 	GameStateEmpty = -1
 )
@@ -746,6 +746,7 @@ func (g *Game) CzarSelectCards(pid uuid.UUID, cards []int) (CzarSelectCardResult
 	g.CurrentBlackCard = newBlackCard
 
 	newCzarId := g.newCzar()
+	g.GameState = GameStateWhiteCardsBeingSelected
 
 	g.updateLastAction()
 	return CzarSelectCardResult{WinnerId: winnerId,

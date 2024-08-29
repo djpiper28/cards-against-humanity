@@ -925,7 +925,7 @@ func TestJudgingWithPlayerWhoIsNotCzarFails(t *testing.T) {
 		res, err := game.PlayCards(pid, cards)
 		assert.NoError(t, err)
 
-		if i == len(game.Players) - 1 {
+		if i == len(game.Players)-1 {
 			assert.True(t, res.MovedToNextCardCzarPhase)
 		}
 	}
@@ -966,7 +966,7 @@ func TestJudgingWithPlayerInvalidPlaysFails(t *testing.T) {
 		res, err := game.PlayCards(pid, cards)
 		assert.NoError(t, err)
 
-		if i == len(game.Players) - 1 {
+		if i == len(game.Players)-1 {
 			assert.True(t, res.MovedToNextCardCzarPhase)
 		}
 	}
@@ -1012,7 +1012,7 @@ func TestJudgingSuccess(t *testing.T) {
 		res, err := game.PlayCards(pid, cards)
 		assert.NoError(t, err)
 
-		if i == len(game.Players) - 1 {
+		if i == len(game.Players)-1 {
 			assert.True(t, res.MovedToNextCardCzarPhase)
 		}
 	}
@@ -1036,4 +1036,5 @@ func TestJudgingSuccess(t *testing.T) {
 	assert.Equal(t, game.CurrentBlackCard, res.NewBlackCard)
 
 	assert.Equal(t, res.WinnerId, winnerId)
+	assert.Equal(t, game.GameState, gameLogic.GameStateWhiteCardsBeingSelected)
 }
