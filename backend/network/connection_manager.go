@@ -266,7 +266,7 @@ func (g *ConnectionManager) MoveToCzarJudgingPhase(gid uuid.UUID, info gameLogic
 	wg := sync.WaitGroup{}
 	wg.Add(len(game.playerConnectionMap))
 	for pid, conn := range game.playerConnectionMap {
-		func(pid uuid.UUID, conn *WsConnection) {
+		go func(pid uuid.UUID, conn *WsConnection) {
 			defer wg.Done()
 			moveToNextPhaseMsg := RpcOnCzarJudgingPhaseMsg{
 				AllPlays: info.AllPlays,
