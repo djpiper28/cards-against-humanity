@@ -1036,5 +1036,6 @@ func TestJudgingSuccess(t *testing.T) {
 	assert.Equal(t, game.CurrentBlackCard, res.NewBlackCard)
 
 	assert.Equal(t, res.WinnerId, winnerId)
+
 	assert.Equal(t, game.GameState, gameLogic.GameStateWhiteCardsBeingSelected)
 }
