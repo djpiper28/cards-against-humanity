@@ -677,8 +677,8 @@ func (g *Game) TimeSinceLastAction() time.Duration {
 }
 
 type CzarSelectCardResult struct {
-	NewCzarId    uuid.UUID `json:"newCzardId"`
-	WinnerId     uuid.UUID `json:"winnerId"`
+	NewCzarId    uuid.UUID  `json:"newCzardId"`
+	WinnerId     uuid.UUID  `json:"winnerId"`
 	NewBlackCard *BlackCard `json:"newBlackCard"`
 	// If there are no more black cards then the game is over
 	GameEnded bool `json:"gameEnded"`
@@ -744,13 +744,28 @@ func (g *Game) CzarSelectCards(pid uuid.UUID, cards []int) (CzarSelectCardResult
 		logger.Logger.Errorf("Cannot get a new card for the next round %s", cardDrawErr)
 	}
 	g.CurrentBlackCard = newBlackCard
+	g.PlayersMap[winnerId].Points += 1
 
 	newCzarId := g.newCzar()
+
 	g.GameState = GameStateWhiteCardsBeingSelected
+	g.CurrentRound += 1
+
+	endGame := cardDrawErr != nil
+	if g.CurrentRound > g.Settings.MaxRounds {
+		endGame = true
+	}
+
+	for _, player := range g.PlayersMap {
+		if player.Points > int(g.Settings.PlayingToPoints) {
+			endGame = true
+			break
+		}
+	}
 
 	g.updateLastAction()
 	return CzarSelectCardResult{WinnerId: winnerId,
 		NewBlackCard: newBlackCard,
 		NewCzarId:    newCzarId,
-		GameEnded:    cardDrawErr != nil}, nil
+		GameEnded:    endGame}, nil
 }

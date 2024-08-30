@@ -1038,4 +1038,6 @@ func TestJudgingSuccess(t *testing.T) {
 	assert.Equal(t, res.WinnerId, winnerId)
 
 	assert.Equal(t, game.GameState, gameLogic.GameStateWhiteCardsBeingSelected)
+	assert.Equal(t, 1, game.PlayersMap[winnerId].Points)
+	assert.Equal(t, uint(2), game.CurrentRound)
 }
