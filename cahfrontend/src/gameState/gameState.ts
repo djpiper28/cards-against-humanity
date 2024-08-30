@@ -417,7 +417,7 @@ class GameState {
       case MsgOnWhiteCardPlayPhase:
         console.log("Handling on white card play phase message");
         return this.handleOnWhiteCardPlayPhase(
-          rpcMessage as RpcOnWhiteCardPlayPhase,
+          rpcMessage.data as RpcOnWhiteCardPlayPhase,
         );
       default:
         throw new Error(

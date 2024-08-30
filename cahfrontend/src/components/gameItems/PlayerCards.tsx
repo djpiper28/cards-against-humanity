@@ -10,10 +10,10 @@ interface GameCard {
 }
 
 interface Props {
-  czarId: string;
   cards: GameCard[];
   selectedCardIds: string[];
   isJudging: boolean;
+  isCzar: boolean;
   onSelectCard?: (cardId: string) => void;
 }
 
@@ -51,7 +51,7 @@ export default function PlayerCards(props: Readonly<Props>) {
 
           return (
             <>
-              <Show when={props.czarId === gameState.getPlayerId()}>
+              <Show when={props.isCzar}>
                 {cardComp()}
               </Show>
               <Show when={props.czarId !== gameState.getPlayerId()}>
@@ -74,8 +74,7 @@ export default function PlayerCards(props: Readonly<Props>) {
     </div>
   );
 
-  const isCzar = () => props.czarId === gameState.getPlayerId();
-  const blockCardPlays = () => isCzar() || props.isJudging;
+  const blockCardPlays = () => props.isCzar || props.isJudging;
   return (
     <>
       <Show when={blockCardPlays()}>
@@ -84,7 +83,7 @@ export default function PlayerCards(props: Readonly<Props>) {
             id="czar"
             class="absolute flex flex-col gap-3 top-0 left-0 right-0 bottom-0 z-10 justify-center items-center text-center bg-[#bababa60] rounded-2xl"
           >
-            <Show when={isCzar()}>
+            <Show when={props.isCzar}>
               <Header text="You are the Card Czar." />
             </Show>
             <Show when={props.isJudging}>

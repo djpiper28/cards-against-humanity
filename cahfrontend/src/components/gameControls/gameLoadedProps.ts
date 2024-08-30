@@ -19,4 +19,5 @@ export interface LobbyLoadedProps {
   state: GameLobbyState;
   roundState: RpcRoundInformationMsg;
   allPlays: WhiteCard[][];
+  playerId: string;
 }

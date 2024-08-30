@@ -33,13 +33,12 @@ import CurrentRoundResults from "../gameItems/CurrentRoundResults";
 
 // Exported for testing reasons
 export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
-  const isGameOwner = () => props.state.ownerId === gameState.getPlayerId();
-  const isCzar = () =>
-    props.roundState.currentCardCzarId === gameState.getPlayerId();
-  const settings = () => props.state.settings;
+  const isGameOwner = () => props.state.ownerId === props.playerId;
+  const isCzar = () => props.roundState.currentCardCzarId === props.playerId;
   const isGameStarted = () => props.state.gameState !== GameStateInLobby;
   const isCzarJudgingPhase = () =>
     props.state.gameState === GameStateCzarJudgingCards;
+  const settings = () => props.state.settings;
 
   createEffect(() => {
     cookieStorage.setItem(gamePasswordCookie, settings().gamePassword);
@@ -112,7 +111,7 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
           </Show>
           <SubHeader text="Your hand:" />
           <PlayerCards
-            czarId={props.roundState.currentCardCzarId}
+            isCzar={isCzar()}
             isJudging={isCzarJudgingPhase()}
             cards={props.roundState.yourHand.map((x) => {
               return {
@@ -265,6 +264,7 @@ export default function GameLobby() {
     <>
       <Show when={!!state()}>
         <GameLobbyLoaded
+          playerId={gameState.getPlayerId()}
           state={state()!}
           roundState={roundState()!}
           setSettings={(settings) => {
