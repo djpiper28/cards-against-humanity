@@ -268,6 +268,7 @@ func (msg RpcCzarSelectCardMsg) Type() RpcMessageType {
 type RpcOnWhiteCardPlayPhase struct {
 	BlackCard  *gameLogic.BlackCard   `json:"blackCard"`
 	YourHand   []*gameLogic.WhiteCard `json:"yourHand"`
+	WinnerId   uuid.UUID              `json:"winnerId"`
 	CardCzarId uuid.UUID              `json:"cardCzarId"`
 }
 

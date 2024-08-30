@@ -359,6 +359,18 @@ class GameState {
     this.roundState.yourHand = msg.yourHand as WhiteCard[];
     this.roundState.currentCardCzarId = msg.cardCzarId;
     this.onRoundStateChange?.(structuredClone(this.roundState));
+
+    this.players = this.players.map((player) => {
+      if (player.id === msg.winnerId) {
+        return {
+          ...player,
+          points: player.points + 1,
+        };
+      }
+
+      return player;
+    });
+    this.onPlayerListChange?.(this.players);
   }
 
   /**

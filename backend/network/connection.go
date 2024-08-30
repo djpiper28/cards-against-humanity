@@ -309,7 +309,8 @@ func (c *WsConnection) listenAndHandle() error {
 						defer wg.Done()
 						msg := RpcOnWhiteCardPlayPhase{YourHand: hand,
 							BlackCard:  res.NewBlackCard,
-							CardCzarId: res.NewCzarId}
+							CardCzarId: res.NewCzarId,
+							WinnerId:   res.WinnerId}
 						encodedMsg, err := EncodeRpcMessage(msg)
 						if err != nil {
 							logger.Logger.Error("Cannot encode message to send to player")
@@ -320,7 +321,7 @@ func (c *WsConnection) listenAndHandle() error {
 				}
 
 				wg.Wait()
-				return nil 
+				return nil
 			},
 		})
 
