@@ -781,6 +781,10 @@ func (g *Game) nextRound() bool {
 	g.CurrentRound += 1
 	g.newCzar()
 
+	for _, player := range g.PlayersMap {
+		player.CurrentPlay = make([]*WhiteCard, 0)
+	}
+
 	err := g.newWhiteCards()
 	if err != nil {
 		logger.Logger.Warnf("Cannot get a new white card for the next round %s", err)
