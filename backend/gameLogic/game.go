@@ -316,7 +316,7 @@ func (g *Game) AddPlayer(playerName string) (uuid.UUID, error) {
 	g.Players = append(g.Players, player.Id)
 	g.PlayersMap[player.Id] = player
 	if g.GameState != GameStateInLobby {
-		g.newCards()
+		g.newWhiteCards()
 	}
 	g.updateLastAction()
 	return player.Id, nil
@@ -419,15 +419,18 @@ func (g *Game) RoundInfo() (RoundInfo, error) {
 	return g.roundInfo()
 }
 
-// Not thread safe, gives each player new cards
-func (g *Game) newCards() error {
+func (g *Game) newBlackCard() error {
 	blackCard, err := g.CardDeck.GetNewBlackCard()
 	if err != nil {
 		return errors.New("Cannot get a black card")
 	}
 
 	g.CurrentBlackCard = blackCard
+	return nil
+}
 
+// Not thread safe, gives each player new cards
+func (g *Game) newWhiteCards() error {
 	for pid, p := range g.PlayersMap {
 		cards, err := g.CardDeck.GetNewWhiteCards(uint(HandSize - len(p.Hand)))
 		if err != nil {
@@ -484,10 +487,16 @@ func (g *Game) StartGame() (RoundInfo, error) {
 	g.newCzar()
 	g.GameState = GameStateWhiteCardsBeingSelected
 
-	err = g.newCards()
+	err = g.newWhiteCards()
 	if err != nil {
 		return RoundInfo{}, err
 	}
+
+	err = g.newBlackCard()
+	if err != nil {
+		return RoundInfo{}, err
+	}
+
 	g.updateLastAction()
 	return g.roundInfo()
 }
@@ -553,11 +562,21 @@ type CzarJudingPhaseInfo struct {
 	PlayerHands
 }
 
+func (g *Game) checkState(expectedState GameState) bool {
+	if g.GameState != expectedState {
+		logger.Logger.Warn("Attempted to run a command whilst in the wrong state",
+			"currentState", g.GameState,
+			"expectedState", expectedState)
+		return false
+	}
+	return true
+}
+
 // This assumes that all players have played, please sanity check before calling,
 // see PlayCards.
 // Not thread safe.
 func (g *Game) moveToCzarJudgingPhase() (CzarJudingPhaseInfo, error) {
-	if g.GameState != GameStateWhiteCardsBeingSelected {
+	if !g.checkState(GameStateWhiteCardsBeingSelected) {
 		return CzarJudingPhaseInfo{}, errors.New("The game is not in the white card selection phase")
 	}
 
@@ -593,7 +612,7 @@ func (g *Game) moveToCzarJudgingPhase() (CzarJudingPhaseInfo, error) {
 		player.Hand = newHand
 	}
 
-	err := g.newCards()
+	err := g.newWhiteCards()
 	if err != nil {
 		logger.Logger.Warn("Cannot give players new cards, after judging the game will end.")
 		return CzarJudingPhaseInfo{}, nil
@@ -632,7 +651,7 @@ func (g *Game) PlayCards(playerId uuid.UUID, cardIds []int) (PlayCardsResult, er
 	g.Lock.Lock()
 	defer g.Lock.Unlock()
 
-	if g.GameState != GameStateWhiteCardsBeingSelected {
+	if !g.checkState(GameStateWhiteCardsBeingSelected) {
 		return PlayCardsResult{}, errors.New("The game is not in the white card selection phase")
 	}
 
@@ -743,6 +762,7 @@ func IsPlayEqual(playersPlays []*WhiteCard, otherPlays []int) bool {
 }
 
 func (g *Game) endGame() {
+	logger.Logger.Info("Ending game", "gameId", g.Id)
 	g.GameState = GameStateInLobby
 }
 
@@ -754,21 +774,22 @@ func (g *Game) endGame() {
 // false means the game did not end
 // true means the game did end (i.e: no more cards)
 func (g *Game) nextRound() bool {
+	logger.Logger.Info("Moving game to next round",
+		"gameId", g.Id,
+		"roundNumber (pre)", g.CurrentRound)
 	g.GameState = GameStateWhiteCardsBeingSelected
 	g.CurrentRound += 1
 	g.newCzar()
 
-	newBlackCard, err := g.CardDeck.GetNewBlackCard()
+	err := g.newWhiteCards()
 	if err != nil {
-		logger.Logger.Warnf("Cannot get a new black card for the next round %s", err)
+		logger.Logger.Warnf("Cannot get a new white card for the next round %s", err)
 		return true
 	}
 
-	g.CurrentBlackCard = newBlackCard
-
-	err = g.newCards()
+	err = g.newBlackCard()
 	if err != nil {
-		logger.Logger.Warnf("Cannot get a new white card for the next round %s", err)
+		logger.Logger.Warnf("Cannot get a new black card for the next round %s", err)
 		return true
 	}
 
@@ -779,11 +800,7 @@ func (g *Game) CzarSelectCards(pid uuid.UUID, cards []int) (CzarSelectCardResult
 	g.Lock.Lock()
 	defer g.Lock.Unlock()
 
-	if g.GameState != GameStateCzarJudgingCards {
-		logger.Logger.Warn("A player tried to select a card for the czar whilst in a different phase",
-			"gameId", g.Id,
-			"playerId", pid,
-			"currentPhase", g.GameState.String())
+	if !g.checkState(GameStateCzarJudgingCards) {
 		return CzarSelectCardResult{}, errors.New("Not in judging phase")
 	}
 
