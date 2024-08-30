@@ -37,6 +37,7 @@ import {
   RpcOnPlayerDisconnectMsg,
   RpcOnPlayerJoinMsg,
   RpcOnPlayerLeaveMsg,
+  RpcOnWhiteCardPlayPhase,
   RpcPlayCardsMsg,
   RpcRoundInformationMsg,
 } from "../rpcTypes";
@@ -45,6 +46,7 @@ import { apiClient, wsBaseUrl } from "../apiClient";
 import WebSocket from "isomorphic-ws";
 import { GamePlayerList } from "./gamePlayersList";
 import { GameLobbyState } from "./gameLobbyState";
+import { WhiteCard } from "../components/gameItems/Card.stories";
 
 export const playerIdCookie = "playerId";
 /**
@@ -346,6 +348,18 @@ class GameState {
     );
   }
 
+  public handleOnWhiteCardPlayPhase(msg: RpcOnWhiteCardPlayPhase) {
+    this.roundState.totalPlays = 0;
+    this.roundState.roundNumber++;
+    this.roundState.blackCard = msg.blackCard!;
+    this.roundState.yourHand = msg.yourHand as WhiteCard[];
+    this.roundState.currentCardCzarId = msg.cardCzarId;
+    this.onRoundStateChange?.(structuredClone(this.roundState));
+
+    this.lobbyState.gameState = GameStateWhiteCardsBeingSelected;
+    this.onLobbyStateChange?.(structuredClone(this.lobbyState));
+  }
+
   /**
    * Handles an RPC message from the server. When testing call the private method and ignore the "error".
    */
@@ -400,8 +414,10 @@ class GameState {
           rpcMessage.data as RpcOnCzarJudgingPhaseMsg,
         );
       case MsgOnWhiteCardPlayPhase:
-        console.log("TODO Implement me");
-        break;
+        console.log("Handling on white card play phase message");
+        return this.handleOnWhiteCardPlayPhase(
+          rpcMessage as RpcOnWhiteCardPlayPhase,
+        );
       default:
         throw new Error(
           `Cannot handle RPC message as type is not valid ${rpcMessage.type}`,

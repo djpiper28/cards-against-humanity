@@ -312,7 +312,7 @@ func (c *WsConnection) listenAndHandle() error {
 							CardCzarId: res.NewCzarId}
 						encodedMsg, err := EncodeRpcMessage(msg)
 						if err != nil {
-							logger.Logger.Errorf("Cannot encode message to send to player")
+							logger.Logger.Error("Cannot encode message to send to player")
 						}
 
 						go GlobalConnectionManager.SendToPlayer(c.GameId, pid, encodedMsg)
