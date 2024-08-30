@@ -508,9 +508,27 @@ func (g *Game) ChangeSettings(newSettings GameSettings) error {
 	return nil
 }
 
+type PlayerHands struct {
+	Hands map[uuid.UUID][]*WhiteCard
+}
+
+func (playerHands *PlayerHands) fromGame(game *Game) {
+	newHands := make(map[uuid.UUID][]*WhiteCard)
+	for pid, player := range game.PlayersMap {
+		hand := make([]*WhiteCard, 0)
+		for _, card := range player.Hand {
+			hand = append(hand, card)
+		}
+
+		newHands[pid] = hand
+	}
+
+	playerHands.Hands = newHands
+}
+
 type CzarJudingPhaseInfo struct {
-	AllPlays    [][]*WhiteCard
-	PlayerHands map[uuid.UUID][]*WhiteCard
+	AllPlays [][]*WhiteCard
+	PlayerHands
 }
 
 // This assumes that all players have played, please sanity check before calling,
@@ -559,17 +577,12 @@ func (g *Game) moveToCzarJudgingPhase() (CzarJudingPhaseInfo, error) {
 		return CzarJudingPhaseInfo{}, nil
 	}
 
-	// Copy out players hands
-	newHands := make(map[uuid.UUID][]*WhiteCard)
-	for pid, player := range g.PlayersMap {
-		hand := make([]*WhiteCard, 0)
-		for _, card := range player.Hand {
-			hand = append(hand, card)
-		}
+	var playerHands PlayerHands
+	playerHands.fromGame(g)
 
-		newHands[pid] = hand
-	}
-	return CzarJudingPhaseInfo{AllPlays: allPlays, PlayerHands: newHands}, nil
+	// Copy out players hands
+	return CzarJudingPhaseInfo{AllPlays: allPlays,
+		PlayerHands: playerHands}, nil
 }
 
 type PlayCardsResult struct {
@@ -677,11 +690,12 @@ func (g *Game) TimeSinceLastAction() time.Duration {
 }
 
 type CzarSelectCardResult struct {
-	NewCzarId    uuid.UUID  `json:"newCzardId"`
-	WinnerId     uuid.UUID  `json:"winnerId"`
-	NewBlackCard *BlackCard `json:"newBlackCard"`
+	NewCzarId    uuid.UUID
+	WinnerId     uuid.UUID
+	NewBlackCard *BlackCard
 	// If there are no more black cards then the game is over
 	GameEnded bool `json:"gameEnded"`
+	PlayerHands
 }
 
 func IsPlayEqual(playersPlays []*WhiteCard, otherPlays []int) bool {
@@ -791,9 +805,13 @@ func (g *Game) CzarSelectCards(pid uuid.UUID, cards []int) (CzarSelectCardResult
 		g.endGame()
 	}
 
+	var playerHands PlayerHands
+	playerHands.fromGame(g)
+
 	g.updateLastAction()
 	return CzarSelectCardResult{WinnerId: winnerId,
 		NewBlackCard: g.CurrentBlackCard,
 		NewCzarId:    g.CurrentCardCzarId,
-		GameEnded:    endGame}, nil
+		GameEnded:    endGame,
+		PlayerHands:  playerHands}, nil
 }

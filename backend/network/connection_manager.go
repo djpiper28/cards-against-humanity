@@ -270,7 +270,7 @@ func (g *ConnectionManager) MoveToCzarJudgingPhase(gid uuid.UUID, info gameLogic
 			defer wg.Done()
 			moveToNextPhaseMsg := RpcOnCzarJudgingPhaseMsg{
 				AllPlays: info.AllPlays,
-				NewHand:  info.PlayerHands[pid],
+				NewHand:  info.PlayerHands.Hands[pid],
 			}
 
 			broadcastMessage, err := EncodeRpcMessage(moveToNextPhaseMsg)

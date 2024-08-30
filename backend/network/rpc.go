@@ -49,6 +49,8 @@ const (
 
 	// Rx when a czar selects a card
 	MsgCzarSelectCard
+	// Tx when the game state returns to white cards being played
+	MsgOnWhiteCardPlayPhase
 )
 
 type RpcMessageBody struct {
@@ -261,4 +263,14 @@ type RpcCzarSelectCardMsg struct {
 
 func (msg RpcCzarSelectCardMsg) Type() RpcMessageType {
 	return MsgCzarSelectCard
+}
+
+type RpcOnWhiteCardPlayPhase struct {
+	BlackCard  *gameLogic.BlackCard   `json:"blackCard"`
+	YourHand   []*gameLogic.WhiteCard `json:"whiteCard"`
+	CardCzarId uuid.UUID              `json:"cardCzarId"`
+}
+
+func (msg RpcOnWhiteCardPlayPhase) Type() RpcMessageType {
+	return MsgOnWhiteCardPlayPhase
 }

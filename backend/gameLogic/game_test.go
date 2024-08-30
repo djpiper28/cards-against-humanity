@@ -848,7 +848,7 @@ func TestPlayingCardCausesCzarJudingPhase(t *testing.T) {
 	}
 	assert.NotNil(t, resp.CzarJudingPhaseInfo.PlayerHands)
 
-	for _, hand := range resp.CzarJudingPhaseInfo.PlayerHands {
+	for _, hand := range resp.CzarJudingPhaseInfo.PlayerHands.Hands {
 		assert.NotNil(t, hand)
 	}
 }
@@ -1040,4 +1040,11 @@ func TestJudgingSuccess(t *testing.T) {
 	assert.Equal(t, game.GameState, gameLogic.GameStateWhiteCardsBeingSelected)
 	assert.Equal(t, 1, game.PlayersMap[winnerId].Points)
 	assert.Equal(t, uint(2), game.CurrentRound)
+
+	for _, player := range game.PlayersMap {
+		assert.Contains(t, res.Hands, player.Id)
+		for _, card := range player.Hand {
+			assert.Contains(t, res.Hands[player.Id], card)
+		}
+	}
 }
