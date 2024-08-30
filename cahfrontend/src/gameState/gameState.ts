@@ -349,15 +349,16 @@ class GameState {
   }
 
   public handleOnWhiteCardPlayPhase(msg: RpcOnWhiteCardPlayPhase) {
-    this.roundState.totalPlays = 0;
+    this.lobbyState.gameState = GameStateWhiteCardsBeingSelected;
+    this.onLobbyStateChange?.(structuredClone(this.lobbyState));
+
     this.roundState.roundNumber++;
+    this.roundState.totalPlays = 0;
+    this.roundState.yourPlays = [];
     this.roundState.blackCard = msg.blackCard!;
     this.roundState.yourHand = msg.yourHand as WhiteCard[];
     this.roundState.currentCardCzarId = msg.cardCzarId;
     this.onRoundStateChange?.(structuredClone(this.roundState));
-
-    this.lobbyState.gameState = GameStateWhiteCardsBeingSelected;
-    this.onLobbyStateChange?.(structuredClone(this.lobbyState));
   }
 
   /**
