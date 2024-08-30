@@ -706,6 +706,39 @@ func IsPlayEqual(playersPlays []*WhiteCard, otherPlays []int) bool {
 	return true
 }
 
+func (g *Game) endGame() {
+	g.GameState = GameStateInLobby
+}
+
+// Moves to the next round, returns if the game ended
+// 1. Changes to the white card selection stage
+// 2. Bumps the round counter
+// 3. Allocates a new czar
+// 4. Makes sure each player has 7 cards
+// false means the game did not end
+// true means the game did end (i.e: no more cards)
+func (g *Game) nextRound() bool {
+	g.GameState = GameStateWhiteCardsBeingSelected
+	g.CurrentRound += 1
+	g.newCzar()
+
+	newBlackCard, err := g.CardDeck.GetNewBlackCard()
+	if err != nil {
+		logger.Logger.Warnf("Cannot get a new black card for the next round %s", err)
+		return true
+	}
+
+	g.CurrentBlackCard = newBlackCard
+
+	err = g.newCards()
+	if err != nil {
+		logger.Logger.Warnf("Cannot get a new white card for the next round %s", err)
+		return true
+	}
+
+	return false
+}
+
 func (g *Game) CzarSelectCards(pid uuid.UUID, cards []int) (CzarSelectCardResult, error) {
 	g.Lock.Lock()
 	defer g.Lock.Unlock()
@@ -739,19 +772,10 @@ func (g *Game) CzarSelectCards(pid uuid.UUID, cards []int) (CzarSelectCardResult
 	}
 
 	// Produce result
-	newBlackCard, cardDrawErr := g.CardDeck.GetNewBlackCard()
-	if cardDrawErr != nil {
-		logger.Logger.Errorf("Cannot get a new card for the next round %s", cardDrawErr)
-	}
-	g.CurrentBlackCard = newBlackCard
 	g.PlayersMap[winnerId].Points += 1
 
-	newCzarId := g.newCzar()
+	endGame := g.nextRound()
 
-	g.GameState = GameStateWhiteCardsBeingSelected
-	g.CurrentRound += 1
-
-	endGame := cardDrawErr != nil
 	if g.CurrentRound > g.Settings.MaxRounds {
 		endGame = true
 	}
@@ -763,9 +787,13 @@ func (g *Game) CzarSelectCards(pid uuid.UUID, cards []int) (CzarSelectCardResult
 		}
 	}
 
+	if endGame {
+		g.endGame()
+	}
+
 	g.updateLastAction()
 	return CzarSelectCardResult{WinnerId: winnerId,
-		NewBlackCard: newBlackCard,
-		NewCzarId:    newCzarId,
+		NewBlackCard: g.CurrentBlackCard,
+		NewCzarId:    g.CurrentCardCzarId,
 		GameEnded:    endGame}, nil
 }
