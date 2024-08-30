@@ -214,6 +214,8 @@ type GameStateInfo struct {
 	Players      []Player         `json:"players"`
 	GameOwnerId  uuid.UUID        `json:"gameOwnerId"`
 	RoundInfo    InitialRoundInfo `json:"roundInfo"`
+	// Only used when there it is in the judging round
+	AllPlays [][]*WhiteCard `json:"allPlays"`
 }
 
 // The state of a game for player who has just joined a game
@@ -241,6 +243,7 @@ func (g *Game) StateInfo(pid uuid.UUID) GameStateInfo {
 		YourPlays:            make([]int, 0),
 	}
 
+	allPlays := make([][]*WhiteCard, 0)
 	for playerId, player := range g.PlayersMap {
 		if pid == playerId {
 			for _, card := range player.Hand {
@@ -255,6 +258,10 @@ func (g *Game) StateInfo(pid uuid.UUID) GameStateInfo {
 		if len(player.CurrentPlay) > 0 {
 			initialRoundInfo.PlayersWhoHavePlayed = append(initialRoundInfo.PlayersWhoHavePlayed, playerId)
 		}
+
+		if g.GameState == GameStateCzarJudgingCards {
+			allPlays = append(allPlays, player.CurrentPlay)
+		}
 	}
 
 	return GameStateInfo{Id: g.Id,
@@ -264,6 +271,7 @@ func (g *Game) StateInfo(pid uuid.UUID) GameStateInfo {
 		Players:      players,
 		GameOwnerId:  g.GameOwnerId,
 		RoundInfo:    initialRoundInfo,
+		AllPlays:     allPlays,
 	}
 }
 

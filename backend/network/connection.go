@@ -156,6 +156,7 @@ func (c *WsConnection) listenAndHandle() error {
 		logger.Logger.Error("Cannot encode the messages", "err", err)
 	}
 
+	// TODO: do not block on this call - this will cause bugs
 	GlobalConnectionManager.Broadcast(gid, message)
 
 	// Send the initial state

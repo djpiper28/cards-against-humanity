@@ -220,7 +220,7 @@ class GameState {
 
     this.onLobbyStateChange?.(this.lobbyState);
 
-    const roundState = {
+    const roundState: RpcRoundInformationMsg = {
       yourPlays: state.roundInfo.yourPlays.map(
         (x) =>
           state.roundInfo.yourHand.find((y) => y?.id === x) ?? {
@@ -240,6 +240,7 @@ class GameState {
       this.handleOnPlayerPlay({ playerId: pid });
     });
     this.onPlayerListChange?.(this.playerList());
+    this.onAllPlaysChanged?.(state.allPlays as WhiteCard[][]);
   }
 
   public playerList(): GamePlayerList {
@@ -465,14 +466,14 @@ class GameState {
   }
 
   public czarSelectCards(cards: number[]) {
-    console.log("Czar is selecting cards: ", cards)
+    console.log("Czar is selecting cards: ", cards);
     if (!this.wsClient) {
       throw new Error("Cannot play cards as websocket is not connected");
     }
 
     const msg: RpcCzarSelectCardMsg = {
-      cards: cards
-    }
+      cards: cards,
+    };
 
     this.wsClient.sendMessage(
       JSON.stringify(this.encodeMessage(MsgCzarSelectCard, msg)),
