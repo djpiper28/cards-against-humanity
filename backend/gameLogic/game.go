@@ -123,6 +123,20 @@ const (
 	GameStateEmpty = -1
 )
 
+func (state GameState) String() string {
+	switch state {
+	case GameStateInLobby:
+		return "In Lobby"
+	case GameStateWhiteCardsBeingSelected:
+		return "White Cards Being Selected"
+	case GameStateCzarJudgingCards:
+		return "Czar Judging Cards"
+	case GameStateEmpty:
+		return "Error"
+	}
+	return "Unknown"
+}
+
 type Game struct {
 	// Used to determine if the game should be shutdown
 	LastAction time.Time
@@ -766,6 +780,10 @@ func (g *Game) CzarSelectCards(pid uuid.UUID, cards []int) (CzarSelectCardResult
 	defer g.Lock.Unlock()
 
 	if g.GameState != GameStateCzarJudgingCards {
+		logger.Logger.Warn("A player tried to select a card for the czar whilst in a different phase",
+			"gameId", g.Id,
+			"playerId", pid,
+			"currentPhase", g.GameState.String())
 		return CzarSelectCardResult{}, errors.New("Not in judging phase")
 	}
 
