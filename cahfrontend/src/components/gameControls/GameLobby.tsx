@@ -34,6 +34,8 @@ import CurrentRoundResults from "../gameItems/CurrentRoundResults";
 // Exported for testing reasons
 export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
   const isGameOwner = () => props.state.ownerId === gameState.getPlayerId();
+  const isCzar = () =>
+    props.roundState.currentCardCzarId === gameState.getPlayerId();
   const settings = () => props.state.settings;
   const isGameStarted = () => props.state.gameState !== GameStateInLobby;
   const isCzarJudgingPhase = () =>
@@ -86,9 +88,10 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
         <Show when={isGameStarted() && props.roundState}>
           <Show when={isCzarJudgingPhase()}>
             <SubHeader
-              text={`${props.roundState.currentCardCzarId === gameState.getPlayerId() ? "Chose a winning play" : "Waiting for the czar to judge"}:`}
+              text={`${isCzar() ? "Chose a winning play" : "Waiting for the czar to judge"}:`}
             />
             <CurrentRoundResults
+              isCzar={isCzar()}
               blackCard={props.roundState.blackCard}
               plays={props.allPlays.map((x, i) => {
                 return {

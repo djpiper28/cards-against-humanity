@@ -9,6 +9,7 @@ import {
 import {
   MsgChangeSettings,
   MsgCommandError,
+  MsgCzarSelectCard,
   MsgNewOwner,
   MsgOnCardPlayed,
   MsgOnCzarJudgingPhase,
@@ -17,12 +18,14 @@ import {
   MsgOnPlayerDisconnect,
   MsgOnPlayerJoin,
   MsgOnPlayerLeave,
+  MsgOnWhiteCardPlayPhase,
   MsgPing,
   MsgPlayCards,
   MsgRoundInformation,
   MsgStartGame,
   RpcChangeSettingsMsg,
   RpcCommandErrorMsg,
+  RpcCzarSelectCardMsg,
   RpcMessage,
   RpcMessageBody,
   RpcMessageType,
@@ -395,6 +398,9 @@ class GameState {
         return this.handleOnCzarJudgingPhase(
           rpcMessage.data as RpcOnCzarJudgingPhaseMsg,
         );
+      case MsgOnWhiteCardPlayPhase:
+        console.log("TODO Implement me");
+        break;
       default:
         throw new Error(
           `Cannot handle RPC message as type is not valid ${rpcMessage.type}`,
@@ -455,6 +461,21 @@ class GameState {
 
     this.wsClient.sendMessage(
       JSON.stringify(this.encodeMessage(MsgPlayCards, msg)),
+    );
+  }
+
+  public czarSelectCards(cards: number[]) {
+    console.log("Czar is selecting cards: ", cards)
+    if (!this.wsClient) {
+      throw new Error("Cannot play cards as websocket is not connected");
+    }
+
+    const msg: RpcCzarSelectCardMsg = {
+      cards: cards
+    }
+
+    this.wsClient.sendMessage(
+      JSON.stringify(this.encodeMessage(MsgCzarSelectCard, msg)),
     );
   }
 }
