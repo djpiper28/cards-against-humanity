@@ -46,6 +46,9 @@ const (
 	MsgOnCardPlayed
 	// Tx when the judging phase starts
 	MsgOnCzarJudgingPhase
+
+	// Rx when a czar selects a card
+	MsgCzarSelectCard
 )
 
 type RpcMessageBody struct {
@@ -71,6 +74,7 @@ type RpcCommandHandlers struct {
 	PingHandler           func() error
 	StartGameHandler      func() error
 	PlayCardsHandler      func(msg RpcPlayCardsMsg) error
+	CzarSelectCardHandler func(msg RpcCzarSelectCardMsg) error
 }
 
 func DecodeAs[T RpcMessage](data []byte) (T, error) {
@@ -115,6 +119,13 @@ func DecodeRpcMessage(data []byte, handlers RpcCommandHandlers) error {
 		}
 
 		return handlers.PlayCardsHandler(command)
+	case MsgCzarSelectCard:
+		command, err := DecodeAs[RpcCzarSelectCardMsg](data)
+		if err != nil {
+			return err
+		}
+
+		return handlers.CzarSelectCardHandler(command)
 	default:
 		logger.Logger.Error("Unknown command", "type", cmd.Type)
 		return errors.New("Unknown command")
@@ -241,4 +252,13 @@ type RpcOnCzarJudgingPhaseMsg struct {
 
 func (msg RpcOnCzarJudgingPhaseMsg) Type() RpcMessageType {
 	return MsgOnCzarJudgingPhase
+}
+
+type RpcCzarSelectCardMsg struct {
+	// Unsorted array of card IDs, i.e: {1, 3, 2}
+	Cards []int `json:"cards"`
+}
+
+func (msg RpcCzarSelectCardMsg) Type() RpcMessageType {
+	return MsgCzarSelectCard
 }

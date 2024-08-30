@@ -289,6 +289,22 @@ func (c *WsConnection) listenAndHandle() error {
 				}
 				return nil
 			},
+			CzarSelectCardHandler: func(msg RpcCzarSelectCardMsg) error {
+				handler = "Czar Selects A Card"
+
+				res, err := gameRepo.Repo.CzarSelectsCard(c.GameId, c.PlayerId, msg.Cards)
+				if err != nil {
+					return err
+				}
+
+				if res.GameEnded {
+					// TODO: end the game lol
+				}
+
+				// TODO: send some output
+
+				return err
+			},
 		})
 
 		microSeconds := time.Since(startTime).Microseconds()
