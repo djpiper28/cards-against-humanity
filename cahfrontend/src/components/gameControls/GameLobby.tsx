@@ -199,6 +199,7 @@ export default function GameLobby() {
   const setupHandlers = () => {
     // Sync UI state with the source of truth
     gameState.onPlayerListChange = (players: GamePlayerList) => {
+      console.log("Player list change detected");
       setPlayers(players);
     };
     gameState.onLobbyStateChange = (state?: GameLobbyState) => {
@@ -207,6 +208,7 @@ export default function GameLobby() {
       setState(state ?? emptyState);
     };
     gameState.onChangeSettings = (settings: RpcChangeSettingsMsg) => {
+      console.log("Settings change detected");
       setDirtyState(false);
 
       const newState = structuredClone(state()!);
@@ -220,6 +222,7 @@ export default function GameLobby() {
       setState(newState);
     };
     gameState.onCommandError = (error: RpcCommandErrorMsg) => {
+      console.error(error);
       setCommandError(error.reason);
       setErrorMessage(error.reason);
     };
@@ -228,7 +231,7 @@ export default function GameLobby() {
       setRoundState(state!);
     };
     gameState.onAllPlaysChanged = (allPlays) => {
-      console.log("All plays changed");
+      console.log("All plays change detected");
       setAllPlays(allPlays);
     };
   };
