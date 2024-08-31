@@ -1,6 +1,7 @@
-import { For } from "solid-js";
+import { createSignal, For } from "solid-js";
 import { GameLogicCardPack } from "../../api";
 import Checkbox from "../inputs/Checkbox";
+import Input, { InputType } from "../inputs/Input";
 
 type CardPack = GameLogicCardPack;
 
@@ -26,17 +27,37 @@ export default function CardsSelector(props: Readonly<Props>) {
       .reduce((a, b) => a + b, 0);
   };
   const panelTitleCss = () =>
-    `text-xl ${
+    `text - xl ${
       blackCards() + whiteCards() === 0
         ? "text-error-colour font-bold"
         : "text-black"
-    }`;
+    }
+  `;
+  const [query, setQuery] = createSignal("");
+
+  const normaliseString = (str: string): string =>
+    str.toLowerCase().replace(/\s{2,}/, " ");
+  const filterByQuery = (
+    cardPacks: GameLogicCardPack[],
+  ): GameLogicCardPack[] => {
+    const normalisedQuery = normaliseString(query());
+    return cardPacks.filter((card) =>
+      normaliseString(card.name).includes(normalisedQuery),
+    );
+  };
 
   return (
-    <div class="flex flex-col gap-3">
-      <fieldset class="flex flex-row flex-wrap gap-2 md:gap-1 overflow-auto max-h-64">
+    <div class="flex flex-col gap-3 max-h-72">
+      <Input
+        inputType={InputType.Text}
+        label="Search"
+        placeHolder="Search..."
+        onChanged={setQuery}
+        value={query()}
+      />
+      <fieldset class="flex flex-row flex-wrap gap-2 md:gap-1 overflow-auto">
         <legend class="hidden">Card Packs</legend>
-        <For each={props.cards}>
+        <For each={filterByQuery(props.cards)}>
           {(pack) => (
             <Checkbox
               checked={!!props.selectedPackIds.find((x) => x === pack.id)}
