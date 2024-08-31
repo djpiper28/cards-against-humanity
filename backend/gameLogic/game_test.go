@@ -850,6 +850,7 @@ func TestPlayingCardCausesCzarJudingPhase(t *testing.T) {
 
 	for _, hand := range resp.CzarJudingPhaseInfo.PlayerHands.Hands {
 		assert.NotNil(t, hand)
+		assert.Len(t, hand, 7)
 	}
 }
 

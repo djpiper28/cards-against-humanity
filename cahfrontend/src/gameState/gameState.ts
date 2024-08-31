@@ -335,10 +335,10 @@ class GameState {
         bodyText: x?.bodyText ?? "Cannot load this card :(",
       };
     });
+    this.onRoundStateChange?.(structuredClone(this.roundState));
 
     this.lobbyState.gameState = GameStateCzarJudgingCards;
     this.onLobbyStateChange?.(structuredClone(this.lobbyState));
-    this.onRoundStateChange?.(structuredClone(this.roundState));
     this.onAllPlaysChanged?.(
       data.allPlays.map((x) =>
         x.map((card) => {

@@ -224,3 +224,6 @@ func (s *ServerTestSuite) TestPlayingCardInGame() {
 	assert.NoError(t, err)
 	assert.Equal(t, client.PlayerId, cardPlayedMsg.PlayerId)
 }
+
+// TODO: test czar can select a winner
+// TODO: test czar can select a winner and cause a game to end

@@ -432,7 +432,12 @@ func (g *Game) newBlackCard() error {
 // Not thread safe, gives each player new cards
 func (g *Game) newWhiteCards() error {
 	for pid, p := range g.PlayersMap {
-		cards, err := g.CardDeck.GetNewWhiteCards(uint(HandSize - len(p.Hand)))
+		numberOfCardsRequired := HandSize - len(p.Hand)
+		if numberOfCardsRequired < 0 {
+			continue
+		}
+
+		cards, err := g.CardDeck.GetNewWhiteCards(uint(numberOfCardsRequired))
 		if err != nil {
 			return errors.New(fmt.Sprintf("Cannot create game: %s", err))
 		}
@@ -486,6 +491,11 @@ func (g *Game) StartGame() (RoundInfo, error) {
 	g.CurrentRound = 1
 	g.newCzar()
 	g.GameState = GameStateWhiteCardsBeingSelected
+
+	// Reset scores
+	for _, player := range g.PlayersMap {
+		player.Points = 0
+	}
 
 	err = g.newWhiteCards()
 	if err != nil {
@@ -596,6 +606,7 @@ func (g *Game) moveToCzarJudgingPhase() (CzarJudingPhaseInfo, error) {
 
 		newHand := make(map[int]*WhiteCard)
 		for _, playerCard := range player.Hand {
+			// Remove cards in current play from the hand
 			found := false
 			for _, card := range player.CurrentPlay {
 				if card.Id == playerCard.Id {
