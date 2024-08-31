@@ -837,12 +837,12 @@ func (g *Game) CzarSelectCards(pid uuid.UUID, cards []int) (CzarSelectCardResult
 
 	endGame := g.nextRound()
 
-	if g.CurrentRound > g.Settings.MaxRounds {
+	if g.CurrentRound >= g.Settings.MaxRounds {
 		endGame = true
 	}
 
 	for _, player := range g.PlayersMap {
-		if player.Points > int(g.Settings.PlayingToPoints) {
+		if player.Points >= int(g.Settings.PlayingToPoints) {
 			endGame = true
 			break
 		}

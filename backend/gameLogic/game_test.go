@@ -1048,3 +1048,107 @@ func TestJudgingSuccess(t *testing.T) {
 		}
 	}
 }
+
+func TestJudgingGameEndMaxRounds(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 1")
+	assert.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 2")
+	assert.NoError(t, err)
+
+	startGameInfo, err := game.StartGame()
+	assert.NoError(t, err)
+
+	var lastPlay []int
+	var winnerId uuid.UUID
+	for i, pid := range game.Players {
+		if pid == game.CurrentCardCzarId {
+			continue
+		}
+
+		cards := make([]int, 0)
+		for i := 0; i < int(game.CurrentBlackCard.CardsToPlay); i++ {
+			cards = append(cards, startGameInfo.PlayerHands[pid][i].Id)
+		}
+
+		lastPlay = cards
+		winnerId = pid
+
+		res, err := game.PlayCards(pid, cards)
+		assert.NoError(t, err)
+
+		if i == len(game.Players)-1 {
+			assert.True(t, res.MovedToNextCardCzarPhase)
+		}
+	}
+
+	assert.Equal(t, gameLogic.GameStateCzarJudgingCards, game.GameState)
+
+	oldCzar := game.CurrentCardCzarId
+
+	game.CurrentRound = game.Settings.MaxRounds - 1
+
+	res, err := game.CzarSelectCards(oldCzar, lastPlay)
+	assert.NoError(t, err)
+
+	assert.True(t, res.GameEnded)
+	assert.Equal(t, winnerId, res.WinnerId)
+}
+
+func TestJudgingGameEndMaxScore(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 1")
+	assert.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 2")
+	assert.NoError(t, err)
+
+	startGameInfo, err := game.StartGame()
+	assert.NoError(t, err)
+
+	var lastPlay []int
+	var winnerId uuid.UUID
+	for i, pid := range game.Players {
+		if pid == game.CurrentCardCzarId {
+			continue
+		}
+
+		cards := make([]int, 0)
+		for i := 0; i < int(game.CurrentBlackCard.CardsToPlay); i++ {
+			cards = append(cards, startGameInfo.PlayerHands[pid][i].Id)
+		}
+
+		lastPlay = cards
+		winnerId = pid
+
+		res, err := game.PlayCards(pid, cards)
+		assert.NoError(t, err)
+
+		if i == len(game.Players)-1 {
+			assert.True(t, res.MovedToNextCardCzarPhase)
+		}
+	}
+
+	assert.Equal(t, gameLogic.GameStateCzarJudgingCards, game.GameState)
+
+	oldCzar := game.CurrentCardCzarId
+
+	game.PlayersMap[winnerId].Points = int(game.Settings.PlayingToPoints) - 1
+
+	res, err := game.CzarSelectCards(oldCzar, lastPlay)
+	assert.NoError(t, err)
+
+	assert.True(t, res.GameEnded)
+	assert.Equal(t, winnerId, res.WinnerId)
+}
