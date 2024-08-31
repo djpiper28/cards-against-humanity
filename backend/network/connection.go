@@ -298,19 +298,23 @@ func (c *WsConnection) listenAndHandle() error {
 					return err
 				}
 
-				if res.GameEnded {
-					// TODO: end the game lol
-				}
-
 				var wg sync.WaitGroup
 				for pid, hand := range res.Hands {
 					wg.Add(1)
 					go func(pid uuid.UUID, hand []*gameLogic.WhiteCard) {
 						defer wg.Done()
-						msg := RpcOnWhiteCardPlayPhase{YourHand: hand,
-							BlackCard:  res.NewBlackCard,
-							CardCzarId: res.NewCzarId,
-							WinnerId:   res.WinnerId}
+
+						var msg RpcMessage
+						if res.GameEnded {
+							msg = RpcOnGameEnd{
+								WinnerId: res.WinnerId,
+							}
+						} else {
+							msg = RpcOnWhiteCardPlayPhase{YourHand: hand,
+								BlackCard:  res.NewBlackCard,
+								CardCzarId: res.NewCzarId,
+								WinnerId:   res.WinnerId}
+						}
 						encodedMsg, err := EncodeRpcMessage(msg)
 						if err != nil {
 							logger.Logger.Error("Cannot encode message to send to player")

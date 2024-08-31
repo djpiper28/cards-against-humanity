@@ -51,6 +51,9 @@ const (
 	MsgCzarSelectCard
 	// Tx when the game state returns to white cards being played
 	MsgOnWhiteCardPlayPhase
+
+	// Tx when the game ends and goes back to the lobby
+	MsgOnGameEnd
 )
 
 type RpcMessageBody struct {
@@ -274,4 +277,13 @@ type RpcOnWhiteCardPlayPhase struct {
 
 func (msg RpcOnWhiteCardPlayPhase) Type() RpcMessageType {
 	return MsgOnWhiteCardPlayPhase
+}
+
+type RpcOnGameEnd struct {
+	// Optional winner ID for game ending normally
+	WinnerId uuid.UUID `json:"winnerId,omitEmpty"`
+}
+
+func (msg RpcOnGameEnd) Type() RpcMessageType {
+	return MsgOnGameEnd
 }

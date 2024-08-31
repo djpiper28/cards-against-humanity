@@ -2,6 +2,7 @@ import {
   BlackCard,
   GameStateCzarJudgingCards,
   GameStateInfo,
+  GameStateInLobby,
   GameStateWhiteCardsBeingSelected,
   Player,
   WhiteCard,
@@ -13,6 +14,7 @@ import {
   MsgNewOwner,
   MsgOnCardPlayed,
   MsgOnCzarJudgingPhase,
+  MsgOnGameEnd,
   MsgOnJoin,
   MsgOnPlayerCreate,
   MsgOnPlayerDisconnect,
@@ -32,6 +34,7 @@ import {
   RpcNewOwnerMsg,
   RpcOnCardPlayedMsg,
   RpcOnCzarJudgingPhaseMsg,
+  RpcOnGameEnd,
   RpcOnJoinMsg,
   RpcOnPlayerCreateMsg,
   RpcOnPlayerDisconnectMsg,
@@ -373,6 +376,31 @@ class GameState {
     this.onPlayerListChange?.(this.players);
   }
 
+  private handleOnGameEnd(msg: RpcOnGameEnd) {
+    if (msg.winnerId) {
+      this.players = this.players.map((player) => {
+        if (player.id === msg.winnerId) {
+          return {
+            ...player,
+            points: player.points + 1,
+          };
+        }
+
+        return player;
+      });
+      this.onPlayerListChange?.(this.players);
+    }
+
+    this.roundState.totalPlays = 0;
+    this.roundState.yourPlays = [];
+    this.roundState.yourHand = [];
+    this.roundState.currentCardCzarId = "not-in-round";
+    this.onRoundStateChange?.(structuredClone(this.roundState));
+
+    this.lobbyState.gameState = GameStateInLobby;
+    this.onLobbyStateChange?.(structuredClone(this.lobbyState));
+  }
+
   /**
    * Handles an RPC message from the server. When testing call the private method and ignore the "error".
    */
@@ -431,6 +459,9 @@ class GameState {
         return this.handleOnWhiteCardPlayPhase(
           rpcMessage.data as RpcOnWhiteCardPlayPhase,
         );
+      case MsgOnGameEnd:
+        console.log("Handling on game end message");
+        return this.handleOnGameEnd(rpcMessage.data as RpcOnGameEnd);
       default:
         throw new Error(
           `Cannot handle RPC message as type is not valid ${rpcMessage.type}`,
