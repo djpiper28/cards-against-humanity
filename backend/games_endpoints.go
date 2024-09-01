@@ -310,6 +310,29 @@ func leaveGame(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"ok": true})
 }
 
+type GameExists struct {
+	Exists bool `json:"exists"`
+}
+
+// @Summary	Check if a game exists
+// @Description	Checks to see if a game exists
+// @Tags			games
+// @Accept			json
+// @Produce		json
+// @Success		200 {object}  GameExists
+// @Failure		500	{object}	ApiError
+// @Failure		400	{object}	ApiError
+// @Router			/games/exists [get]
+func gameExists(c *gin.Context) {
+	authData, err := attemptAuthentication(c)
+	if err != nil {
+		return
+	}
+
+	found := network.GlobalConnectionManager.Exists(authData.GameId)
+	c.JSON(http.StatusOK, GameExists{Exists: found})
+}
+
 func SetupGamesEndpoints(r *gin.Engine) {
 	gamesRoute := r.Group("/games")
 	{
@@ -318,5 +341,6 @@ func SetupGamesEndpoints(r *gin.Engine) {
 		gamesRoute.GET("/join", joinGame)
 		gamesRoute.POST("/join", createPlayerForJoining)
 		gamesRoute.DELETE("/leave", leaveGame)
+		gamesRoute.GET("/exists", gameExists)
 	}
 }

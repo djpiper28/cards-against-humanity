@@ -51,9 +51,7 @@ export default function PlayerCards(props: Readonly<Props>) {
 
           return (
             <>
-              <Show when={props.isCzar}>
-                {cardComp()}
-              </Show>
+              <Show when={props.isCzar}>{cardComp()}</Show>
               <Show when={props.czarId !== gameState.getPlayerId()}>
                 <button
                   id={id}

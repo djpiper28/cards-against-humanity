@@ -290,3 +290,8 @@ func (g *ConnectionManager) MoveToCzarJudgingPhase(gid uuid.UUID, info gameLogic
 	}
 	return sendErr
 }
+
+func (gcm *ConnectionManager) Exists(gameId uuid.UUID) bool {
+	_, err := gameRepo.Repo.GetGame(gameId)
+	return err == nil
+}
