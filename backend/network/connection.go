@@ -173,195 +173,204 @@ func (c *WsConnection) listenAndHandle() error {
 
 	// Start listening and handling
 	for {
-		msg, err := c.conn.Receive()
+		err := c.readMessage(gid)
 		if err != nil {
-			c.Close()
-			return errors.New("Cannot read from websocket")
-		}
-
-		handler := UnknownCommand
-		startTime := time.Now()
-		err = DecodeRpcMessage(msg, RpcCommandHandlers{
-			ChangeSettingsHandler: func(msg RpcChangeSettingsMsg) error {
-				handler = "Change Settings"
-				game, err := gameRepo.Repo.GetGame(gid)
-				if err != nil {
-					return errors.New("Cannot find the game")
-				}
-
-				if game.GameOwnerId != c.PlayerId {
-					return errors.New("You cannot change the settings as you are not the game owner")
-				}
-
-				err = gameRepo.Repo.ChangeSettings(gid, msg.Settings)
-				if err != nil {
-					return err
-				}
-
-				broadcastMessage, err := EncodeRpcMessage(msg)
-				if err != nil {
-					return err
-				}
-
-				go GlobalConnectionManager.Broadcast(gid, broadcastMessage)
-				return nil
-			},
-			PingHandler: func() error {
-				handler = PingCommand
-				c.lock.Lock()
-				defer c.lock.Unlock()
-
-				c.LastPingTime = time.Now()
-				c.PingFlag = false
-				return nil
-			},
-			StartGameHandler: func() error {
-				handler = "Start Game"
-				game, err := gameRepo.Repo.GetGame(gid)
-				if err != nil {
-					return errors.New("Cannot find the game")
-				}
-
-				if game.GameOwnerId != c.PlayerId {
-					return errors.New("Only the game owner can start the game")
-				}
-
-				info, err := gameRepo.Repo.StartGame(gid)
-				if err != nil {
-					return err
-				}
-
-				totalPlays := 0
-				for _, plays := range info.PlayersPlays {
-					if len(plays) > 0 {
-						totalPlays++
-					}
-				}
-
-				for playerId, hand := range info.PlayerHands {
-					handCopy := make([]gameLogic.WhiteCard, len(hand))
-					for i, val := range hand {
-						handCopy[i] = *val
-					}
-
-					playsCopy := make([]gameLogic.WhiteCard, 0)
-					for i, val := range info.PlayersPlays[playerId] {
-						playsCopy[i] = *val
-					}
-
-					roundInfo := RpcRoundInformationMsg{
-						CurrentCardCzarId: info.CurrentCardCzarId,
-						YourHand:          handCopy,
-						RoundNumber:       info.RoundNumber,
-						BlackCard:         *info.CurrentBlackCard,
-						YourPlays:         playsCopy,
-						TotalPlays:        totalPlays,
-					}
-
-					encodedMessage, err := EncodeRpcMessage(roundInfo)
-					if err != nil {
-						return err
-					}
-
-					go GlobalConnectionManager.SendToPlayer(c.GameId, playerId, encodedMessage)
-				}
-				return nil
-			},
-			PlayCardsHandler: func(msg RpcPlayCardsMsg) error {
-				handler = "Play Cards"
-
-				info, err := gameRepo.Repo.PlayerPlayCards(c.GameId, c.PlayerId, msg.CardIds)
-				if err != nil {
-					return err
-				}
-
-				cardPlayedMsg := RpcOnCardPlayedMsg{
-					PlayerId: c.PlayerId,
-				}
-
-				broadcastMessage, err := EncodeRpcMessage(cardPlayedMsg)
-				if err != nil {
-					return err
-				}
-
-				go GlobalConnectionManager.Broadcast(gid, broadcastMessage)
-				if info.MovedToNextCardCzarPhase {
-					go GlobalConnectionManager.MoveToCzarJudgingPhase(gid, info.CzarJudingPhaseInfo)
-				}
-				return nil
-			},
-			CzarSelectCardHandler: func(msg RpcCzarSelectCardMsg) error {
-				handler = "Czar Selects A Card"
-
-				res, err := gameRepo.Repo.CzarSelectsCard(c.GameId, c.PlayerId, msg.Cards)
-				if err != nil {
-					return err
-				}
-
-				var wg sync.WaitGroup
-				for pid, hand := range res.Hands {
-					wg.Add(1)
-					go func(pid uuid.UUID, hand []*gameLogic.WhiteCard) {
-						defer wg.Done()
-
-						var msg RpcMessage
-						if res.GameEnded {
-							msg = RpcOnGameEnd{
-								WinnerId: res.WinnerId,
-							}
-						} else {
-							msg = RpcOnWhiteCardPlayPhase{YourHand: hand,
-								BlackCard:  res.NewBlackCard,
-								CardCzarId: res.NewCzarId,
-								WinnerId:   res.WinnerId}
-						}
-						encodedMsg, err := EncodeRpcMessage(msg)
-						if err != nil {
-							logger.Logger.Error("Cannot encode message to send to player")
-						}
-
-						go GlobalConnectionManager.SendToPlayer(c.GameId, pid, encodedMsg)
-					}(pid, hand)
-				}
-
-				wg.Wait()
-				return nil
-			},
-		})
-
-		microSeconds := time.Since(startTime).Microseconds()
-		go gameRepo.AddCommandExecuted(int(time.Since(startTime).Microseconds()))
-
-		if handler != PingCommand {
-			logger.Logger.Infof("Command Handler \"%s\" | %s | %dµs",
-				handler,
-				gid,
-				microSeconds)
-		}
-
-		if handler == UnknownCommand {
-			go gameRepo.AddUnknownCommand()
-		}
-
-		if err != nil {
-			logger.Logger.Error("Error processing message",
-				"err", err,
-				"gameId", c.GameId,
-				"playerId", c.PlayerId)
-			go gameRepo.AddCommandFailed()
-
-			var message RpcCommandErrorMsg
-			message.Reason = err.Error()
-			encodedMessage, err := EncodeRpcMessage(message)
-			if err != nil {
-				logger.Logger.Error("Cannot encode the error message",
-					"err", err)
-				continue
-			}
-
-			go c.Send(encodedMessage)
+			return err
 		}
 	}
+}
+
+func (c *WsConnection) readMessage(gid uuid.UUID) error {
+	msg, err := c.conn.Receive()
+	if err != nil {
+		c.Close()
+		return errors.New("Cannot read from websocket")
+	}
+
+	handler := UnknownCommand
+	startTime := time.Now()
+	err = DecodeRpcMessage(msg, RpcCommandHandlers{
+		ChangeSettingsHandler: func(msg RpcChangeSettingsMsg) error {
+			handler = "Change Settings"
+			game, err := gameRepo.Repo.GetGame(gid)
+			if err != nil {
+				return errors.New("Cannot find the game")
+			}
+
+			if game.GameOwnerId != c.PlayerId {
+				return errors.New("You cannot change the settings as you are not the game owner")
+			}
+
+			err = gameRepo.Repo.ChangeSettings(gid, msg.Settings)
+			if err != nil {
+				return err
+			}
+
+			broadcastMessage, err := EncodeRpcMessage(msg)
+			if err != nil {
+				return err
+			}
+
+			go GlobalConnectionManager.Broadcast(gid, broadcastMessage)
+			return nil
+		},
+		PingHandler: func() error {
+			handler = PingCommand
+			c.lock.Lock()
+			defer c.lock.Unlock()
+
+			c.LastPingTime = time.Now()
+			c.PingFlag = false
+			return nil
+		},
+		StartGameHandler: func() error {
+			handler = "Start Game"
+			game, err := gameRepo.Repo.GetGame(gid)
+			if err != nil {
+				return errors.New("Cannot find the game")
+			}
+
+			if game.GameOwnerId != c.PlayerId {
+				return errors.New("Only the game owner can start the game")
+			}
+
+			info, err := gameRepo.Repo.StartGame(gid)
+			if err != nil {
+				return err
+			}
+
+			totalPlays := 0
+			for _, plays := range info.PlayersPlays {
+				if len(plays) > 0 {
+					totalPlays++
+				}
+			}
+
+			for playerId, hand := range info.PlayerHands {
+				handCopy := make([]gameLogic.WhiteCard, len(hand))
+				for i, val := range hand {
+					handCopy[i] = *val
+				}
+
+				playsCopy := make([]gameLogic.WhiteCard, 0)
+				for i, val := range info.PlayersPlays[playerId] {
+					playsCopy[i] = *val
+				}
+
+				roundInfo := RpcRoundInformationMsg{
+					CurrentCardCzarId: info.CurrentCardCzarId,
+					YourHand:          handCopy,
+					RoundNumber:       info.RoundNumber,
+					BlackCard:         *info.CurrentBlackCard,
+					YourPlays:         playsCopy,
+					TotalPlays:        totalPlays,
+				}
+
+				encodedMessage, err := EncodeRpcMessage(roundInfo)
+				if err != nil {
+					return err
+				}
+
+				go GlobalConnectionManager.SendToPlayer(c.GameId, playerId, encodedMessage)
+			}
+			return nil
+		},
+		PlayCardsHandler: func(msg RpcPlayCardsMsg) error {
+			handler = "Play Cards"
+
+			info, err := gameRepo.Repo.PlayerPlayCards(c.GameId, c.PlayerId, msg.CardIds)
+			if err != nil {
+				return err
+			}
+
+			cardPlayedMsg := RpcOnCardPlayedMsg{
+				PlayerId: c.PlayerId,
+			}
+
+			broadcastMessage, err := EncodeRpcMessage(cardPlayedMsg)
+			if err != nil {
+				return err
+			}
+
+			go GlobalConnectionManager.Broadcast(gid, broadcastMessage)
+			if info.MovedToNextCardCzarPhase {
+				go GlobalConnectionManager.MoveToCzarJudgingPhase(gid, info.CzarJudingPhaseInfo)
+			}
+			return nil
+		},
+		CzarSelectCardHandler: func(msg RpcCzarSelectCardMsg) error {
+			handler = "Czar Selects A Card"
+
+			res, err := gameRepo.Repo.CzarSelectsCard(c.GameId, c.PlayerId, msg.Cards)
+			if err != nil {
+				return err
+			}
+
+			var wg sync.WaitGroup
+			for pid, hand := range res.Hands {
+				wg.Add(1)
+				go func(pid uuid.UUID, hand []*gameLogic.WhiteCard) {
+					defer wg.Done()
+
+					var msg RpcMessage
+					if res.GameEnded {
+						msg = RpcOnGameEnd{
+							WinnerId: res.WinnerId,
+						}
+					} else {
+						msg = RpcOnWhiteCardPlayPhase{YourHand: hand,
+							BlackCard:  res.NewBlackCard,
+							CardCzarId: res.NewCzarId,
+							WinnerId:   res.WinnerId}
+					}
+					encodedMsg, err := EncodeRpcMessage(msg)
+					if err != nil {
+						logger.Logger.Error("Cannot encode message to send to player")
+					}
+
+					go GlobalConnectionManager.SendToPlayer(c.GameId, pid, encodedMsg)
+				}(pid, hand)
+			}
+
+			wg.Wait()
+			return nil
+		},
+	})
+
+	microSeconds := time.Since(startTime).Microseconds()
+	go gameRepo.AddCommandExecuted(int(time.Since(startTime).Microseconds()))
+
+	if handler != PingCommand {
+		logger.Logger.Infof("Command Handler \"%s\" | %s | %dµs",
+			handler,
+			gid,
+			microSeconds)
+	}
+
+	if handler == UnknownCommand {
+		go gameRepo.AddUnknownCommand()
+	}
+
+	if err != nil {
+		logger.Logger.Error("Error processing message",
+			"err", err,
+			"gameId", c.GameId,
+			"playerId", c.PlayerId)
+		go gameRepo.AddCommandFailed()
+
+		var message RpcCommandErrorMsg
+		message.Reason = err.Error()
+		encodedMessage, err := EncodeRpcMessage(message)
+		if err != nil {
+			logger.Logger.Error("Cannot encode the error message",
+				"err", err)
+			return nil
+		}
+
+		go c.Send(encodedMessage)
+	}
+
+	return nil
 }
 
 func (c *WsConnection) ListenAndHandle(g *ConnectionManager) {
