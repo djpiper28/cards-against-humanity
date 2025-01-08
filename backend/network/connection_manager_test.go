@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/djpiper28/cards-against-humanity/backend/limits"
 	"github.com/djpiper28/cards-against-humanity/backend/network"
 	"github.com/stretchr/testify/assert"
 )
@@ -20,8 +21,8 @@ type MockConnection struct {
 }
 
 func NewMockConnection() *MockConnection {
-	return &MockConnection{received: make(chan []byte),
-		sent:   make(chan []byte),
+	return &MockConnection{received: make(chan []byte, limits.ChannelSize),
+		sent:   make(chan []byte, limits.ChannelSize),
 		closed: false}
 }
 
