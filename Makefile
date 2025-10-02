@@ -14,7 +14,7 @@ frontend-install:
 
 .PHONY: frontend-api
 frontend-api: swagger 
-	npx swagger-typescript-api -p ./backend/docs/swagger.json -o ./cahfrontend/src/ -n api.ts
+	npx swagger-typescript-api generate -p ./backend/docs/swagger.json -o ./cahfrontend/src/ -n api.ts
 
 .PHONY: frontend-tygo
 frontend-tygo:
