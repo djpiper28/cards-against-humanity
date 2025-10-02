@@ -248,13 +248,13 @@ func attemptAuthentication(c *gin.Context) (authenticationData, error) {
 // @Summary		Joins a game and upgrades the connection to a websocket if all is well
 // @Description	Validates the input, checks the game exists then tries to upgrade the socket and register the connection. See the RPC docs for what to expect on the websocket. Use playerId, password and gameId cookies to authenticate.
 // @Tags			games
-// @Accept			json
+// @Accept		json
 // @Produce		json
 // @Success		200
 // @Failure		500	{object}	ApiError
 // @Failure		404	{object}	ApiError
 // @Failure		400	{object}	ApiError
-// @Router			/games/join [get]
+// @Router		/games/join [get]
 func joinGame(c *gin.Context) {
 	authData, err := attemptAuthentication(c)
 	if err != nil {
@@ -283,13 +283,13 @@ func joinGame(c *gin.Context) {
 // @Summary		Allows the player to leave a game
 // @Description	Leaves the current game that a player is in
 // @Tags			games
-// @Accept			json
+// @Accept		json
 // @Produce		json
 // @Success		200
 // @Failure		500	{object}	ApiError
 // @Failure		404	{object}	ApiError
 // @Failure		400	{object}	ApiError
-// @Router			/games/leave [delete]
+// @Router		/games/leave [delete]
 func leaveGame(c *gin.Context) {
 	authData, err := attemptAuthentication(c)
 	if err != nil {
@@ -339,6 +339,7 @@ func SetupGamesEndpoints(r *gin.Engine) {
 		gamesRoute.GET("/notFull", getGames)
 		gamesRoute.POST("/create", createGame)
 		gamesRoute.GET("/join", joinGame)
+		gamesRoute.GET("/ws", joinGame)
 		gamesRoute.POST("/join", createPlayerForJoining)
 		gamesRoute.DELETE("/leave", leaveGame)
 		gamesRoute.GET("/exists", gameExists)
