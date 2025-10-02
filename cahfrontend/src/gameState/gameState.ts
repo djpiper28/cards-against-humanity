@@ -326,6 +326,12 @@ class GameState {
     this.lobbyState.gameState = GameStateWhiteCardsBeingSelected;
     this.onLobbyStateChange?.(structuredClone(this.lobbyState));
     this.onRoundStateChange?.(structuredClone(this.roundState));
+
+    for (const player of this.players) {
+      this.players = this.players.filter((x: Player) => x.id !== player.id);
+      const newPlayer = { ...player, hasPlayed: false };
+      this.players.push(newPlayer);
+    }
   }
 
   private handleOnCzarJudgingPhase(data: RpcOnCzarJudgingPhaseMsg) {
