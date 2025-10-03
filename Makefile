@@ -25,10 +25,6 @@ frontend-tygo:
 frontend-types: frontend-tygo frontend-api 
 	echo "Generated types"
 
-.PHONY: frontend-storybook
-frontend-storybook: frontend-install
-	cd ./cahfrontend && pnpm run build-storybook
-
 .PHONY: frontend
 frontend: frontend-install frontend-types
 	cd ./cahfrontend && pnpm run build
@@ -59,7 +55,7 @@ test-e2e: start-docker-compose
 	cd ./e2e/ && go test './...' ${GO_TEST_ARGS}
 
 .PHONY: test
-test: test-backend test-frontend test-e2e frontend-storybook
+test: test-backend test-frontend test-e2e
 	echo "Testing Done"
 
 .PHONY: bench
