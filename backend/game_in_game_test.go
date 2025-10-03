@@ -227,3 +227,4 @@ func (s *ServerTestSuite) TestPlayingCardInGame() {
 
 // TODO: test czar can select a winner
 // TODO: test czar can select a winner and cause a game to end
+// TODO: test czar skips black card

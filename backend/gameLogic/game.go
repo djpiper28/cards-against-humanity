@@ -299,7 +299,7 @@ func (g *Game) AddPlayer(playerName string) (uuid.UUID, error) {
 
 	player, err := NewPlayer(playerName)
 	if err != nil {
-		return uuid.UUID{}, errors.New(fmt.Sprintf("Cannot create player %s", err))
+		return uuid.UUID{}, fmt.Errorf("Cannot create player %s", err)
 	}
 
 	for _, playerId := range g.Players {
@@ -439,7 +439,7 @@ func (g *Game) newWhiteCards() error {
 
 		cards, err := g.CardDeck.GetNewWhiteCards(uint(numberOfCardsRequired))
 		if err != nil {
-			return errors.New(fmt.Sprintf("Cannot create game: %s", err))
+			return fmt.Errorf("Cannot create game: %s", err)
 		}
 
 		for _, card := range cards {
@@ -474,18 +474,18 @@ func (g *Game) StartGame() (RoundInfo, error) {
 	}
 
 	if len(g.Players) < MinPlayers {
-		return RoundInfo{}, errors.New(fmt.Sprintf("Cannot start game until the minimum amount of players %d have joined the game", MinPlayers))
+		return RoundInfo{}, fmt.Errorf("Cannot start game until the minimum amount of players %d have joined the game", MinPlayers)
 	}
 
 	// Validate the decks, as before this they are updated via a lazy copy
 	packs, err := GetCardPacks(g.Settings.CardPacks)
 	if err != nil {
-		return RoundInfo{}, errors.New(fmt.Sprintf("Cannot create the game deck %s", err))
+		return RoundInfo{}, fmt.Errorf("Cannot create the game deck %s", err)
 	}
 
 	deck, err := AccumalateCardPacks(packs)
 	if err != nil {
-		return RoundInfo{}, errors.New(fmt.Sprintf("Cannot create the game deck %s", err))
+		return RoundInfo{}, fmt.Errorf("Cannot create the game deck %s", err)
 	}
 	g.CardDeck = deck
 	g.CurrentRound = 1
@@ -874,4 +874,31 @@ func (g *Game) CzarSelectCards(pid uuid.UUID, cards []int) (CzarSelectCardResult
 		NewCzarId:    g.CurrentCardCzarId,
 		GameEnded:    endGame,
 		PlayerHands:  playerHands}, nil
+}
+
+func (g *Game) SkipBlackCard(pid uuid.UUID) (*BlackCard, error) {
+	g.Lock.Lock()
+	defer g.Lock.Unlock()
+
+	if pid != g.CurrentCardCzarId {
+		return nil, errors.New("Player is not the card czar so cannot skip the black card")
+	}
+
+  if !g.checkState(GameStateWhiteCardsBeingSelected) {
+    return nil, errors.New("Cannot skip a card unless white cards are being selected")
+  }
+
+	err := g.newBlackCard()
+	if err != nil {
+		return nil, errors.Join(errors.New("Cannot skip black card"), err)
+	}
+
+	// Clear plays
+	for _, pid := range g.Players {
+		player, _ := g.PlayersMap[pid]
+		player.CurrentPlay = make([]*WhiteCard, 0)
+	}
+
+	logger.Logger.Info("Skipped the black card", "gameId", g.Id, "playerId", pid)
+	return g.CurrentBlackCard, nil
 }

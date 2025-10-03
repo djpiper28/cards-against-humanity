@@ -1,6 +1,6 @@
-module github.com/djpiper28/cards-against-humanity/backend
+module github.com/djpiper28/cards-against-humanity
 
-go 1.21
+go 1.25
 
 require (
 	github.com/carousell/gin-prometheus-middleware v1.5.9
@@ -8,6 +8,7 @@ require (
 	github.com/chenyahui/gin-cache v1.9.0
 	github.com/gin-contrib/cors v1.5.0
 	github.com/gin-gonic/gin v1.9.1
+	github.com/go-rod/rod v0.116.2
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.1
@@ -16,6 +17,8 @@ require (
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.3
 )
+
+tool github.com/swaggo/swag/cmd/swag
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
@@ -70,6 +73,11 @@ require (
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	github.com/urfave/cli/v2 v2.3.0 // indirect
+	github.com/ysmood/fetchup v0.2.3 // indirect
+	github.com/ysmood/goob v0.4.0 // indirect
+	github.com/ysmood/got v0.40.0 // indirect
+	github.com/ysmood/gson v0.7.3 // indirect
+	github.com/ysmood/leakless v0.9.0 // indirect
 	golang.org/x/arch v0.5.0 // indirect
 	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect

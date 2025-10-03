@@ -323,3 +323,15 @@ func (gr *GameRepo) CzarSelectsCard(gameId, pid uuid.UUID, cards []int) (gameLog
 
 	return game.CzarSelectCards(pid, cards)
 }
+
+func (gr *GameRepo) CzarSkipsCard(gameId, pid uuid.UUID) (*gameLogic.BlackCard, error) {
+	gr.lock.RLock()
+	defer gr.lock.RUnlock()
+
+	game, found := gr.GameMap[gameId]
+	if !found {
+		return nil, errors.New("Cannot find game")
+	}
+
+	return game.SkipBlackCard(pid)
+}

@@ -7,6 +7,7 @@ import {
   MsgChangeSettings,
   MsgCommandError,
   MsgNewOwner,
+  MsgOnBlackCardSkipped,
   MsgOnCardPlayed,
   MsgOnCzarJudgingPhase,
   MsgOnPlayerCreate,
@@ -15,6 +16,7 @@ import {
   MsgOnPlayerLeave,
   RpcChangeSettingsMsg,
   RpcMessage,
+  RpcOnBlackCardSkipped,
   RpcOnCzarJudgingPhaseMsg,
 } from "../rpcTypes";
 import { gameState } from "./gameState";
@@ -427,6 +429,7 @@ describe("Game state tests", () => {
 
     gameState.onLobbyStateChange = vi.fn();
     gameState.onRoundStateChange = vi.fn();
+    gameState.onPlayerListChange = vi.fn();
     gameState.onAllPlaysChanged = vi.fn();
 
     const allPlays: WhiteCard[][] = [
@@ -511,6 +514,35 @@ describe("Game state tests", () => {
     expect(gameState.roundState.yourHand).toEqual(newHand);
 
     expect(gameState.onAllPlaysChanged).toHaveBeenCalledWith(allPlays);
+
+    for (const player of gameState.playerList()) {
+      expect(player.hasPlayed).toBe(false);
+    }
+  });
+
+  it("Should handle skip black card", () => {
+    const gid = v4();
+    const pid = v4();
+    gameState.setupState(gid, pid, "");
+
+    gameState.onPlayerListChange = vi.fn();
+    gameState.onRoundStateChange = vi.fn();
+
+    const newCard: RpcOnBlackCardSkipped = {
+      newBlackCard: {
+        bodyText: "lorem ipsum",
+        cardsToPlay: 1,
+        id: 1,
+      },
+    };
+    const msg: RpcMessage = {
+      type: MsgOnBlackCardSkipped,
+      data: newCard,
+    };
+
+    gameState.handleRpcMessage(JSON.stringify(msg));
+    expect(gameState.onRoundStateChange).toHaveBeenCalled();
+    expect(gameState.onPlayerListChange).toHaveBeenCalled();
 
     for (const player of gameState.playerList()) {
       expect(player.hasPlayed).toBe(false);

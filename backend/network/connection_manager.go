@@ -109,7 +109,8 @@ func (g *ConnectionManager) UnregisterConnection(gameId, playerId uuid.UUID) {
 	if err != nil {
 		logger.Logger.Error("Cannot tag player as disconnected from game",
 			"playerId", playerId,
-			"gameId", gameId)
+			"gameId", gameId,
+      "err", err)
 	}
 
 	onPlayerDisconnectMsg := RpcOnPlayerDisconnectMsg{
