@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"net/url"
 	"os"
 	"strings"
@@ -13,10 +14,17 @@ import (
 )
 
 func GetBrowser() *rod.Browser {
+	for !isAlive() {
+		log.Printf("Sleeping until services are alive...")
+		time.Sleep(time.Second / 5)
+	}
+
 	var browser *rod.Browser
 	if strings.ToLower(os.Getenv("DEBUG")) == "true" {
 		launcher := launcher.New().
-			Headless(false)
+			Headless(false).
+			NoSandbox(true)
+
 		browser = rod.New().ControlURL(launcher.MustLaunch())
 		browser.Trace(true)
 		browser.SlowMotion(time.Second / 3)
@@ -94,4 +102,20 @@ func GetDomain() string {
 		log.Fatalf("Cannot get domain for base url: %s", err)
 	}
 	return url.Host
+}
+
+func isAlive() bool {
+	_, err := http.Get(frontendUrlProxy)
+	if err != nil {
+		log.Printf("Cannot talk to the frontend: %s", err)
+		return false
+	}
+
+	_, err = http.Get(backendUrl + "/res/packs")
+	if err != nil {
+		log.Printf("Cannot talk to the backend: %s", err)
+		return false
+	}
+
+	return true
 }

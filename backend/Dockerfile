@@ -11,7 +11,7 @@ WORKDIR /build
 COPY . .
 RUN make backend -j
 
-FROM build as release
+FROM build AS release
 
 RUN useradd -m app
 WORKDIR /home/app
