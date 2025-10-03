@@ -12,6 +12,7 @@ import {
   MsgCommandError,
   MsgCzarSelectCard,
   MsgNewOwner,
+  MsgOnBlackCardSkipped,
   MsgOnCardPlayed,
   MsgOnCzarJudgingPhase,
   MsgOnGameEnd,
@@ -24,6 +25,7 @@ import {
   MsgPing,
   MsgPlayCards,
   MsgRoundInformation,
+  MsgSkipBlackCard,
   MsgStartGame,
   RpcChangeSettingsMsg,
   RpcCommandErrorMsg,
@@ -32,6 +34,7 @@ import {
   RpcMessageBody,
   RpcMessageType,
   RpcNewOwnerMsg,
+  RpcOnBlackCardSkipped,
   RpcOnCardPlayedMsg,
   RpcOnCzarJudgingPhaseMsg,
   RpcOnGameEnd,
@@ -43,13 +46,13 @@ import {
   RpcOnWhiteCardPlayPhase,
   RpcPlayCardsMsg,
   RpcRoundInformationMsg,
+  RpcSkipBlackCard,
 } from "../rpcTypes";
 import { WebSocketClient, toWebSocketClient } from "./websocketClient";
 import { apiClient, wsBaseUrl } from "../apiClient";
 import WebSocket from "isomorphic-ws";
 import { GamePlayerList } from "./gamePlayersList";
 import { GameLobbyState } from "./gameLobbyState";
-import { WhiteCard } from "../components/gameItems/Card.stories";
 
 export const playerIdCookie = "playerId";
 /**
@@ -326,12 +329,13 @@ class GameState {
     this.lobbyState.gameState = GameStateWhiteCardsBeingSelected;
     this.onLobbyStateChange?.(structuredClone(this.lobbyState));
     this.onRoundStateChange?.(structuredClone(this.roundState));
-
-    for (const player of this.players) {
-      this.players = this.players.filter((x: Player) => x.id !== player.id);
-      const newPlayer = { ...player, hasPlayed: false };
-      this.players.push(newPlayer);
-    }
+    this.players = this.players.map((player) => {
+      return {
+        ...player,
+        hasPlayed: false,
+      };
+    });
+    this.onPlayerListChange?.(this.players);
   }
 
   private handleOnCzarJudgingPhase(data: RpcOnCzarJudgingPhaseMsg) {
@@ -389,6 +393,7 @@ class GameState {
           return {
             ...player,
             points: player.points + 1,
+            hasPlayed: false,
           };
         }
 
@@ -405,6 +410,21 @@ class GameState {
 
     this.lobbyState.gameState = GameStateInLobby;
     this.onLobbyStateChange?.(structuredClone(this.lobbyState));
+  }
+
+  private handleOnBlackCardSkipped(msg: RpcOnBlackCardSkipped) {
+    this.roundState.blackCard = msg.newBlackCard;
+    this.roundState.yourPlays = [];
+
+    this.players = this.players.map((player) => {
+      return {
+        ...player,
+        hasPlayed: false,
+      };
+    });
+
+    this.onRoundStateChange?.(structuredClone(this.roundState));
+    this.onPlayerListChange?.(this.players);
   }
 
   /**
@@ -468,6 +488,11 @@ class GameState {
       case MsgOnGameEnd:
         console.log("Handling on game end message");
         return this.handleOnGameEnd(rpcMessage.data as RpcOnGameEnd);
+      case MsgOnBlackCardSkipped:
+        console.log("Handling on black card skipped message");
+        return this.handleOnBlackCardSkipped(
+          rpcMessage.data as RpcOnBlackCardSkipped,
+        );
       default:
         throw new Error(
           `Cannot handle RPC message as type is not valid ${rpcMessage.type}`,
@@ -543,6 +568,19 @@ class GameState {
 
     this.wsClient.sendMessage(
       JSON.stringify(this.encodeMessage(MsgCzarSelectCard, msg)),
+    );
+  }
+
+  public czarSkipBlackCard() {
+    console.log("Czar is skipping black card");
+    if (!this.wsClient) {
+      throw new Error("Cannot skip cards as websocket is not connected");
+    }
+
+    const msg: RpcSkipBlackCard = {};
+
+    this.wsClient.sendMessage(
+      JSON.stringify(this.encodeMessage(MsgSkipBlackCard, msg)),
     );
   }
 }

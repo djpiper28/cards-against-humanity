@@ -294,7 +294,7 @@ func (msg RpcSkipBlackCard) Type() RpcMessageType {
 }
 
 type RpcOnBlackCardSkipped struct {
-	NewBlackCard gameLogic.BlackCard `json:"blackCard"`
+	NewBlackCard gameLogic.BlackCard `json:"newBlackCard"`
 }
 
 func (msg RpcOnBlackCardSkipped) Type() RpcMessageType {

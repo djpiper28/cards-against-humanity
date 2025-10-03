@@ -102,12 +102,24 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
             />
           </Show>
           <Show when={!isCzarJudgingPhase()}>
-            <Card
-              id={props.roundState.blackCard.id}
-              isWhite={false}
-              cardText={props.roundState.blackCard.bodyText}
-              packName={`${props.roundState.blackCard.cardsToPlay} white cards to play`}
-            />
+            <div class="flex flex-col gap-3 w-min">
+              <Card
+                id={props.roundState.blackCard.id}
+                isWhite={false}
+                cardText={props.roundState.blackCard.bodyText}
+                packName={`${props.roundState.blackCard.cardsToPlay} white cards to play`}
+              />
+              <Show when={isCzar()}>
+                <Button
+                  id="skip-black-card"
+                  onClick={() => {
+                    gameState.czarSkipBlackCard();
+                  }}
+                >
+                  Skip Card
+                </Button>
+              </Show>
+            </div>
           </Show>
           <SubHeader text="Your hand:" />
           <PlayerCards
