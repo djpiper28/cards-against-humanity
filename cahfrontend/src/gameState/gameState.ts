@@ -518,9 +518,8 @@ class GameState {
       throw new Error("Cannot leave game as websocket is not connected");
     }
 
-    const resp = apiClient.games.leaveDelete();
-    this.onError = undefined;
     this.wsClient.disconnect();
+    const resp = await apiClient.games.leaveDelete();
     return resp;
   }
 

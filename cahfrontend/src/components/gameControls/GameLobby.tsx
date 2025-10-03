@@ -29,6 +29,7 @@ import { LobbyLoadedProps } from "./gameLoadedProps";
 import { GameNotStartedView } from "./GameNotStartedView";
 import Card from "../gameItems/Card";
 import CurrentRoundResults from "../gameItems/CurrentRoundResults";
+import { indexUrl } from "../../routes";
 
 // Exported for testing reasons
 export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
@@ -62,10 +63,7 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
             gameState
               .leaveGame()
               .then(() => {
-                clearGameCookies();
                 console.log("Left game successfully");
-                // This is really janky, however it forces a complete state reset.
-                window.location.href = "/";
               })
               .catch((e) => {
                 console.error(e);
@@ -73,6 +71,9 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
                   "Unable to leave game. Please try again.",
                 );
               });
+
+            clearGameCookies();
+            props.navigate(indexUrl);
           }}
         >
           Leave Game
