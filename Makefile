@@ -18,7 +18,7 @@ frontend-api: swagger
 
 .PHONY: frontend-tygo
 frontend-tygo:
-	cd backend && go run github.com/gzuidhof/tygo generate
+	cd backend && go run github.com/djpiper28/tygo generate
 
 .PHONY: frontend-types
 frontend-types: frontend-tygo frontend-api 
