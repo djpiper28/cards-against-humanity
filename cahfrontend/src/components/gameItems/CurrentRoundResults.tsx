@@ -17,7 +17,7 @@ interface PlayerPlayProps {
 function PlayerCard(props: Readonly<PlayerPlayProps>) {
   const cardNode = (
     <div
-      class={`flex flex-row gap-2 border-2 border-white rounded-2xl ${props.play.winner ? "border-blue-500" : ""}`}
+      class={`flex flex-row gap-2 border-2 border-yellow-300 rounded-2xl ${props.play.winner ? "border-blue-500" : ""}`}
     >
       {props.play.whiteCards.map((card, index) => (
         <Card
