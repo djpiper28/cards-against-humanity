@@ -151,13 +151,15 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
                 return;
               }
 
-              const plays = [
+              let plays = [
                 ...props.roundState.yourPlays.map((x) => x.id.toString()),
                 id,
               ];
 
               if (plays.length > props.roundState.blackCard.cardsToPlay) {
+                plays = plays.reverse();
                 plays.pop();
+                plays = plays.reverse();
               }
 
               props.setSelectedCardIds(plays);
