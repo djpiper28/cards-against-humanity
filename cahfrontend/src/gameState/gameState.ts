@@ -519,6 +519,7 @@ class GameState {
     }
 
     this.wsClient.disconnect();
+    this.wsClient = undefined;
     const resp = await apiClient.games.leaveDelete();
     return resp;
   }

@@ -72,8 +72,8 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
                 );
               });
 
-            clearGameCookies();
-            props.navigate(indexUrl);
+            // clearGameCookies();
+            window.location.href = indexUrl;
           }}
         >
           Leave Game
