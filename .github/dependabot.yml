@@ -10,11 +10,7 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: "gomod"
-    directory: "/backend"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "gomod"
-    directory: "/e2e"
+    directory: "/"
     schedule:
       interval: "weekly"
   - package-ecosystem: "github-actions"
@@ -23,6 +19,14 @@ updates:
       interval: "weekly"
   - package-ecosystem: "docker"
     directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "/devProxy"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "/backend"
     schedule:
       interval: "weekly"
   - package-ecosystem: "gitsubmodule"
