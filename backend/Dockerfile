@@ -1,4 +1,4 @@
-FROM golang:latest as build
+FROM golang:latest AS build
 
 RUN apt-get update
 RUN apt-get install ca-certificates make npm -y
