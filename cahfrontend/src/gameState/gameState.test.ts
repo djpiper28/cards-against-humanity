@@ -511,5 +511,9 @@ describe("Game state tests", () => {
     expect(gameState.roundState.yourHand).toEqual(newHand);
 
     expect(gameState.onAllPlaysChanged).toHaveBeenCalledWith(allPlays);
+
+    for (const player of gameState.playerList()) {
+      expect(player.hasPlayed).toBe(false);
+    }
   });
 });
