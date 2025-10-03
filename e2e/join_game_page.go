@@ -26,7 +26,7 @@ func NewJoinGamePage(b *rod.Browser, gameId string) JoinGamePage {
 }
 
 func (page *JoinGamePage) InLobbyAdmin() bool {
-	page.Page.Timeout(Timeout).MustElementR("h1", fmt.Sprintf("/.*'s game/i"))
+	page.Page.Timeout(Timeout).MustElementR("h1", "/.*'s game/i")
 	return true
 }
 
