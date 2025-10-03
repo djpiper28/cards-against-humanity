@@ -16,7 +16,9 @@ func GetBrowser() *rod.Browser {
 	var browser *rod.Browser
 	if strings.ToLower(os.Getenv("DEBUG")) == "true" {
 		launcher := launcher.New().
-			Headless(false)
+			Headless(false).
+			NoSandbox(true)
+
 		browser = rod.New().ControlURL(launcher.MustLaunch())
 		browser.Trace(true)
 		browser.SlowMotion(time.Second / 3)
