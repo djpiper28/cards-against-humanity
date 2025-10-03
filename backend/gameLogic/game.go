@@ -633,8 +633,10 @@ func (g *Game) moveToCzarJudgingPhase() (CzarJudingPhaseInfo, error) {
 	playerHands.fromGame(g)
 
 	// Copy out players hands
-	return CzarJudingPhaseInfo{AllPlays: allPlays,
-		PlayerHands: playerHands}, nil
+	return CzarJudingPhaseInfo{
+		AllPlays:    allPlays,
+		PlayerHands: playerHands,
+	}, nil
 }
 
 type PlayCardsResult struct {
@@ -684,7 +686,7 @@ func (g *Game) PlayCards(playerId uuid.UUID, cardIds []int) (PlayCardsResult, er
 	for _, cardId := range cardIds {
 		whiteCard, err := GetWhiteCard(cardId)
 		if err != nil {
-			return PlayCardsResult{}, errors.New(fmt.Sprintf("Cannot find card %d", cardId))
+			return PlayCardsResult{}, fmt.Errorf("Cannot find card %d", cardId)
 		}
 
 		currentPlay = append(currentPlay, whiteCard)
@@ -696,7 +698,7 @@ func (g *Game) PlayCards(playerId uuid.UUID, cardIds []int) (PlayCardsResult, er
 		// Duplicate check
 		_, found := checkedCards[cardId]
 		if found {
-			return PlayCardsResult{}, errors.New(fmt.Sprintf("Duplicate card in cardIds detected %d", cardId))
+			return PlayCardsResult{}, fmt.Errorf("Duplicate card in cardIds detected %d", cardId)
 		}
 
 		// Search for card in hand
@@ -710,7 +712,7 @@ func (g *Game) PlayCards(playerId uuid.UUID, cardIds []int) (PlayCardsResult, er
 		}
 
 		if !found {
-			return PlayCardsResult{}, errors.New(fmt.Sprintf("Cannot find card in your hand %d", cardId))
+			return PlayCardsResult{}, fmt.Errorf("Cannot find card in your hand %d", cardId)
 		}
 	}
 
@@ -820,13 +822,13 @@ func (g *Game) CzarSelectCards(pid uuid.UUID, cards []int) (CzarSelectCardResult
 	}
 
 	if g.CurrentCardCzarId != pid {
-		return CzarSelectCardResult{}, errors.New(fmt.Sprintf("%s is not the card czar", pid))
+		return CzarSelectCardResult{}, fmt.Errorf("%s is not the card czar", pid)
 	}
 
 	if len(cards) != int(g.CurrentBlackCard.CardsToPlay) {
-		return CzarSelectCardResult{}, errors.New(fmt.Sprintf("Expected %d cards, found %d",
+		return CzarSelectCardResult{}, fmt.Errorf("Expected %d cards, found %d",
 			g.CurrentBlackCard.CardsToPlay,
-			len(cards)))
+			len(cards))
 	}
 
 	// Find the player who won
