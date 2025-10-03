@@ -23,8 +23,10 @@ func (ws *WebsocketConnection) Send(message []byte) error {
 }
 
 func (ws *WebsocketConnection) Receive() ([]byte, error) {
-	/*msgType*/ _, msg, err := ws.Conn.ReadMessage()
-	// if msgType == websocket.TextMessage {
+	msgType, msg, err := ws.Conn.ReadMessage()
+	if msgType == websocket.PingMessage {
+		ws.Conn.WriteMessage(websocket.PongMessage, []byte("pong"))
+	}
 	return msg, err
 }
 
