@@ -370,6 +370,7 @@ func (g *Game) RemovePlayer(playerToRemoveId uuid.UUID) (PlayerRemovalResult, er
 
 	g.updateLastAction()
 	// TODO: If there are below the minimum amount of players move to the lobby
+  // TODO: If the player was the czar
 	return res, nil
 }
 
