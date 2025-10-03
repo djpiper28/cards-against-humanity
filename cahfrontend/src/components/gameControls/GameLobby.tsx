@@ -65,7 +65,8 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
               .then(() => {
                 clearGameCookies();
                 console.log("Left game successfully");
-                props.navigate(indexUrl);
+                // This is really janky, however it forces a complete state reset.
+                window.location.href = "/";
               })
               .catch((e) => {
                 console.error(e);
