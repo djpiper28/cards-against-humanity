@@ -7,6 +7,11 @@ RUN npm i -g pnpm
 
 WORKDIR /app
 # Set context to ../
+
+# Force node modules to be cached
+COPY cahfrontend/package.json cahfrontend/
+COPY cahfrontend/pnpm-lock.yaml cahfrontend/
+RUN cd cahfrontend && pnpm i
 COPY . .
 
 #!/bin/sh
@@ -20,9 +25,7 @@ ARG BASE_URL=localhost:8000
 ENV VITE_API_BASE_URL=http://$BASE_URL/api
 ENV VITE_WS_BASE_URL=ws://$BASE_URL/ws
 ENV CI=true
-
-# Make sure that the node modules are not stored in the cache
-RUN make frontend -j && rm -rf cahfrontend/node_modules
+RUN make frontend -j
 
 FROM nginx:latest
 

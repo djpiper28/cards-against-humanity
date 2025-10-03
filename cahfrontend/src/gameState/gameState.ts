@@ -329,13 +329,6 @@ class GameState {
     this.lobbyState.gameState = GameStateWhiteCardsBeingSelected;
     this.onLobbyStateChange?.(structuredClone(this.lobbyState));
     this.onRoundStateChange?.(structuredClone(this.roundState));
-    this.players = this.players.map((player) => {
-      return {
-        ...player,
-        hasPlayed: false,
-      };
-    });
-    this.onPlayerListChange?.(this.players);
   }
 
   private handleOnCzarJudgingPhase(data: RpcOnCzarJudgingPhaseMsg) {
@@ -378,6 +371,7 @@ class GameState {
         return {
           ...player,
           points: player.points + 1,
+          hasPlayed: false,
         };
       }
 
