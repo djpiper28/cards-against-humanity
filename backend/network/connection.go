@@ -335,6 +335,26 @@ func (c *WsConnection) readMessage(gid uuid.UUID) error {
 			wg.Wait()
 			return nil
 		},
+		SkipBlackCardHandler: func() error {
+			handler = "Skip Black Card Handler"
+
+			newCard, err := gameRepo.Repo.CzarSkipsCard(c.GameId, c.PlayerId)
+			if err != nil {
+				return err
+			}
+
+			var msg RpcMessage
+			msg = RpcOnBlackCardSkipped{
+				NewBlackCard: *newCard,
+			}
+			encodedMsg, err := EncodeRpcMessage(msg)
+			if err != nil {
+				logger.Logger.Error("Cannot encode message to send to players")
+			}
+
+			go GlobalConnectionManager.Broadcast(c.GameId, encodedMsg)
+			return nil
+		},
 	})
 
 	microSeconds := time.Since(startTime).Microseconds()

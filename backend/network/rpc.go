@@ -52,6 +52,11 @@ const (
 	// Tx when the game state returns to white cards being played
 	MsgOnWhiteCardPlayPhase
 
+	// Rx card czar decides they want to have a different black card
+	MsgSkipBlackCard
+	// Tx when the black card gets skipped
+	MsgOnBlackCardSkipped
+
 	// Tx when the game ends and goes back to the lobby
 	MsgOnGameEnd
 )
@@ -80,6 +85,7 @@ type RpcCommandHandlers struct {
 	StartGameHandler      func() error
 	PlayCardsHandler      func(msg RpcPlayCardsMsg) error
 	CzarSelectCardHandler func(msg RpcCzarSelectCardMsg) error
+	SkipBlackCardHandler  func() error
 }
 
 func DecodeAs[T RpcMessage](data []byte) (T, error) {
@@ -131,6 +137,8 @@ func DecodeRpcMessage(data []byte, handlers RpcCommandHandlers) error {
 		}
 
 		return handlers.CzarSelectCardHandler(command)
+	case MsgSkipBlackCard:
+		return handlers.SkipBlackCardHandler()
 	default:
 		logger.Logger.Error("Unknown command", "type", cmd.Type)
 		return errors.New("Unknown command")
@@ -279,9 +287,23 @@ func (msg RpcOnWhiteCardPlayPhase) Type() RpcMessageType {
 	return MsgOnWhiteCardPlayPhase
 }
 
+type RpcSkipBlackCard struct{}
+
+func (msg RpcSkipBlackCard) Type() RpcMessageType {
+	return MsgSkipBlackCard
+}
+
+type RpcOnBlackCardSkipped struct {
+	NewBlackCard gameLogic.BlackCard `json:"blackCard"`
+}
+
+func (msg RpcOnBlackCardSkipped) Type() RpcMessageType {
+	return MsgOnBlackCardSkipped
+}
+
 type RpcOnGameEnd struct {
 	// Optional winner ID for game ending normally
-	WinnerId uuid.UUID `json:"winnerId,omitEmpty"`
+	WinnerId uuid.UUID `json:"winnerId"`
 }
 
 func (msg RpcOnGameEnd) Type() RpcMessageType {

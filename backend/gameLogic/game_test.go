@@ -8,6 +8,7 @@ import (
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDefaultGameSettings(t *testing.T) {
@@ -1152,4 +1153,98 @@ func TestJudgingGameEndMaxScore(t *testing.T) {
 
 	assert.True(t, res.GameEnded)
 	assert.Equal(t, winnerId, res.WinnerId)
+}
+
+func TestSkipBlackCardWrongState(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	require.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 1")
+	require.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 2")
+	require.NoError(t, err)
+
+	_, err = game.SkipBlackCard(game.CurrentCardCzarId)
+	require.Error(t, err)
+}
+
+func TestSkipBlackCardNotCzar(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	require.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 1")
+	require.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 2")
+	require.NoError(t, err)
+
+	_, err = game.StartGame()
+	require.NoError(t, err)
+
+	_, err = game.SkipBlackCard(uuid.New())
+	require.Error(t, err)
+}
+
+func TestSkipBlackCard(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	require.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 1")
+	require.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 2")
+	require.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 3")
+	require.NoError(t, err)
+
+	_, err = game.StartGame()
+	require.NoError(t, err)
+
+	for _, pid := range game.Players {
+		if pid == game.CurrentCardCzarId {
+			continue
+		}
+
+		player, found := game.PlayersMap[pid]
+		require.True(t, found)
+
+		hand := make([]*gameLogic.WhiteCard, 0)
+		for _, card := range player.Hand {
+			hand = append(hand, card)
+		}
+
+		cards := make([]int, 0)
+		for i := range game.CurrentBlackCard.CardsToPlay {
+			cards = append(cards, hand[i].Id)
+		}
+
+		_, err = game.PlayCards(pid, cards)
+		require.NoError(t, err)
+
+		// Only play one of the players cards
+		break
+	}
+
+	newCard, err := game.SkipBlackCard(game.CurrentCardCzarId)
+	require.NoError(t, err)
+	require.NotNil(t, newCard)
+
+	for _, pid := range game.Players {
+		player, found := game.PlayersMap[pid]
+		require.True(t, found)
+
+		require.Len(t, player.CurrentPlay, 0)
+		require.Len(t, player.Hand, gameLogic.HandSize)
+	}
 }
