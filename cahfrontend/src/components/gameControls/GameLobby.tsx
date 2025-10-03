@@ -21,7 +21,6 @@ import {
 import Button from "../buttons/Button";
 import { cookieStorage } from "@solid-primitives/storage";
 import { useNavigate } from "@solidjs/router";
-import { indexUrl } from "../../routes";
 import clearGameCookies from "../../gameState/clearGameCookies";
 import SubHeader from "../typography/SubHeader";
 import { GameLobbyState } from "../../gameState/gameLobbyState";
@@ -141,8 +140,8 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
               }
 
               const plays = [
-                id,
                 ...props.roundState.yourPlays.map((x) => x.id.toString()),
+                id,
               ];
 
               if (plays.length > props.roundState.blackCard.cardsToPlay) {
