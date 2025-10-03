@@ -299,9 +299,12 @@ func leaveGame(c *gin.Context) {
 	err = network.GlobalConnectionManager.RemovePlayer(authData.GameId,
 		authData.PlayerId)
 	if err != nil {
-		logger.Logger.Errorf("Player %s in game %s was unable to leave the game: %s",
+		logger.Logger.Error("Player in game was unable to leave",
+			"playerId",
 			authData.PlayerId,
+			"gameId",
 			authData.GameId,
+			"err",
 			err)
 		c.JSON(http.StatusInternalServerError, NewApiError(errors.New("Cannot leave the game")))
 		return
