@@ -19,9 +19,10 @@ ENV PATH=$PATH:/usr/local/go/bin
 ARG BASE_URL=localhost:8000
 ENV VITE_API_BASE_URL=http://$BASE_URL/api
 ENV VITE_WS_BASE_URL=ws://$BASE_URL/ws
+ENV CI=true
 
-RUN rm -r cahfrontend/node_modules
-RUN make frontend -j
+# Make sure that the node modules are not stored in the cache
+RUN make frontend -j && rm -rf cahfrontend/node_modules
 
 FROM nginx:latest
 
