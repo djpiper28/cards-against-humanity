@@ -370,7 +370,7 @@ func (g *Game) RemovePlayer(playerToRemoveId uuid.UUID) (PlayerRemovalResult, er
 
 	g.updateLastAction()
 	// TODO: If there are below the minimum amount of players move to the lobby
-  // TODO: If the player was the czar
+	// TODO: If the player was the czar
 	return res, nil
 }
 
@@ -603,7 +603,10 @@ func (g *Game) moveToCzarJudgingPhase() (CzarJudingPhaseInfo, error) {
 		for _, card := range player.CurrentPlay {
 			playersPlay = append(playersPlay, card)
 		}
-		allPlays = append(allPlays, playersPlay)
+
+		if len(playersPlay) > 0 {
+			allPlays = append(allPlays, playersPlay)
+		}
 
 		newHand := make(map[int]*WhiteCard)
 		for _, playerCard := range player.Hand {
@@ -632,6 +635,11 @@ func (g *Game) moveToCzarJudgingPhase() (CzarJudingPhaseInfo, error) {
 
 	var playerHands PlayerHands
 	playerHands.fromGame(g)
+
+	for i := range allPlays {
+		j := rand.Intn(i + 1)
+		allPlays[i], allPlays[j] = allPlays[j], allPlays[i]
+	}
 
 	// Copy out players hands
 	return CzarJudingPhaseInfo{
@@ -885,9 +893,9 @@ func (g *Game) SkipBlackCard(pid uuid.UUID) (*BlackCard, error) {
 		return nil, errors.New("Player is not the card czar so cannot skip the black card")
 	}
 
-  if !g.checkState(GameStateWhiteCardsBeingSelected) {
-    return nil, errors.New("Cannot skip a card unless white cards are being selected")
-  }
+	if !g.checkState(GameStateWhiteCardsBeingSelected) {
+		return nil, errors.New("Cannot skip a card unless white cards are being selected")
+	}
 
 	err := g.newBlackCard()
 	if err != nil {
