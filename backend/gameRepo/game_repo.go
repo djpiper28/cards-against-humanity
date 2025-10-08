@@ -84,7 +84,8 @@ func (gr *GameRepo) PlayerLeaveGame(gameId, playerId uuid.UUID) (gameLogic.Playe
 	}
 
 	if res.PlayersLeft == 0 {
-		logger.Logger.Infof("Game %s has no players left, deleting it", gameId)
+		logger.Logger.Info("Game has no players left, deleting it",
+			"gameId", gameId)
 		gr.removeGame(gameId)
 	}
 
