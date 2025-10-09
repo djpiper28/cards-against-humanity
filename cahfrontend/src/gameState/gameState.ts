@@ -273,7 +273,7 @@ class GameState {
       id: msg.id,
       name: msg.name,
       connected: false,
-      points: player?.points ?? 0,
+      points: 0,
       hasPlayed: false,
     });
 
