@@ -329,8 +329,9 @@ export default function GameLobby() {
         </div>
       </Show>
 
-      <p id="error-message" class="text-error-colour">
-        {errorMessage()}
+      <p id="error-message" class="text-error-colour text-sm">
+        Last error: {errorMessage()}. (You can ignore this, it is for
+        developers)
       </p>
     </>
   );
