@@ -188,7 +188,7 @@ class GameState {
   public emitState() {
     this.onLobbyStateChange?.(structuredClone(this.lobbyState));
     this.onPlayerListChange?.(this.playerList());
-    // this.onRoundStateChange?.(structuredClone(this.roundState));
+    this.onRoundStateChange?.(structuredClone(this.roundState));
   }
 
   public isOwner(): boolean {
@@ -204,16 +204,16 @@ class GameState {
       gameState: state.gameState,
     };
 
+    this.players = [];
+
     for (const player of state.players) {
-      if (!this.players.find((x) => x.id === player.id)) {
-        this.players.push({
-          id: player.id,
-          name: player.name,
-          connected: player.connected,
-          points: player.points,
-          hasPlayed: /*player.hasPlayed*/ false,
-        });
-      }
+      this.players.push({
+        id: player.id,
+        name: player.name,
+        connected: player.connected,
+        points: player.points,
+        hasPlayed: player.hasPlayed,
+      });
     }
 
     const errorWhiteCard: WhiteCard = {
@@ -256,14 +256,11 @@ class GameState {
   }
 
   private handleOnPlayerJoin(msg: RpcOnPlayerJoinMsg) {
-    const player = this.players.find((x: Player) => x.id === msg.id);
-    this.players = this.players.filter((x: Player) => x.id !== msg.id);
-    this.players.push({
-      id: msg.id,
-      name: msg.name,
-      connected: true,
-      points: player?.points ?? 0,
-      hasPlayed: /*player?.hasPlayed*/ false,
+    this.players = this.players.map((x) => {
+      if (x.id === msg.playerId) {
+        x.connected = true;
+      }
+      return x;
     });
 
     this.onPlayerListChange?.(this.playerList());
@@ -284,14 +281,11 @@ class GameState {
   }
 
   private handleOnPlayerDisconnect(msg: RpcOnPlayerDisconnectMsg) {
-    const player = this.players.find((x: Player) => x.id === msg.id);
-    this.players = this.players.filter((x: Player) => x.id !== msg.id);
-    this.players.push({
-      id: msg.id,
-      name: player?.name ?? "error",
-      connected: false,
-      points: player?.points ?? 0,
-      hasPlayed: player?.hasPlayed ?? false,
+    this.players = this.players.map((x) => {
+      if (x.id === msg.playerId) {
+        x.connected = false;
+      }
+      return x;
     });
 
     this.onPlayerListChange?.(this.playerList());
@@ -303,15 +297,13 @@ class GameState {
   }
 
   private handleOnPlayerPlay(msg: RpcOnCardPlayedMsg) {
-    const player = this.players.find((x: Player) => x.id === msg.playerId);
-    this.players = this.players.filter((x: Player) => x.id !== msg.playerId);
-    this.players.push({
-      id: player?.id ?? msg.playerId,
-      name: player?.name ?? "error",
-      connected: player?.connected ?? false,
-      points: player?.points ?? 0,
-      hasPlayed: true,
+    this.players = this.players.map((x) => {
+      if (x.id === msg.playerId) {
+        x.hasPlayed = true;
+      }
+      return x;
     });
+
     this.onPlayerListChange?.(this.playerList());
   }
 
@@ -364,7 +356,6 @@ class GameState {
 
   public handleOnWhiteCardPlayPhase(msg: RpcOnWhiteCardPlayPhase) {
     this.lobbyState.gameState = GameStateWhiteCardsBeingSelected;
-    this.onLobbyStateChange?.(structuredClone(this.lobbyState));
 
     this.roundState.roundNumber++;
     this.roundState.totalPlays = 0;
@@ -372,7 +363,6 @@ class GameState {
     this.roundState.blackCard = msg.blackCard!;
     this.roundState.yourHand = msg.yourHand as WhiteCard[];
     this.roundState.currentCardCzarId = msg.cardCzarId;
-    this.onRoundStateChange?.(structuredClone(this.roundState));
 
     this.players = this.players.map((player) => {
       if (player.id === msg.winnerId) {
@@ -385,7 +375,7 @@ class GameState {
 
       return player;
     });
-    this.onPlayerListChange?.(this.players);
+    this.emitState();
   }
 
   private handleOnGameEnd(msg: RpcOnGameEnd) {
@@ -401,17 +391,15 @@ class GameState {
 
         return player;
       });
-      this.onPlayerListChange?.(this.players);
     }
 
     this.roundState.totalPlays = 0;
     this.roundState.yourPlays = [];
     this.roundState.yourHand = [];
     this.roundState.currentCardCzarId = "not-in-round";
-    this.onRoundStateChange?.(structuredClone(this.roundState));
 
     this.lobbyState.gameState = GameStateInLobby;
-    this.onLobbyStateChange?.(structuredClone(this.lobbyState));
+    this.emitState();
   }
 
   private handleOnBlackCardSkipped(msg: RpcOnBlackCardSkipped) {
