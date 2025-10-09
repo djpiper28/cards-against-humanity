@@ -249,7 +249,8 @@ func (g *Game) StateInfo(pid uuid.UUID) GameStateInfo {
 	}
 
 	// error state does not matter
-	initialRoundInfo := InitialRoundInfo{CardCzarId: g.CurrentCardCzarId,
+	initialRoundInfo := InitialRoundInfo{
+		CardCzarId:           g.CurrentCardCzarId,
 		RoundNumber:          g.CurrentRound,
 		BlackCard:            g.CurrentBlackCard,
 		PlayersWhoHavePlayed: make([]uuid.UUID, 0),
@@ -278,7 +279,8 @@ func (g *Game) StateInfo(pid uuid.UUID) GameStateInfo {
 		}
 	}
 
-	return GameStateInfo{Id: g.Id,
+	return GameStateInfo{
+		Id:           g.Id,
 		Settings:     *g.Settings,
 		CreationTime: g.CreationTime,
 		GameState:    g.GameState,

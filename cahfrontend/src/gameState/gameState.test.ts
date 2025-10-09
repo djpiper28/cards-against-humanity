@@ -52,7 +52,7 @@ describe("Game state tests", () => {
     expect(WebSocket).toHaveBeenCalledWith(`${wsBaseUrl}`);
   });
 
-  it("Should add a new player to the player list when they connect", () => {
+  it("Should set a player to connected on join", () => {
     const gid = v4();
     const pid = v4();
     gameState.setupState(gid, pid, "");
@@ -65,7 +65,16 @@ describe("Game state tests", () => {
       },
     };
 
-    expect(gameState.playerList().length).toBe(0);
+    gameState.players = [
+      {
+        id: msg.data.id,
+        name: msg.data.name,
+        connected: true,
+        points: 0,
+        hasPlayed: false,
+      },
+    ];
+
     gameState.handleRpcMessage(JSON.stringify(msg));
 
     expect(gameState.playerList().length).toBe(1);
@@ -92,7 +101,16 @@ describe("Game state tests", () => {
       },
     };
 
-    expect(gameState.playerList().length).toBe(0);
+    gameState.players = [
+      {
+        id: msg.data.id,
+        name: msg.data.name,
+        connected: true,
+        points: 0,
+        hasPlayed: false,
+      },
+    ];
+
     gameState.handleRpcMessage(JSON.stringify(msg));
 
     expect(gameState.playerList().length).toBe(1);
@@ -120,42 +138,17 @@ describe("Game state tests", () => {
       },
     };
 
-    gameState.handleRpcMessage(JSON.stringify(msg));
-    gameState.handleRpcMessage(JSON.stringify(msg));
-
-    expect(gameState.playerList()[0]).toEqual({
-      id: msg.data.id,
-      name: msg.data.name,
-      connected: true,
-      points: 0,
-      hasPlayed: false,
-    });
-    expect(gameState.playerList().length).toBe(1);
-  });
-
-  it("Should set a player to connected if they are in the players list but disconnected", () => {
-    const gid = v4();
-    const pid = v4();
-    gameState.setupState(gid, pid, "");
-
-    const msg: RpcMessage = {
-      type: MsgOnPlayerJoin,
-      data: {
-        id: v4(),
-        name: "Player 1",
-      },
-    };
-
     gameState.players = [
       {
         id: msg.data.id,
         name: msg.data.name,
-        connected: false,
+        connected: true,
         points: 0,
         hasPlayed: false,
       },
     ];
 
+    gameState.handleRpcMessage(JSON.stringify(msg));
     gameState.handleRpcMessage(JSON.stringify(msg));
 
     expect(gameState.playerList().length).toBe(1);

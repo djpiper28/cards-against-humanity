@@ -76,3 +76,5 @@ func (s *ServerTestSuite) TestGetCardPacks() {
 	err = json.Unmarshal(body, &packs)
 	assert.Nil(t, err, "There should not be any errors getting the card packs")
 }
+
+// TODO: test leave game
