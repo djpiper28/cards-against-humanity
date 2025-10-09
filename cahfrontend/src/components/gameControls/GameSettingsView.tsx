@@ -9,7 +9,7 @@ interface Props {
 export default function GameSettingsView(props: Readonly<Props>) {
   return (
     <div>
-      <h2>Game Settings</h2>
+      <h2 class="text-lg font-bold">Game Settings</h2>
       <div>
         <p>
           Game Password:{" "}

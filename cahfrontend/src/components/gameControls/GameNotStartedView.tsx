@@ -1,5 +1,5 @@
 import { LobbyLoadedProps } from "./gameLoadedProps";
-import { Show } from "solid-js";
+import { For, Show } from "solid-js";
 import { gameState } from "../../gameState/gameState";
 import { MsgChangeSettings, RpcChangeSettingsMsg } from "../../rpcTypes";
 import CardsSelector from "./CardsSelector";
@@ -88,6 +88,18 @@ export function GameNotStartedView(props: Readonly<LobbyLoadedProps>) {
             Start Game
           </Button>
         </Show>
+      </Show>
+
+      <Show when={!isGameOwner()}>
+        <h2 class="text-lg font-bold">All Card Packs</h2>
+        <ul class="flex flex-row gap-3 flex-wrap list-disc max-h-72 overflow-auto">
+          <For
+            each={props.cardPacks}
+            fallback={<p>All card packs should be shown here...</p>}
+          >
+            {(cardPack) => <li class="px-2">{cardPack.name}</li>}
+          </For>
+        </ul>
       </Show>
     </>
   );

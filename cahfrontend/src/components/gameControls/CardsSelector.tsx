@@ -47,7 +47,7 @@ export default function CardsSelector(props: Readonly<Props>) {
   };
 
   return (
-    <div class="flex flex-col gap-3 max-h-72">
+    <div class="flex flex-col gap-3 max-h-72 lg:max-h-96 2xl:max-h-screen">
       <Input
         inputType={InputType.Text}
         label="Search"
