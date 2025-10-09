@@ -27,6 +27,7 @@ import {
   MsgRoundInformation,
   MsgSkipBlackCard,
   MsgStartGame,
+  MsgKickPlayer,
   RpcChangeSettingsMsg,
   RpcCommandErrorMsg,
   RpcCzarSelectCardMsg,
@@ -47,6 +48,7 @@ import {
   RpcPlayCardsMsg,
   RpcRoundInformationMsg,
   RpcSkipBlackCard,
+  RpcKickPlayer,
 } from "../rpcTypes";
 import { WebSocketClient, toWebSocketClient } from "./websocketClient";
 import { apiClient, wsBaseUrl } from "../apiClient";
@@ -265,8 +267,11 @@ class GameState {
     }
 
     this.players = this.players.map((x) => {
-      if (x.id === msg.playerId) {
-        x.connected = true;
+      if (x.id === msg.id) {
+        return {
+          ...x,
+          connected: true,
+        };
       }
       return x;
     });
@@ -275,7 +280,6 @@ class GameState {
   }
 
   private handleOnPlayerCreate(msg: RpcOnPlayerCreateMsg) {
-    const player = this.players.find((x: Player) => x.id === msg.id);
     this.players = this.players.filter((x: Player) => x.id !== msg.id);
     this.players.push({
       id: msg.id,
@@ -290,8 +294,11 @@ class GameState {
 
   private handleOnPlayerDisconnect(msg: RpcOnPlayerDisconnectMsg) {
     this.players = this.players.map((x) => {
-      if (x.id === msg.playerId) {
-        x.connected = false;
+      if (x.id === msg.id) {
+        return {
+          ...x,
+          connected: false,
+        };
       }
       return x;
     });
@@ -307,7 +314,10 @@ class GameState {
   private handleOnPlayerPlay(msg: RpcOnCardPlayedMsg) {
     this.players = this.players.map((x) => {
       if (x.id === msg.playerId) {
-        x.hasPlayed = true;
+        return {
+          ...x,
+          hasPlayed: true,
+        };
       }
       return x;
     });
@@ -524,6 +534,7 @@ class GameState {
 
     this.wsClient.disconnect();
     this.wsClient = undefined;
+
     const resp = await apiClient.games.leaveDelete();
     return resp;
   }
@@ -579,6 +590,21 @@ class GameState {
 
     this.wsClient.sendMessage(
       JSON.stringify(this.encodeMessage(MsgSkipBlackCard, msg)),
+    );
+  }
+
+  public czarKickPlayer(playerId: string) {
+    console.log("Czar is kicking a player");
+    if (!this.wsClient) {
+      throw new Error("Cannot skip cards as websocket is not connected");
+    }
+
+    const msg: RpcKickPlayer = {
+      playerId,
+    };
+
+    this.wsClient.sendMessage(
+      JSON.stringify(this.encodeMessage(MsgKickPlayer, msg)),
     );
   }
 }
