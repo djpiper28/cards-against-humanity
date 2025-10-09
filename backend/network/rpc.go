@@ -57,6 +57,9 @@ const (
 	// Tx when the black card gets skipped
 	MsgOnBlackCardSkipped
 
+	// Rx card czar decides they want to kick a player
+	MsgKickPlayer
+
 	// Tx when the game ends and goes back to the lobby
 	MsgOnGameEnd
 )
@@ -86,6 +89,7 @@ type RpcCommandHandlers struct {
 	PlayCardsHandler      func(msg RpcPlayCardsMsg) error
 	CzarSelectCardHandler func(msg RpcCzarSelectCardMsg) error
 	SkipBlackCardHandler  func() error
+	KickPlayerHandler     func(msg RpcKickPlayer) error
 }
 
 func DecodeAs[T RpcMessage](data []byte) (T, error) {
@@ -139,6 +143,13 @@ func DecodeRpcMessage(data []byte, handlers RpcCommandHandlers) error {
 		return handlers.CzarSelectCardHandler(command)
 	case MsgSkipBlackCard:
 		return handlers.SkipBlackCardHandler()
+	case MsgKickPlayer:
+		command, err := DecodeAs[RpcKickPlayer](data)
+		if err != nil {
+			return err
+		}
+
+		return handlers.KickPlayerHandler(command)
 	default:
 		logger.Logger.Error("Unknown command", "type", cmd.Type)
 		return errors.New("Unknown command")
@@ -308,4 +319,12 @@ type RpcOnGameEnd struct {
 
 func (msg RpcOnGameEnd) Type() RpcMessageType {
 	return MsgOnGameEnd
+}
+
+type RpcKickPlayer struct {
+	PlayerId uuid.UUID `json:"playerId"`
+}
+
+func (msg RpcKickPlayer) Type() RpcMessageType {
+	return MsgKickPlayer
 }

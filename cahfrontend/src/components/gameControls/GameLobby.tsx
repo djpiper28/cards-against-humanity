@@ -64,6 +64,9 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
               .leaveGame()
               .then(() => {
                 console.log("Left game successfully");
+
+                clearGameCookies();
+                window.location.href = indexUrl;
               })
               .catch((e) => {
                 console.error(e);
@@ -71,9 +74,6 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
                   "Unable to leave game. Please try again.",
                 );
               });
-
-            // clearGameCookies();
-            window.location.href = indexUrl;
           }}
         >
           Leave Game

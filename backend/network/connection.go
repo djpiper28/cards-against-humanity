@@ -2,6 +2,7 @@ package network
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"sync"
 	"time"
@@ -336,7 +337,7 @@ func (c *WsConnection) readMessage(gid uuid.UUID) error {
 			return nil
 		},
 		SkipBlackCardHandler: func() error {
-			handler = "Skip Black Card Handler"
+			handler = "Skip Black Card"
 
 			newCard, err := gameRepo.Repo.CzarSkipsCard(c.GameId, c.PlayerId)
 			if err != nil {
@@ -353,6 +354,29 @@ func (c *WsConnection) readMessage(gid uuid.UUID) error {
 			}
 
 			go GlobalConnectionManager.Broadcast(c.GameId, encodedMsg)
+			return nil
+		},
+		KickPlayerHandler: func(msg RpcKickPlayer) error {
+			handler = "Kick Player"
+
+			game, err := gameRepo.Repo.GetGame(c.GameId)
+			if err != nil {
+				return errors.Join(errors.New("Cannot find game"), err)
+			}
+
+			game.Lock.Lock()
+			ownerId := game.GameOwnerId
+			game.Lock.Unlock()
+
+			if ownerId != c.PlayerId {
+				return fmt.Errorf("Player %s is not the owner (%s)", c.PlayerId, ownerId)
+			}
+
+			err = GlobalConnectionManager.RemovePlayer(c.GameId, msg.PlayerId)
+			if err != nil {
+				return errors.Join(errors.New("Cannot kick player"), err)
+			}
+
 			return nil
 		},
 	})
