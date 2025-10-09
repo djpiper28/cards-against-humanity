@@ -256,6 +256,16 @@ class GameState {
   }
 
   private handleOnPlayerJoin(msg: RpcOnPlayerJoinMsg) {
+    if (!this.players.find((x: Player) => x.id === msg.id)) {
+      this.players.push({
+        id: msg.id,
+        name: msg.id,
+        connected: true,
+        points: 0,
+        hasPlayed: false,
+      });
+    }
+
     this.players = this.players.map((x) => {
       if (x.id === msg.playerId) {
         x.connected = true;
