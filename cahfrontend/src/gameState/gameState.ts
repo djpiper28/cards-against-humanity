@@ -226,8 +226,6 @@ class GameState {
       cardsToPlay: 1,
     };
 
-    this.onLobbyStateChange?.(this.lobbyState);
-
     const roundState: RpcRoundInformationMsg = {
       yourPlays: state.roundInfo.yourPlays.map(
         (x) =>
@@ -242,13 +240,13 @@ class GameState {
       blackCard: state.roundInfo.blackCard ?? errorBlackCard,
       totalPlays: state.roundInfo.playersWhoHavePlayed.length,
     };
-    this.onRoundStateChange?.(roundState);
 
+    this.roundState = roundState;
     state.roundInfo.playersWhoHavePlayed.forEach((pid) => {
       this.handleOnPlayerPlay({ playerId: pid });
     });
-    this.onPlayerListChange?.(this.playerList());
-    this.onAllPlaysChanged?.(state.allPlays as WhiteCard[][]);
+    this.onAllPlaysChanged(state.allPlays);
+    this.emitState();
   }
 
   public playerList(): GamePlayerList {
