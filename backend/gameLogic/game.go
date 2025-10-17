@@ -377,7 +377,7 @@ func (g *Game) RemovePlayer(playerToRemoveId uuid.UUID) (PlayerRemovalResult, er
 }
 
 type PreviousWinner struct {
-	PlayerId   uuid.UUID              `json:"playerId"`
+	PlayerId   uuid.UUID    `json:"playerId"`
 	BlackCard  *BlackCard   `json:"blackCard"`
 	Whitecards []*WhiteCard `json:"whiteCards"`
 }
