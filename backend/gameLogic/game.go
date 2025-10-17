@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/djpiper28/cards-against-humanity/backend/logger"
 	"github.com/google/uuid"
 )
@@ -379,8 +378,8 @@ func (g *Game) RemovePlayer(playerToRemoveId uuid.UUID) (PlayerRemovalResult, er
 
 type PreviousWinner struct {
 	PlayerId   uuid.UUID              `json:"playerId"`
-	BlackCard  *gameLogic.BlackCard   `json:"blackCard"`
-	Whitecards []*gameLogic.WhiteCard `json:"whiteCards"`
+	BlackCard  *BlackCard   `json:"blackCard"`
+	Whitecards []*WhiteCard `json:"whiteCards"`
 }
 
 // This contains everyone's hands, so just remember not to send it to all players lol
