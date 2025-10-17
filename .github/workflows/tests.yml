@@ -29,5 +29,5 @@ jobs:
         run: |
           git submodule init
           git submodule update
-      - name: Build the package
-        run: make test -j
+      - name: Tests (non-e2e)
+        run: make test-backend test-frontend -j

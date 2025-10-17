@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/djpiper28/cards-against-humanity/backend/logger"
 	"github.com/google/uuid"
 )
@@ -376,6 +377,12 @@ func (g *Game) RemovePlayer(playerToRemoveId uuid.UUID) (PlayerRemovalResult, er
 	return res, nil
 }
 
+type PreviousWinner struct {
+	PlayerId   uuid.UUID              `json:"playerId"`
+	BlackCard  *gameLogic.BlackCard   `json:"blackCard"`
+	Whitecards []*gameLogic.WhiteCard `json:"whiteCards"`
+}
+
 // This contains everyone's hands, so just remember not to send it to all players lol
 type RoundInfo struct {
 	PlayerHands       map[uuid.UUID][]*WhiteCard
@@ -383,6 +390,7 @@ type RoundInfo struct {
 	CurrentBlackCard  *BlackCard
 	CurrentCardCzarId uuid.UUID
 	RoundNumber       uint
+	PreviousWinner    PreviousWinner
 }
 
 // Not thread safe

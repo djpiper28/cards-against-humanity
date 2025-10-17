@@ -244,7 +244,8 @@ type RpcRoundInformationMsg struct {
 	YourPlays         []gameLogic.WhiteCard `json:"yourPlays"`
 	// Total amuont of players who have played cards, including yourself:
 	// if playerCount - 1 /*card czar*/ == TotalPlays then all players have played
-	TotalPlays int `json:"totalPlays"`
+	TotalPlays            int                      `json:"totalPlays"`
+	PreviousWinnerDetails gameLogic.PreviousWinner `json:"previousWinner"`
 }
 
 func (msg RpcRoundInformationMsg) Type() RpcMessageType {
