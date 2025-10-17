@@ -35,7 +35,7 @@ backend: swagger
 
 # Tests
 .PHONY: test-frontend
-test-frontend: frontend-types
+test-frontend: frontend-types frontend-install
 	cd ./cahfrontend && pnpm run test
 	
 GO_TEST_ARGS=-v -benchmem ./... -race -cover -coverpkg ./... -covermode=atomic -coverprofile=coverage.out
