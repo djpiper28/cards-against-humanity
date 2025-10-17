@@ -68,11 +68,11 @@ e2e-fmt:
 
 .PHONY: backend-fmt
 backend-fmt:
-	cd ./backend/ && swag fmt && gofmt -l -w .
+	cd ./backend/ && go run swag fmt && gofmt -l -w .
 
 .PHONY: frontend-fmt
 frontend-fmt:
-	cd ./cahfrontend/ && prettier -w .
+	cd ./cahfrontend/ && pnpm prettier
 
 .PHONY: fmt
 fmt: backend-fmt frontend-fmt e2e-fmt
