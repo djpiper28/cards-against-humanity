@@ -358,7 +358,7 @@ func (s *ServerTestSuite) TestPlayersGetRoundInfoAfterWinnerSelected() {
 
 	whiteCardPlay, err := network.DecodeAs[network.RpcOnWhiteCardPlayPhase](msg)
 	assert.NoError(t, err, "Should be a white card play message")
-	assert.Equal(t, expectedPreviousWinner, whiteCardPlay.ThisRoundsWinner)
+	assert.Equal(t, expectedPreviousWinner, whiteCardPlay.Winner)
 	assert.Equal(t, client.PlayerId, whiteCardPlay.WinnerId)
   assert.Equal(t, game.CurrentBlackCard, whiteCardPlay.BlackCard)
   assert.Len(t, whiteCardPlay.YourHand, 7)
