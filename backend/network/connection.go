@@ -259,12 +259,13 @@ func (c *WsConnection) readMessage(gid uuid.UUID) error {
 				}
 
 				roundInfo := RpcRoundInformationMsg{
-					CurrentCardCzarId: info.CurrentCardCzarId,
-					YourHand:          handCopy,
-					RoundNumber:       info.RoundNumber,
-					BlackCard:         *info.CurrentBlackCard,
-					YourPlays:         playsCopy,
-					TotalPlays:        totalPlays,
+					CurrentCardCzarId:     info.CurrentCardCzarId,
+					YourHand:              handCopy,
+					RoundNumber:           info.RoundNumber,
+					BlackCard:             *info.CurrentBlackCard,
+					YourPlays:             playsCopy,
+					TotalPlays:            totalPlays,
+					PreviousWinnerDetails: info.PreviousWinner,
 				}
 
 				encodedMessage, err := EncodeRpcMessage(roundInfo)
@@ -319,10 +320,13 @@ func (c *WsConnection) readMessage(gid uuid.UUID) error {
 							WinnerId: res.WinnerId,
 						}
 					} else {
-						msg = RpcOnWhiteCardPlayPhase{YourHand: hand,
-							BlackCard:  res.NewBlackCard,
-							CardCzarId: res.NewCzarId,
-							WinnerId:   res.WinnerId}
+						msg = RpcOnWhiteCardPlayPhase{
+							YourHand:       hand,
+							BlackCard:      res.NewBlackCard,
+							CardCzarId:     res.NewCzarId,
+							WinnerId:       res.WinnerId,
+							Winner: res.PreviousWinner,
+						}
 					}
 					encodedMsg, err := EncodeRpcMessage(msg)
 					if err != nil {

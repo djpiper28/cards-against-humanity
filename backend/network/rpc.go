@@ -289,10 +289,12 @@ func (msg RpcCzarSelectCardMsg) Type() RpcMessageType {
 }
 
 type RpcOnWhiteCardPlayPhase struct {
-	BlackCard  *gameLogic.BlackCard   `json:"blackCard"`
-	YourHand   []*gameLogic.WhiteCard `json:"yourHand"`
-	WinnerId   uuid.UUID              `json:"winnerId"`
-	CardCzarId uuid.UUID              `json:"cardCzarId"`
+	BlackCard *gameLogic.BlackCard   `json:"blackCard"`
+	YourHand  []*gameLogic.WhiteCard `json:"yourHand"`
+	// Deprecated, use Winner
+	WinnerId   uuid.UUID                `json:"winnerId"`
+	CardCzarId uuid.UUID                `json:"cardCzarId"`
+	Winner     gameLogic.PreviousWinner `json:"previousWinner"`
 }
 
 func (msg RpcOnWhiteCardPlayPhase) Type() RpcMessageType {

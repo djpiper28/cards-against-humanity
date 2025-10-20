@@ -147,6 +147,7 @@ type Game struct {
 
 	CurrentCardCzarId uuid.UUID
 	GameOwnerId       uuid.UUID
+	PreviousWinner    PreviousWinner
 
 	CurrentRound     uint
 	Settings         *GameSettings
@@ -211,12 +212,13 @@ func (g *Game) Info() GameInfo {
 }
 
 type InitialRoundInfo struct {
-	CardCzarId           uuid.UUID    `json:"czarId"`
-	RoundNumber          uint         `json:"roundNumber"`
-	BlackCard            *BlackCard   `json:"blackCard"`
-	PlayersWhoHavePlayed []uuid.UUID  `json:"playersWhoHavePlayed"`
-	YourHand             []*WhiteCard `json:"yourHand"`
-	YourPlays            []int        `json:"yourPlays"`
+	CardCzarId           uuid.UUID      `json:"czarId"`
+	RoundNumber          uint           `json:"roundNumber"`
+	BlackCard            *BlackCard     `json:"blackCard"`
+	PlayersWhoHavePlayed []uuid.UUID    `json:"playersWhoHavePlayed"`
+	YourHand             []*WhiteCard   `json:"yourHand"`
+	YourPlays            []int          `json:"yourPlays"`
+	PreviousWinner       PreviousWinner `json:"previousWinner"`
 }
 
 // Information about a game you can see when you join. Settings - password + players
@@ -256,6 +258,7 @@ func (g *Game) StateInfo(pid uuid.UUID) GameStateInfo {
 		PlayersWhoHavePlayed: make([]uuid.UUID, 0),
 		YourHand:             make([]*WhiteCard, 0),
 		YourPlays:            make([]int, 0),
+		PreviousWinner:       g.PreviousWinner,
 	}
 
 	allPlays := make([][]*WhiteCard, 0)
@@ -399,11 +402,14 @@ func (g *Game) roundInfo() (RoundInfo, error) {
 		return RoundInfo{}, errors.New("The game is not in the white card selection phase")
 	}
 
-	info := RoundInfo{CurrentBlackCard: g.CurrentBlackCard,
+	info := RoundInfo{
+		CurrentBlackCard:  g.CurrentBlackCard,
 		CurrentCardCzarId: g.CurrentCardCzarId,
 		RoundNumber:       g.CurrentRound,
 		PlayerHands:       make(map[uuid.UUID][]*WhiteCard),
-		PlayersPlays:      make(map[uuid.UUID][]*WhiteCard)}
+		PlayersPlays:      make(map[uuid.UUID][]*WhiteCard),
+		PreviousWinner:    g.PreviousWinner,
+	}
 
 	for _, player := range g.PlayersMap {
 		handCards := make([]*WhiteCard, 0)
@@ -766,7 +772,8 @@ type CzarSelectCardResult struct {
 	WinnerId     uuid.UUID
 	NewBlackCard *BlackCard
 	// If there are no more black cards then the game is over
-	GameEnded bool `json:"gameEnded"`
+	GameEnded      bool           `json:"gameEnded"`
+	PreviousWinner PreviousWinner `json:"previousWinner"`
 	PlayerHands
 }
 
@@ -865,6 +872,20 @@ func (g *Game) CzarSelectCards(pid uuid.UUID, cards []int) (CzarSelectCardResult
 
 	// Produce result
 	g.PlayersMap[winnerId].Points += 1
+	g.PreviousWinner.BlackCard = g.CurrentBlackCard
+	g.PreviousWinner.PlayerId = winnerId
+
+	whiteCards := make([]*WhiteCard, len(cards))
+	for i, cardId := range cards {
+		card, err := GetWhiteCard(cardId)
+		if err != nil {
+			logger.Logger.Error("Cannot find card", "err", err, "cardId", cardId)
+			continue
+		}
+
+		whiteCards[i] = card
+	}
+	g.PreviousWinner.Whitecards = whiteCards
 
 	endGame := g.nextRound()
 
@@ -887,11 +908,14 @@ func (g *Game) CzarSelectCards(pid uuid.UUID, cards []int) (CzarSelectCardResult
 	playerHands.fromGame(g)
 
 	g.updateLastAction()
-	return CzarSelectCardResult{WinnerId: winnerId,
-		NewBlackCard: g.CurrentBlackCard,
-		NewCzarId:    g.CurrentCardCzarId,
-		GameEnded:    endGame,
-		PlayerHands:  playerHands}, nil
+	return CzarSelectCardResult{
+		WinnerId:       winnerId,
+		NewBlackCard:   g.CurrentBlackCard,
+		NewCzarId:      g.CurrentCardCzarId,
+		GameEnded:      endGame,
+		PlayerHands:    playerHands,
+		PreviousWinner: g.PreviousWinner,
+	}, nil
 }
 
 func (g *Game) SkipBlackCard(pid uuid.UUID) (*BlackCard, error) {

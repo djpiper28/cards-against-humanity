@@ -145,6 +145,7 @@ func TestNewGame(t *testing.T) {
 	assert.NotEmpty(t, game.Id)
 	assert.NotEmpty(t, game.LastAction)
 	assert.NotEmpty(t, game.TimeSinceLastAction())
+  assert.Empty(t, game.PreviousWinner)
 }
 
 func TestGameInfo(t *testing.T) {
@@ -200,6 +201,7 @@ func TestGameStateInfo(t *testing.T) {
 	assert.Empty(t, info.RoundInfo.BlackCard)
 	assert.Empty(t, info.RoundInfo.CardCzarId)
 	assert.Empty(t, info.RoundInfo.RoundNumber)
+  assert.Empty(t, info.RoundInfo.PreviousWinner)
 }
 
 func TestGameStateInfoMidRound(t *testing.T) {
@@ -223,16 +225,13 @@ func TestGameStateInfoMidRound(t *testing.T) {
 		}
 	}
 
-	// roundInfo, err := game.RoundInfo()
-	// assert.NoError(t, err)
-
 	assert.Equal(t, game.Id, info.Id)
 	assert.Equal(t, *game.Settings, info.Settings)
 	assert.Equal(t, expectedPlayers, info.Players)
 	assert.Equal(t, game.CreationTime, info.CreationTime)
 	assert.Equal(t, game.GameState, info.GameState)
 	assert.Equal(t, game.GameOwnerId, info.GameOwnerId)
-	// assert.Equal(t, roundInfo, info.RoundInfo)
+  assert.Equal(t, game.PreviousWinner, info.RoundInfo.PreviousWinner)
 }
 
 func TestAddInvalidPlayer(t *testing.T) {
