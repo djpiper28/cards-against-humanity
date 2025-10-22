@@ -57,7 +57,7 @@ export default function PlayerCards(props: Readonly<Props>) {
                   id={id}
                   class={
                     isSelected()
-                      ? "border-4 border-blue-500 rounded-2xl bg-white"
+                      ? "border-4 border-blue-500 rounded-2xl bg-white cursor-pointer hover:scale-105"
                       : ""
                   }
                   onClick={() => props.onSelectCard?.(card.id)}
