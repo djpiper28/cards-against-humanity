@@ -36,6 +36,7 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
   const isGameOwner = () => props.state.ownerId === props.playerId;
   const isCzar = () => props.roundState.currentCardCzarId === props.playerId;
   const isGameStarted = () => props.state.gameState !== GameStateInLobby;
+  const roundState = () => props.roundState;
   const isCzarJudgingPhase = () =>
     props.state.gameState === GameStateCzarJudgingCards;
   const settings = () => props.state.settings;
@@ -92,7 +93,7 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
             />
             <CurrentRoundResults
               isCzar={isCzar()}
-              blackCard={props.roundState.blackCard}
+              blackCard={roundState().blackCard}
               plays={props.allPlays.map((x, i) => {
                 return {
                   index: i,
@@ -105,10 +106,10 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
           <Show when={!isCzarJudgingPhase()}>
             <div class="flex flex-col gap-3 w-min">
               <Card
-                id={props.roundState.blackCard.id}
+                id={roundState().blackCard.id}
                 isWhite={false}
-                cardText={props.roundState.blackCard.bodyText}
-                packName={`${props.roundState.blackCard.cardsToPlay} white cards to play`}
+                cardText={roundState().blackCard.bodyText}
+                packName={`${roundState().blackCard.cardsToPlay} white cards to play`}
               />
               <Show when={isCzar()}>
                 <Button
@@ -126,7 +127,7 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
           <PlayerCards
             isCzar={isCzar()}
             isJudging={isCzarJudgingPhase()}
-            cards={props.roundState.yourHand.map((x) => {
+            cards={roundState().yourHand.map((x) => {
               return {
                 id: x.id.toString(),
                 name: x.bodyText,
@@ -136,7 +137,7 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
             selectedCardIds={
               isCzarJudgingPhase()
                 ? []
-                : props.roundState.yourPlays.map((x) => x.id.toString())
+                : roundState().yourPlays.map((x) => x.id.toString())
             }
             onSelectCard={(id) => {
               if (isCzarJudgingPhase()) {
@@ -144,7 +145,7 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
               }
 
               if (
-                props.roundState.yourPlays
+                roundState().yourPlays
                   .map((x) => x.id.toString())
                   .find((x) => x === id)
               ) {
@@ -153,11 +154,11 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
               }
 
               let plays = [
-                ...props.roundState.yourPlays.map((x) => x.id.toString()),
+                ...roundState().yourPlays.map((x) => x.id.toString()),
                 id,
               ];
 
-              if (plays.length > props.roundState.blackCard.cardsToPlay) {
+              if (plays.length > roundState().blackCard.cardsToPlay) {
                 plays = plays.reverse();
                 plays.pop();
                 plays = plays.reverse();
@@ -171,8 +172,8 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
 
         <PlayerList
           players={props.players}
-          czarId={props.roundState.currentCardCzarId}
-          previousWinner={props.roundState.previousWinner}
+          czarId={roundState().currentCardCzarId}
+          previousWinner={roundState().previousWinner}
         />
       </div>
     </RoundedWhite>
