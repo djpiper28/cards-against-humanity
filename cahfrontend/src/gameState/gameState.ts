@@ -436,10 +436,6 @@ class GameState {
     this.roundState.yourPlays = [];
     this.roundState.yourHand = [];
     this.roundState.currentCardCzarId = "not-in-round";
-    this.roundState.previousWinner = {
-      whiteCards: [],
-      playerId: "",
-    };
 
     this.lobbyState.gameState = GameStateInLobby;
     this.emitState();
