@@ -316,7 +316,8 @@ func (msg RpcOnBlackCardSkipped) Type() RpcMessageType {
 
 type RpcOnGameEnd struct {
 	// Optional winner ID for game ending normally
-	WinnerId uuid.UUID `json:"winnerId"`
+	WinnerId uuid.UUID                `json:"winnerId"`
+	Winner   gameLogic.PreviousWinner `json:"winner"`
 }
 
 func (msg RpcOnGameEnd) Type() RpcMessageType {

@@ -318,14 +318,15 @@ func (c *WsConnection) readMessage(gid uuid.UUID) error {
 					if res.GameEnded {
 						msg = RpcOnGameEnd{
 							WinnerId: res.WinnerId,
+							Winner:   res.PreviousWinner,
 						}
 					} else {
 						msg = RpcOnWhiteCardPlayPhase{
-							YourHand:       hand,
-							BlackCard:      res.NewBlackCard,
-							CardCzarId:     res.NewCzarId,
-							WinnerId:       res.WinnerId,
-							Winner: res.PreviousWinner,
+							YourHand:   hand,
+							BlackCard:  res.NewBlackCard,
+							CardCzarId: res.NewCzarId,
+							WinnerId:   res.WinnerId,
+							Winner:     res.PreviousWinner,
 						}
 					}
 					encodedMsg, err := EncodeRpcMessage(msg)

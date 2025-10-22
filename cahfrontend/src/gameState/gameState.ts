@@ -5,6 +5,7 @@ import {
   GameStateInLobby,
   GameStateWhiteCardsBeingSelected,
   Player,
+  PreviousWinner,
   WhiteCard,
 } from "../gameLogicTypes";
 import {
@@ -95,6 +96,15 @@ class GameState {
     yourHand: [],
     yourPlays: [],
     totalPlays: 0,
+    previousWinner: {
+      blackCard: {
+        id: 0,
+        cardsToPlay: 0,
+        bodyText: "",
+      },
+      playerId: "",
+      whiteCards: [],
+    },
   };
 
   // Events
@@ -138,13 +148,23 @@ class GameState {
       yourHand: [],
       yourPlays: [],
       totalPlays: 0,
+      previousWinner: {
+        blackCard: {
+          id: 0,
+          cardsToPlay: 0,
+          bodyText: "",
+        },
+        playerId: "",
+        whiteCards: [],
+      },
     };
 
     this.onLobbyStateChange = undefined;
     this.onPlayerListChange = undefined;
     this.onRoundStateChange = undefined;
-    this.onCommandError = undefined;
     this.onChangeSettings = undefined;
+    this.onAllPlaysChanged = undefined;
+    this.onCommandError = undefined;
     this.onError = undefined;
 
     const url = wsBaseUrl;
@@ -241,13 +261,13 @@ class GameState {
       currentCardCzarId: state.roundInfo.czarId,
       blackCard: state.roundInfo.blackCard ?? errorBlackCard,
       totalPlays: state.roundInfo.playersWhoHavePlayed.length,
+      previousWinner: state.roundInfo.previousWinner,
     };
 
     this.roundState = roundState;
     state.roundInfo.playersWhoHavePlayed.forEach((pid) => {
       this.handleOnPlayerPlay({ playerId: pid });
     });
-    this.onAllPlaysChanged(state.allPlays);
     this.emitState();
   }
 
@@ -381,6 +401,7 @@ class GameState {
     this.roundState.blackCard = msg.blackCard!;
     this.roundState.yourHand = msg.yourHand as WhiteCard[];
     this.roundState.currentCardCzarId = msg.cardCzarId;
+    this.roundState.previousWinner = msg.previousWinner;
 
     this.players = this.players.map((player) => {
       if (player.id === msg.winnerId) {
@@ -415,6 +436,10 @@ class GameState {
     this.roundState.yourPlays = [];
     this.roundState.yourHand = [];
     this.roundState.currentCardCzarId = "not-in-round";
+    this.roundState.previousWinner = {
+      whiteCards: [],
+      playerId: "",
+    };
 
     this.lobbyState.gameState = GameStateInLobby;
     this.emitState();

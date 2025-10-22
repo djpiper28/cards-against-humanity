@@ -172,6 +172,7 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
         <PlayerList
           players={props.players}
           czarId={props.roundState.currentCardCzarId}
+          previousWinner={props.roundState.previousWinner}
         />
       </div>
     </RoundedWhite>
@@ -200,14 +201,16 @@ export default function GameLobby() {
     currentCardCzarId: "",
     roundNumber: 1,
     totalPlays: 0,
+    previousWinner: {
+      playerId: "",
+      whiteCards: [],
+    },
   });
   const [players, setPlayers] = createSignal<GamePlayerList>([]);
-
   const [packs, setPacks] = createSignal<GameLogicCardPack[]>([]);
   const [errorMessage, setErrorMessage] = createSignal("");
   const [commandError, setCommandError] = createSignal("");
   const [allPlays, setAllPlays] = createSignal<WhiteCard[][]>([]);
-
   const [dirtyState, setDirtyState] = createSignal(false);
 
   const setupHandlers = () => {

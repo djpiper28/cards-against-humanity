@@ -8,6 +8,7 @@ packages:
       uuid.NullUUID: "null | string /* uuid */"
       gameLogic.WhiteCard: "gameLogic.WhiteCard"
       gameLogic.BlackCard: "gameLogic.BlackCard"
+      gameLogic.PreviousWinner: "gameLogic.PreviousWinner"
     frontmatter: import * as gameLogic from "./gameLogicTypes"
     output_path: "../cahfrontend/src/rpcTypes.ts"
   - path: "github.com/djpiper28/cards-against-humanity/backend/gameLogic"
