@@ -88,7 +88,9 @@ export default function PlayerCards(props: Readonly<Props>) {
               <Header text="Judging in progress..." />
             </Show>
           </div>
-          <div class="static blur">{playerCardComp()}</div>
+          <Show when={!props.isCzar}>
+            <div class="static blur">{playerCardComp()}</div>
+          </Show>
         </div>
       </Show>
       <Show when={!blockCardPlays()}>{playerCardComp()}</Show>
