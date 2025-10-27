@@ -98,8 +98,8 @@ github.com/charmbracelet/x/cellbuf v0.0.13-0.20250311204145-2c3ea96c31dd h1:vy0G
 github.com/charmbracelet/x/cellbuf v0.0.13-0.20250311204145-2c3ea96c31dd/go.mod h1:xe0nKWGd3eJgtqZRaN9RjMtK7xUYchjzPr7q6kcvCCs=
 github.com/charmbracelet/x/term v0.2.1 h1:AQeHeLZ1OqSXhrAWpYUtZyX1T3zVxfpZuEQMIQaGIAQ=
 github.com/charmbracelet/x/term v0.2.1/go.mod h1:oQ4enTYFV7QN4m0i9mzHrViD7TQKvNEEkHUMCmsxdUg=
-github.com/chenyahui/gin-cache v1.9.0 h1:lQlx4qa+Xh3eEuRtmZsviZx4X1uVJ9mOcroti2f+408=
-github.com/chenyahui/gin-cache v1.9.0/go.mod h1:wh30aYY5rRMUAJmQvw1qoIIcEVRV1EkMJkpXzgipe8U=
+github.com/chenyahui/gin-cache v1.10.0 h1:04QIaHVLRH9K8GuPGPvVI6/DHkWDUCCQlwe4V+IOoW0=
+github.com/chenyahui/gin-cache v1.10.0/go.mod h1:7yoxLlCM6TEbvaSzW3p04Zg4IviY3x5Q4jaHMmugyQ4=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=
 github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMnBNeIyt5eFwwo7qiLfzFZmjNmxjkiQlU=
