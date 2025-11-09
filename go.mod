@@ -5,7 +5,7 @@ go 1.25.1
 require (
 	github.com/carousell/gin-prometheus-middleware v1.5.10
 	github.com/charmbracelet/log v0.4.2
-	github.com/chenyahui/gin-cache v1.9.0
+	github.com/chenyahui/gin-cache v1.10.0
 	github.com/gin-contrib/cors v1.7.6
 	github.com/gin-gonic/gin v1.11.0
 	github.com/go-rod/rod v0.116.2
@@ -14,7 +14,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/stretchr/testify v1.11.1
 	github.com/swaggo/files v1.0.1
-	github.com/swaggo/gin-swagger v1.6.0
+	github.com/swaggo/gin-swagger v1.6.1
 )
 
 tool (
