@@ -28,7 +28,8 @@ const (
 
 	MinCardPacks = 1
 
-	HandSize = 7
+	MaxHandMulligans = 100
+	HandSize         = 7
 )
 
 // Game settings used for the internal state and game creation
