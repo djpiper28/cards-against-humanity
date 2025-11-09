@@ -355,6 +355,15 @@ class GameState {
   }
 
   private handleRoundInformation(data: RpcRoundInformationMsg) {
+    if (data.roundNumber != this.roundState.roundNumber) {
+      this.players = this.players.map((player) => {
+        return {
+          ...player,
+          points: 0,
+        };
+      });
+    }
+
     this.roundState = data;
     this.lobbyState.gameState = GameStateWhiteCardsBeingSelected;
     this.onLobbyStateChange?.(structuredClone(this.lobbyState));
