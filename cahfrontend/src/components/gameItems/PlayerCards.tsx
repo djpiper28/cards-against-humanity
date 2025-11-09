@@ -72,14 +72,14 @@ export default function PlayerCards(props: Readonly<Props>) {
     </div>
   );
 
-  const blockCardPlays = () => props.isCzar || props.isJudging;
+  const blackCardPlays = () => props.isCzar || props.isJudging;
   return (
     <>
-      <Show when={blockCardPlays()}>
+      <Show when={blackCardPlays()}>
         <div class="relative flex w-fit">
           <div
             id="czar"
-            class="absolute flex flex-col gap-3 top-0 left-0 right-0 bottom-0 z-10 justify-center items-center text-center bg-[#bababa60] rounded-2xl"
+            class="absolute flex flex-col gap-3 top-0 left-0 right-0 bottom-0 z-10 justify-center items-center text-center bg-[#bababa60] rounded-2xl min-h-60"
           >
             <Show when={props.isCzar}>
               <Header text="You are the Card Czar." />
@@ -93,7 +93,7 @@ export default function PlayerCards(props: Readonly<Props>) {
           </Show>
         </div>
       </Show>
-      <Show when={!blockCardPlays()}>{playerCardComp()}</Show>
+      <Show when={!blackCardPlays()}>{playerCardComp()}</Show>
     </>
   );
 }
