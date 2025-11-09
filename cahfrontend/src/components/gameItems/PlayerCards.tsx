@@ -49,24 +49,7 @@ export default function PlayerCards(props: Readonly<Props>) {
             </>
           );
 
-          return (
-            <>
-              <Show when={props.isCzar}>{cardComp()}</Show>
-              <Show when={props.czarId !== gameState.getPlayerId()}>
-                <button
-                  id={id}
-                  class={
-                    isSelected()
-                      ? "border-4 border-blue-500 rounded-2xl bg-white cursor-pointer hover:scale-105"
-                      : ""
-                  }
-                  onClick={() => props.onSelectCard?.(card.id)}
-                >
-                  {cardComp()}
-                </button>
-              </Show>
-            </>
-          );
+          return <Show when={props.isCzar}>{cardComp()}</Show>;
         }}
       </For>
     </div>
