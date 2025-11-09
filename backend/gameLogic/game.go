@@ -19,7 +19,7 @@ const (
 
 	// Shit game at 1
 	MinPlayingToPoints = 2
-	MaxPlayingToPoints = 50
+	MaxPlayingToPoints = 100
 
 	MaxPasswordLength = 50
 
