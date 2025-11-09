@@ -1,7 +1,6 @@
 import { For, Show } from "solid-js";
 import Card from "./Card";
 import Header from "../typography/Header";
-import { gameState } from "../../gameState/gameState";
 
 interface GameCard {
   id: string;
