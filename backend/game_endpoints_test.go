@@ -122,12 +122,7 @@ func (s *ServerTestSuite) TestLeaveGame() {
 	leavingPlayerInfo, err := client.AddPlayer(name)
 	require.NoError(t, err)
 
-	_, msg, err = client.Read()
-	require.Nil(t, err, "Should be able to read the message")
-	require.True(t, len(msg) > 0, "Message should have a non-zero length")
-
-	rpcMsg, err := network.DecodeAs[network.RpcOnPlayerJoinMsg](msg)
-	require.NoError(t, err)
+	rpcMsg := ReadMessage[network.RpcOnPlayerJoinMsg](s, t, client)
 	require.Equal(t, leavingPlayerInfo.PlayerId, rpcMsg.Id)
 	require.Equal(t, name, rpcMsg.Name)
 

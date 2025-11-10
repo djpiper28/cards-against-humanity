@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -241,6 +242,9 @@ func (s *ServerTestSuite) ReadCreateJoinMessages(t *testing.T, client *TestGameC
 	join := false
 	tries := 0
 
+	_, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
 	for ; tries < 4 && (!join || !create); tries++ {
 		var rpcMessage network.RpcMessageBody
 		msgType, msg, err := client.Read()
@@ -269,43 +273,56 @@ func (s *ServerTestSuite) ReadCreateJoinMessages(t *testing.T, client *TestGameC
 			pong, err := network.EncodeRpcMessage(network.RpcPingMsg{})
 			require.NoError(t, err)
 			require.NoError(t, client.Write(pong))
+		case network.MsgCommandError:
+			require.Fail(t, "MsgCommandError", string(msg))
 		default:
 			err := fmt.Errorf("Cannot parse message %d", rpcMessage.Type)
 			t.Log(err)
 			panic(err)
 		}
 	}
+
+	if !create || !join {
+		require.FailNow(t, "Cannot read create and join messages", "create", create, "join", join)
+	}
 }
 
 // Ignores pings that are sent
 func ReadMessage[T network.RpcMessage](s *ServerTestSuite, t *testing.T, client *TestGameConnection) T {
 	t.Helper()
-	msgType, msg, err := client.Read()
-	require.Equal(t, msgType, websocket.TextMessage)
-	require.NoError(t, err)
 
 	type TProxy struct {
 		Type network.RpcMessageType `json:"type"`
 		Data T                      `json:"data"`
 	}
 
-	var proxy TProxy
-	err = json.Unmarshal(msg, &proxy)
-	require.NoError(t, err)
-
-	if proxy.Type == network.MsgPing {
-		pong, err := network.EncodeRpcMessage(network.RpcPingMsg{})
+	for tries := 0; tries < 5; tries++ {
+		msgType, msg, err := client.Read()
+		require.Equal(t, msgType, websocket.TextMessage)
 		require.NoError(t, err)
-		require.NoError(t, client.Write(pong))
-		return ReadMessage[T](s, t, client)
+
+		_, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
+
+		var proxy TProxy
+		err = json.Unmarshal(msg, &proxy)
+		require.NoError(t, err)
+
+		if proxy.Type == network.MsgPing {
+			pong, err := network.EncodeRpcMessage(network.RpcPingMsg{})
+			require.NoError(t, err)
+			require.NoError(t, client.Write(pong))
+			continue
+		}
+
+		if proxy.Type == network.MsgCommandError {
+			require.FailNowf(t, "MSG Command Error was returned: %s", string(msg))
+		}
+
+		require.Equal(t, proxy.Data.Type(), proxy.Type)
+		return proxy.Data
 	}
 
-  if proxy.Type == network.MsgCommandError {
-    t.Logf("MSG Command Error was returned: %s", string(msg))
-    t.FailNow()
-  }
-
-	require.Equal(t, proxy.Data.Type(), proxy.Type)
-
-	return proxy.Data
+	require.FailNow(t, "Max tries to read desired message exceeded")
+	panic("Fail")
 }

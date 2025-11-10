@@ -319,12 +319,7 @@ func (s *ServerTestSuite) TestPlayersGetRoundInfoAfterWinnerSelected() {
 	require.Equal(t, info.PreviousWinner, game.PreviousWinner)
 
 	// The player should have had a RpcOnWhiteCardPlayPhase
-	require.NoError(t, err, "Should be able to read (the initial game state)")
-	require.True(t, len(msg) > 0, "Message should have a non-zero length")
-	require.Equal(t, msgType, websocket.TextMessage)
-
-	whiteCardPlay, err := network.DecodeAs[network.RpcOnWhiteCardPlayPhase](msg)
-	require.NoError(t, err, "Should be a white card play message")
+	whiteCardPlay := ReadMessage[network.RpcOnWhiteCardPlayPhase](s, t, client)
 	require.Equal(t, expectedPreviousWinner, whiteCardPlay.Winner)
 	require.Equal(t, client.PlayerId, whiteCardPlay.WinnerId)
 	require.Equal(t, game.CurrentBlackCard, whiteCardPlay.BlackCard)
