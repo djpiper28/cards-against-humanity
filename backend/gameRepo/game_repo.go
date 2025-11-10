@@ -336,3 +336,15 @@ func (gr *GameRepo) CzarSkipsCard(gameId, pid uuid.UUID) (*gameLogic.BlackCard, 
 
 	return game.SkipBlackCard(pid)
 }
+
+func (gr *GameRepo) MulliganHand(gameId, pid uuid.UUID) ([]*gameLogic.WhiteCard, error) {
+	gr.lock.RLock()
+	defer gr.lock.RUnlock()
+
+	game, found := gr.GameMap[gameId]
+	if !found {
+		return nil, errors.New("Cannot find game")
+	}
+
+	return game.MulliganHand(pid)
+}
