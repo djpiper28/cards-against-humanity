@@ -242,14 +242,7 @@ func (s *ServerTestSuite) TestPlayersGetRoundInfoAfterWinnerSelected() {
 	require.Equal(t, client.PlayerId, onPlayerJoinMsg.Id, "The current user should have joined the game")
 
 	// Second message should be the state
-	msgType, msg, err = client.Read()
-
-	require.NoError(t, err, "Should be able to read (the initial game state)")
-	require.True(t, len(msg) > 0, "Message should have a non-zero length")
-	require.Equal(t, msgType, websocket.TextMessage)
-
-	onJoinMsg, err := network.DecodeAs[network.RpcOnJoinMsg](msg)
-	require.NoError(t, err, "Should be a join message")
+  onJoinMsg := ReadMessage[network.RpcOnJoinMsg](s, t, client)
 	require.Equal(t, client.GameId, onJoinMsg.State.Id)
 	require.Len(t, onJoinMsg.State.Players, 1)
 	require.Contains(t, onJoinMsg.State.Players, gameLogic.Player{
@@ -282,11 +275,7 @@ func (s *ServerTestSuite) TestPlayersGetRoundInfoAfterWinnerSelected() {
 	err = client.Write(msgBytes)
 	require.NoError(t, err)
 
-	_, msg, err = client.Read()
-	require.NoError(t, err, "Should be able to read the message")
-	require.True(t, len(msg) > 0, "Message should have a non-zero length")
-
-	rpcMsg, err := network.DecodeAs[network.RpcRoundInformationMsg](msg)
+  rpcMsg := ReadMessage[network.RpcRoundInformationMsg](s, t, client)
 	require.NoError(t, err)
 	require.Len(t, rpcMsg.YourHand, gameLogic.HandSize)
 	require.NotEmpty(t, rpcMsg.BlackCard)
