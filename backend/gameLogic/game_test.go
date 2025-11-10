@@ -1292,10 +1292,12 @@ func TestMulliganCzarHand(t *testing.T) {
 	_, err = game.StartGame()
 	require.NoError(t, err)
 
+	oldCards := game.PlayersMap[game.CurrentCardCzarId].Hand
 	cards, err := game.MulliganHand(game.CurrentCardCzarId)
 	require.NoError(t, err)
 
 	require.Len(t, cards, gameLogic.HandSize)
+	require.NotEqual(t, cards, oldCards)
 	for _, card := range cards {
 		require.NotNil(t, card)
 	}
