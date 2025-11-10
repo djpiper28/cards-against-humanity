@@ -279,9 +279,13 @@ func (s *ServerTestSuite) TestPlayersGetRoundInfoAfterWinnerSelected() {
 	whiteCardIds := make([]int, 0)
 	cardsToPlay := game.CurrentBlackCard.CardsToPlay
 
-	for i := range cardsToPlay {
-		whiteCards = append(whiteCards, game.PlayersMap[client.PlayerId].Hand[int(i)])
-		whiteCardIds = append(whiteCardIds, int(i))
+	for _, card := range game.PlayersMap[client.PlayerId].Hand {
+		whiteCards = append(whiteCards, card)
+		whiteCardIds = append(whiteCardIds, card.Id) 
+
+    if len(whiteCards) == int(cardsToPlay) {
+      break
+    }
 	}
 
 	playCardMsg, err := network.EncodeRpcMessage(network.RpcPlayCardsMsg{CardIds: whiteCardIds})

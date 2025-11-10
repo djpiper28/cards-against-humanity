@@ -301,7 +301,7 @@ func ReadMessage[T network.RpcMessage](s *ServerTestSuite, t *testing.T, client 
 	}
 
   if proxy.Type == network.MsgCommandError {
-    t.Logf("MSG Command Error was returned", string(msg))
+    t.Logf("MSG Command Error was returned: %s", string(msg))
     t.FailNow()
   }
 
