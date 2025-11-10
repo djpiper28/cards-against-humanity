@@ -177,6 +177,7 @@ type TestGameInfo struct {
 
 func (s *ServerTestSuite) CreateDefaultGame() TestGameInfo {
 	t := s.T()
+	t.Helper()
 
 	name := "Dave"
 	gs := DefaultGameSettings()
@@ -204,6 +205,7 @@ func (s *ServerTestSuite) CreateDefaultGame() TestGameInfo {
 
 func (s *ServerTestSuite) CreatePlayer(gameId uuid.UUID, name, password string) TestGameData {
 	t := s.T()
+	t.Helper()
 
 	jsonBody := CreatePlayerRequest{
 		PlayerName: name,
@@ -233,6 +235,8 @@ func (s *ServerTestSuite) CreatePlayer(gameId uuid.UUID, name, password string) 
 }
 
 func (s *ServerTestSuite) ReadCreateJoinMessages(t *testing.T, client *TestGameConnection, pid uuid.UUID) {
+	t.Helper()
+
 	create := false
 	join := false
 	tries := 0
@@ -275,6 +279,7 @@ func (s *ServerTestSuite) ReadCreateJoinMessages(t *testing.T, client *TestGameC
 
 // Ignores pings that are sent
 func ReadMessage[T network.RpcMessage](s *ServerTestSuite, t *testing.T, client *TestGameConnection) T {
+	t.Helper()
 	msgType, msg, err := client.Read()
 	require.Equal(t, msgType, websocket.TextMessage)
 	require.NoError(t, err)

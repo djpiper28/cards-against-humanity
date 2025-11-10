@@ -111,14 +111,7 @@ func (s *ServerTestSuite) TestStartGameEnoughPlayers() {
 		info, err := client.AddPlayer(name)
 		require.NoError(t, err)
 
-		_, msg, err = client.Read()
-		require.Nil(t, err, "Should be able to read the message")
-		require.True(t, len(msg) > 0, "Message should have a non-zero length")
-
-		rpcMsg, err := network.DecodeAs[network.RpcOnPlayerJoinMsg](msg)
-		require.NoError(t, err)
-		require.Equal(t, rpcMsg.Id, info.PlayerId)
-		require.Equal(t, rpcMsg.Name, name)
+    s.ReadCreateJoinMessages(t, client, info.PlayerId)
 	}
 
 	startGameMsg := network.RpcStartGameMsg{}
@@ -257,14 +250,7 @@ func (s *ServerTestSuite) TestPlayersGetRoundInfoAfterWinnerSelected() {
 		info, err := client.AddPlayer(name)
 		require.NoError(t, err)
 
-		_, msg, err = client.Read()
-		require.NoError(t, err, "Should be able to read the message")
-		require.True(t, len(msg) > 0, "Message should have a non-zero length")
-
-		rpcMsg, err := network.DecodeAs[network.RpcOnPlayerJoinMsg](msg)
-		require.NoError(t, err)
-		require.Equal(t, rpcMsg.Id, info.PlayerId)
-		require.Equal(t, rpcMsg.Name, name)
+    s.ReadCreateJoinMessages(t, client, info.PlayerId)
 	}
 
 	// Start game
@@ -304,11 +290,7 @@ func (s *ServerTestSuite) TestPlayersGetRoundInfoAfterWinnerSelected() {
 	err = client.Write(playCardMsg)
 	require.NoError(t, err)
 
-	_, msg, err = client.Read()
-	require.NoError(t, err)
-
-	cardPlayedMsg, err := network.DecodeAs[network.RpcOnCardPlayedMsg](msg)
-	require.NoError(t, err)
+  cardPlayedMsg := ReadMessage[network.RpcOnCardPlayedMsg](s, t, client)
 	require.Equal(t, client.PlayerId, cardPlayedMsg.PlayerId)
 
 	// Select the winner
@@ -393,14 +375,7 @@ func (s *ServerTestSuite) TestMulliganHand() {
 		info, err := client.AddPlayer(name)
 		require.NoError(t, err)
 
-		_, msg, err = client.Read()
-		require.Nil(t, err, "Should be able to read the message")
-		require.True(t, len(msg) > 0, "Message should have a non-zero length")
-
-		rpcMsg, err := network.DecodeAs[network.RpcOnPlayerJoinMsg](msg)
-		require.NoError(t, err)
-		require.Equal(t, rpcMsg.Id, info.PlayerId)
-		require.Equal(t, rpcMsg.Name, name)
+    s.ReadCreateJoinMessages(t, client, info.PlayerId)
 	}
 
 	startGameMsg := network.RpcStartGameMsg{}
