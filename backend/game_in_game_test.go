@@ -121,12 +121,7 @@ func (s *ServerTestSuite) TestStartGameEnoughPlayers() {
 	err = client.Write(msgBytes)
 	require.NoError(t, err)
 
-	_, msg, err = client.Read()
-	require.NoError(t, err, "Should be able to read the message")
-	require.NotEmpty(t, msg, "Message should have a non-zero length")
-
-	rpcMsg, err := network.DecodeAs[network.RpcRoundInformationMsg](msg)
-	require.NoError(t, err)
+	rpcMsg:= ReadMessage[network.RpcRoundInformationMsg](s, t, client)
 	require.Len(t, rpcMsg.YourHand, gameLogic.HandSize)
 	require.NotEmpty(t, rpcMsg.BlackCard)
 	require.Empty(t, rpcMsg.YourPlays)
