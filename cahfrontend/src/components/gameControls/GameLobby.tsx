@@ -145,8 +145,8 @@ export function GameLobbyLoaded(props: Readonly<LobbyLoadedProps>) {
               }
 
               if (
-                roundState().yourPlays
-                  .map((x) => x.id.toString())
+                roundState()
+                  .yourPlays.map((x) => x.id.toString())
                   .find((x) => x === id)
               ) {
                 console.log("Cannot play a card that is selected.");
