@@ -50,6 +50,10 @@ import {
   RpcRoundInformationMsg,
   RpcSkipBlackCard,
   RpcKickPlayer,
+  RpcOnNewHand,
+  MsgOnNewHand,
+  RpcMulliganHand,
+  MsgMulliganHand,
 } from "../rpcTypes";
 import { WebSocketClient, toWebSocketClient } from "./websocketClient";
 import { apiClient, wsBaseUrl } from "../apiClient";
@@ -465,6 +469,22 @@ class GameState {
     this.onPlayerListChange?.(this.players);
   }
 
+  private handleOnNewHand(msg: RpcOnNewHand) {
+    this.roundState.yourHand = msg.whiteCards.map((x) => {
+      if (!x) {
+        return {
+          id: 0,
+          bodyText: "error",
+        };
+      }
+
+      return x;
+    });
+
+    this.roundState.yourPlays = [];
+    this.onRoundStateChange?.(structuredClone(this.roundState));
+  }
+
   /**
    * Handles an RPC message from the server. When testing call the private method and ignore the "error".
    */
@@ -531,6 +551,9 @@ class GameState {
         return this.handleOnBlackCardSkipped(
           rpcMessage.data as RpcOnBlackCardSkipped,
         );
+      case MsgOnNewHand:
+        console.log("Handling on white cards (from mulligan)");
+        return this.handleOnNewHand(rpcMessage.data as RpcOnNewHand);
       default:
         throw new Error(
           `Cannot handle RPC message as type is not valid ${rpcMessage.type}`,
@@ -635,6 +658,19 @@ class GameState {
 
     this.wsClient.sendMessage(
       JSON.stringify(this.encodeMessage(MsgKickPlayer, msg)),
+    );
+  }
+
+  public mulligan() {
+    console.log("Mulliganing hand");
+    if (!this.wsClient) {
+      throw new Error("Cannot skip cards as websocket is not connected");
+    }
+
+    const msg: RpcMulliganHand = {};
+
+    this.wsClient.sendMessage(
+      JSON.stringify(this.encodeMessage(MsgMulliganHand, msg)),
     );
   }
 }

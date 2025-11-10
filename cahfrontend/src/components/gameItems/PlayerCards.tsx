@@ -1,6 +1,8 @@
 import { For, Show } from "solid-js";
 import Card from "./Card";
 import Header from "../typography/Header";
+import Button from "../buttons/Button";
+import { gameState } from "../../gameState/gameState";
 
 interface GameCard {
   id: string;
@@ -90,7 +92,19 @@ export default function PlayerCards(props: Readonly<Props>) {
           <div class="static blur">{playerCardComp()}</div>
         </div>
       </Show>
-      <Show when={!blackCardJudging()}>{playerCardComp()}</Show>
+      <Show when={!blackCardJudging()}>
+        {playerCardComp()}
+        <div class="self-end">
+          <Button
+            id="mulligan"
+            onClick={() => {
+              gameState.mulligan();
+            }}
+          >
+            Mulligan
+          </Button>
+        </div>
+      </Show>
     </>
   );
 }
