@@ -347,7 +347,7 @@ func (msg RpcMulliganHand) Type() RpcMessageType {
 }
 
 type RpcOnNewHand struct {
-	WhiteCards []*gameLogic.WhiteCard
+  WhiteCards []*gameLogic.WhiteCard `json:"whiteCards"`
 }
 
 func (msg RpcOnNewHand) Type() RpcMessageType {
