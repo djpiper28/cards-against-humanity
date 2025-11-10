@@ -129,7 +129,7 @@ func (s *ServerTestSuite) TestStartGameEnoughPlayers() {
 	require.NoError(t, err)
 
 	_, msg, err = client.Read()
-	require.Nil(t, err, "Should be able to read the message")
+	require.NoError(t, err, "Should be able to read the message")
 	require.NotEmpty(t, msg, "Message should have a non-zero length")
 
 	rpcMsg, err := network.DecodeAs[network.RpcRoundInformationMsg](msg)

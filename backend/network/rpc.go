@@ -3,6 +3,7 @@ package network
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/djpiper28/cards-against-humanity/backend/logger"
@@ -109,6 +110,10 @@ func DecodeAs[T RpcMessage](data []byte) (T, error) {
 	if err != nil {
 		return proxy.Data, err
 	}
+
+  if proxy.Type != proxy.Data.Type() {
+    return proxy.Data, fmt.Errorf("Type mismatch, expected %d, found %d", proxy.Type, proxy.Data.Type())
+  }
 
 	return proxy.Data, nil
 }
