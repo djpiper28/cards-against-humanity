@@ -300,7 +300,12 @@ func ReadMessage[T network.RpcMessage](s *ServerTestSuite, t *testing.T, client 
 		return ReadMessage[T](s, t, client)
 	}
 
-	require.Equal(t, proxy.Type, proxy.Data.Type())
+  if proxy.Type == network.MsgCommandError {
+    t.Logf("MSG Command Error was returned", string(msg))
+    t.FailNow()
+  }
+
+	require.Equal(t, proxy.Data.Type(), proxy.Type)
 
 	return proxy.Data
 }
