@@ -51,7 +51,7 @@ export default function PlayerCards(props: Readonly<Props>) {
           return (
             <>
               <Show when={props.isCzar}>{cardComp()}</Show>
-              <Show when={props.czarId !== gameState.getPlayerId()}>
+              <Show when={!props.isCzar}>
                 <button
                   id={id}
                   class={
@@ -87,9 +87,7 @@ export default function PlayerCards(props: Readonly<Props>) {
               <Header text="Judging in progress..." />
             </Show>
           </div>
-          <Show when={!props.isCzar}>
-            <div class="static blur">{playerCardComp()}</div>
-          </Show>
+          <div class="static blur">{playerCardComp()}</div>
         </div>
       </Show>
       <Show when={!blackCardJudging()}>{playerCardComp()}</Show>
