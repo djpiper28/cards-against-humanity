@@ -130,7 +130,7 @@ func (s *ServerTestSuite) TestStartGameEnoughPlayers() {
 
 	_, msg, err = client.Read()
 	assert.Nil(t, err, "Should be able to read the message")
-	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
+	assert.NotEmpty(t, msg, "Message should have a non-zero length")
 
 	rpcMsg, err := network.DecodeAs[network.RpcRoundInformationMsg](msg)
 	assert.NoError(t, err)
@@ -303,8 +303,20 @@ func (s *ServerTestSuite) TestPlayersGetRoundInfoAfterWinnerSelected() {
 	assert.Empty(t, rpcMsg.PreviousWinnerDetails)
 
 	// Play card
-	winningPlay := []int{rpcMsg.YourHand[0].Id}
-	playCardMsg, err := network.EncodeRpcMessage(network.RpcPlayCardsMsg{CardIds: winningPlay})
+	game, err := gameRepo.Repo.GetGame(client.GameId)
+	assert.NoError(t, err)
+
+	oldBlackCard := game.CurrentBlackCard
+	whiteCards := make([]*gameLogic.WhiteCard, 0)
+	whiteCardIds := make([]int, 0)
+	cardsToPlay := game.CurrentBlackCard.CardsToPlay
+
+	for i := range cardsToPlay {
+		whiteCards = append(whiteCards, game.PlayersMap[client.PlayerId].Hand[int(i)])
+		whiteCardIds = append(whiteCardIds, int(i))
+	}
+
+	playCardMsg, err := network.EncodeRpcMessage(network.RpcPlayCardsMsg{CardIds: whiteCardIds})
 	assert.NoError(t, err)
 
 	err = client.Write(playCardMsg)
@@ -318,13 +330,7 @@ func (s *ServerTestSuite) TestPlayersGetRoundInfoAfterWinnerSelected() {
 	assert.Equal(t, client.PlayerId, cardPlayedMsg.PlayerId)
 
 	// Select the winner
-	game, err := gameRepo.Repo.GetGame(client.GameId)
-	assert.NoError(t, err)
-
-	oldBlackCard := game.CurrentBlackCard
-	whiteCard := game.PlayersMap[client.PlayerId].Hand[0]
-
-	info, err := gameRepo.Repo.CzarSelectsCard(client.GameId, game.CurrentCardCzarId, winningPlay)
+	info, err := gameRepo.Repo.CzarSelectsCard(client.GameId, game.CurrentCardCzarId, whiteCardIds)
 	assert.NoError(t, err)
 
 	assert.Equal(t, info.WinnerId, client.PlayerId)
@@ -342,14 +348,12 @@ func (s *ServerTestSuite) TestPlayersGetRoundInfoAfterWinnerSelected() {
 	}
 
 	expectedPreviousWinner := gameLogic.PreviousWinner{
-		PlayerId:  client.PlayerId,
-		BlackCard: oldBlackCard,
-		Whitecards: []*gameLogic.WhiteCard{
-			whiteCard,
-		},
+		PlayerId:   client.PlayerId,
+		BlackCard:  oldBlackCard,
+		Whitecards: whiteCards,
 	}
-	assert.Equal(t, expectedPreviousWinner, game.PreviousWinner)
 	assert.Equal(t, expectedPreviousWinner, info.PreviousWinner)
+	assert.Equal(t, info.PreviousWinner, game.PreviousWinner)
 
 	// The player should have had a RpcOnWhiteCardPlayPhase
 	assert.NoError(t, err, "Should be able to read (the initial game state)")
