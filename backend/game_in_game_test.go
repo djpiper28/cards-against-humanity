@@ -330,7 +330,7 @@ func (s *ServerTestSuite) TestPlayersGetRoundInfoAfterWinnerSelected() {
 	assert.Equal(t, info.WinnerId, client.PlayerId)
 	assert.NotEqual(t, oldBlackCard, info.NewBlackCard)
 	assert.False(t, info.GameEnded)
-  assert.Contains(t, game.Players, info.NewCzarId)
+	assert.Contains(t, game.Players, info.NewCzarId)
 
 	for pid, hand := range info.Hands {
 		assert.Contains(t, game.Players, pid)
@@ -351,7 +351,7 @@ func (s *ServerTestSuite) TestPlayersGetRoundInfoAfterWinnerSelected() {
 	assert.Equal(t, expectedPreviousWinner, game.PreviousWinner)
 	assert.Equal(t, expectedPreviousWinner, info.PreviousWinner)
 
-  // The player should have had a RpcOnWhiteCardPlayPhase
+	// The player should have had a RpcOnWhiteCardPlayPhase
 	assert.NoError(t, err, "Should be able to read (the initial game state)")
 	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
 	assert.Equal(t, msgType, websocket.TextMessage)
@@ -360,9 +360,95 @@ func (s *ServerTestSuite) TestPlayersGetRoundInfoAfterWinnerSelected() {
 	assert.NoError(t, err, "Should be a white card play message")
 	assert.Equal(t, expectedPreviousWinner, whiteCardPlay.Winner)
 	assert.Equal(t, client.PlayerId, whiteCardPlay.WinnerId)
-  assert.Equal(t, game.CurrentBlackCard, whiteCardPlay.BlackCard)
-  assert.Len(t, whiteCardPlay.YourHand, 7)
-  assert.Equal(t, game.CurrentCardCzarId, whiteCardPlay.CardCzarId)
+	assert.Equal(t, game.CurrentBlackCard, whiteCardPlay.BlackCard)
+	assert.Len(t, whiteCardPlay.YourHand, 7)
+	assert.Equal(t, game.CurrentCardCzarId, whiteCardPlay.CardCzarId)
+}
+
+func (s *ServerTestSuite) TestMulliganHand() {
+	t := s.T()
+	t.Parallel()
+
+	client, err := NewTestGameConnection()
+	assert.NoError(t, err)
+	assert.NotNil(t, client)
+	defer client.Close()
+
+	// First message should be the player join broadcast, which we ignore
+	msgType, msg, err := client.Read()
+
+	assert.Nil(t, err, "Should be able to read (the initial game state)")
+	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
+	assert.Equal(t, msgType, websocket.TextMessage)
+
+	onPlayerJoinMsg, err := network.DecodeAs[network.RpcOnPlayerJoinMsg](msg)
+	assert.Nil(t, err)
+	assert.Equal(t, client.PlayerId, onPlayerJoinMsg.Id, "The current user should have joined the game")
+
+	// Second message should be the state
+	msgType, msg, err = client.Read()
+
+	assert.Nil(t, err, "Should be able to read (the initial game state)")
+	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
+	assert.Equal(t, msgType, websocket.TextMessage)
+
+	onJoinMsg, err := network.DecodeAs[network.RpcOnJoinMsg](msg)
+	assert.NoError(t, err, "Should be a join message")
+	assert.Equal(t, client.GameId, onJoinMsg.State.Id)
+	assert.Len(t, onJoinMsg.State.Players, 1)
+	assert.Contains(t, onJoinMsg.State.Players, gameLogic.Player{
+		Id:        client.PlayerId,
+		Name:      "Dave",
+		Points:    0,
+		Connected: true})
+
+	for i := 1; i < gameLogic.MinPlayers; i++ {
+		name := fmt.Sprintf("Player %d", i)
+		info, err := client.AddPlayer(name)
+		assert.NoError(t, err)
+
+		_, msg, err = client.Read()
+		assert.Nil(t, err, "Should be able to read the message")
+		assert.True(t, len(msg) > 0, "Message should have a non-zero length")
+
+		rpcMsg, err := network.DecodeAs[network.RpcOnPlayerJoinMsg](msg)
+		assert.NoError(t, err)
+		assert.Equal(t, rpcMsg.Id, info.PlayerId)
+		assert.Equal(t, rpcMsg.Name, name)
+	}
+
+	startGameMsg := network.RpcStartGameMsg{}
+	msgBytes, err := network.EncodeRpcMessage(startGameMsg)
+	assert.Nil(t, err)
+
+	err = client.Write(msgBytes)
+	assert.NoError(t, err)
+
+	_, msg, err = client.Read()
+	assert.Nil(t, err, "Should be able to read the message")
+	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
+
+	rpcMsg, err := network.DecodeAs[network.RpcRoundInformationMsg](msg)
+	assert.NoError(t, err)
+	assert.Len(t, rpcMsg.YourHand, gameLogic.HandSize)
+	assert.NotEmpty(t, rpcMsg.BlackCard)
+	assert.Empty(t, rpcMsg.YourPlays)
+	assert.Equal(t, 0, rpcMsg.TotalPlays)
+	assert.Equal(t, uint(1), rpcMsg.RoundNumber)
+	assert.Empty(t, rpcMsg.PreviousWinnerDetails)
+
+	mulliganMsg, err := network.EncodeRpcMessage(network.RpcMulliganHand{})
+	assert.NoError(t, err)
+
+	err = client.Write(mulliganMsg)
+	assert.NoError(t, err)
+
+	_, msg, err = client.Read()
+	assert.NoError(t, err)
+
+	cardPlayedMsg, err := network.DecodeAs[network.RpcOnNewHand](msg)
+	assert.NoError(t, err)
+	assert.Len(t, cardPlayedMsg.WhiteCards, 7)
 }
 
 // TODO: test czar can select a winner

@@ -384,6 +384,26 @@ func (c *WsConnection) readMessage(gid uuid.UUID) error {
 
 			return nil
 		},
+		MulliganHandler: func() error {
+			handler = "Mulligan Hand"
+
+			newCards, err := gameRepo.Repo.MulliganHand(c.GameId, c.PlayerId)
+			if err != nil {
+				return errors.Join(errors.New("Cannot mulligan hand"), err)
+			}
+
+			rpcMessage := RpcOnNewHand{
+				WhiteCards: newCards,
+			}
+
+			msg, err := EncodeRpcMessage(rpcMessage)
+			if err != nil {
+				return err
+			}
+
+			go GlobalConnectionManager.SendToPlayer(c.GameId, c.PlayerId, msg)
+			return nil
+		},
 	})
 
 	microSeconds := time.Since(startTime).Microseconds()

@@ -28,7 +28,6 @@ const (
 
 	MinCardPacks = 1
 
-	MaxHandMulligans = 100
 	HandSize         = 7
 )
 

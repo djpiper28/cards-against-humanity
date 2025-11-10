@@ -62,6 +62,11 @@ const (
 
 	// Tx when the game ends and goes back to the lobby
 	MsgOnGameEnd
+
+	// Rx player decides to mulligan their hand
+	MsgMulliganHand
+	// Tx when a player gets a new hand (from mulligan)
+	MsgOnNewHand
 )
 
 type RpcMessageBody struct {
@@ -90,6 +95,7 @@ type RpcCommandHandlers struct {
 	CzarSelectCardHandler func(msg RpcCzarSelectCardMsg) error
 	SkipBlackCardHandler  func() error
 	KickPlayerHandler     func(msg RpcKickPlayer) error
+	MulliganHandler       func() error
 }
 
 func DecodeAs[T RpcMessage](data []byte) (T, error) {
@@ -150,6 +156,8 @@ func DecodeRpcMessage(data []byte, handlers RpcCommandHandlers) error {
 		}
 
 		return handlers.KickPlayerHandler(command)
+  case MsgMulliganHand:
+    return handlers.MulliganHandler()
 	default:
 		logger.Logger.Error("Unknown command", "type", cmd.Type)
 		return errors.New("Unknown command")
@@ -330,4 +338,18 @@ type RpcKickPlayer struct {
 
 func (msg RpcKickPlayer) Type() RpcMessageType {
 	return MsgKickPlayer
+}
+
+type RpcMulliganHand struct{}
+
+func (msg RpcMulliganHand) Type() RpcMessageType {
+	return MsgMulliganHand
+}
+
+type RpcOnNewHand struct {
+	WhiteCards []*gameLogic.WhiteCard
+}
+
+func (msg RpcOnNewHand) Type() RpcMessageType {
+	return MsgOnNewHand
 }
