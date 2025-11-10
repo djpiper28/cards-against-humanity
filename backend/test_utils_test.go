@@ -12,7 +12,9 @@ import (
 
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/djpiper28/cards-against-humanity/backend/logger"
+	"github.com/djpiper28/cards-against-humanity/backend/network"
 	"github.com/google/uuid"
+	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
@@ -228,4 +230,72 @@ func (s *ServerTestSuite) CreatePlayer(gameId uuid.UUID, name, password string) 
 
 	require.NotEmpty(t, create.PlayerId)
 	return TestGameData{Ids: GameCreatedResp{GameId: gameId, PlayerId: create.PlayerId}, Jar: &GameJoinCookieJar{GameId: gameId, PlayerId: create.PlayerId, Password: password}}
+}
+
+func (s *ServerTestSuite) ReadCreateJoinMessages(t *testing.T, client *TestGameConnection, pid uuid.UUID) {
+	create := false
+	join := false
+	tries := 0
+
+	for ; tries < 4 && (!join || !create); tries++ {
+		var rpcMessage network.RpcMessageBody
+		msgType, msg, err := client.Read()
+		require.Equal(t, msgType, websocket.TextMessage)
+		require.NoError(t, err)
+		require.NoError(t, json.Unmarshal(msg, &rpcMessage))
+
+		switch rpcMessage.Type {
+		case network.MsgOnPlayerCreate:
+			onPlayerCreateMsg, err := network.DecodeAs[network.RpcOnPlayerCreateMsg](msg)
+			require.Nil(t, err)
+			require.Equal(t, pid, onPlayerCreateMsg.Id, "The current user should have joined the game")
+			t.Log("MsgOnPlayerCreate")
+
+			require.False(t, create)
+			create = true
+		case network.MsgOnPlayerJoin:
+			onPlayerJoinMsg, err := network.DecodeAs[network.RpcOnPlayerJoinMsg](msg)
+			require.Nil(t, err)
+			require.Equal(t, pid, onPlayerJoinMsg.Id, "The current user should have joined the game")
+			t.Log("MsgOnPlayerJoin")
+
+			require.False(t, join)
+			join = true
+		case network.MsgPing:
+			pong, err := network.EncodeRpcMessage(network.RpcPingMsg{})
+			require.NoError(t, err)
+			require.NoError(t, client.Write(pong))
+		default:
+			err := fmt.Errorf("Cannot parse message %d", rpcMessage.Type)
+			t.Log(err)
+			panic(err)
+		}
+	}
+}
+
+// Ignores pings that are sent
+func ReadMessage[T network.RpcMessage](s *ServerTestSuite, t *testing.T, client *TestGameConnection) T {
+	msgType, msg, err := client.Read()
+	require.Equal(t, msgType, websocket.TextMessage)
+	require.NoError(t, err)
+
+	type TProxy struct {
+		Type network.RpcMessageType `json:"type"`
+		Data T                      `json:"data"`
+	}
+
+	var proxy TProxy
+	err = json.Unmarshal(msg, &proxy)
+	require.NoError(t, err)
+
+	if proxy.Type == network.MsgPing {
+		pong, err := network.EncodeRpcMessage(network.RpcPingMsg{})
+		require.NoError(t, err)
+		require.NoError(t, client.Write(pong))
+		return ReadMessage[T](s, t, client)
+	}
+
+	require.Equal(t, proxy.Type, proxy.Data.Type())
+
+	return proxy.Data
 }

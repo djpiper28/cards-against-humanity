@@ -171,15 +171,15 @@ func createPlayerForJoining(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie(AuthorizationCookie, token, -1, "/", "", true, true)
-	c.JSON(http.StatusCreated, CreatePlayerResponse{PlayerId: playerId, AuthorisationCookie: token})
-
 	// Transmit to the other players
 	msg, err := network.EncodeRpcMessage(onCreateMessage)
 	if err != nil {
 		logger.Logger.Error("Error encoding message", "err", err)
 	}
-	go network.GlobalConnectionManager.Broadcast(createReq.GameId, msg)
+	network.GlobalConnectionManager.Broadcast(createReq.GameId, msg)
+
+	c.SetCookie(AuthorizationCookie, token, -1, "/", "", true, true)
+	c.JSON(http.StatusCreated, CreatePlayerResponse{PlayerId: playerId, AuthorisationCookie: token})
 }
 
 type authenticationData struct {

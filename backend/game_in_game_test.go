@@ -183,26 +183,19 @@ func (s *ServerTestSuite) TestPlayingCardInGame() {
 		name := fmt.Sprintf("Player %d", i)
 		info, err := client.AddPlayer(name)
 		require.NoError(t, err)
-
-		_, msg, err = client.Read()
-		require.Nil(t, err, "Should be able to read the message")
-		require.True(t, len(msg) > 0, "Message should have a non-zero length")
-
-		rpcMsg, err := network.DecodeAs[network.RpcOnPlayerJoinMsg](msg)
-		require.NoError(t, err)
-		require.Equal(t, rpcMsg.Id, info.PlayerId)
-		require.Equal(t, rpcMsg.Name, name)
+    require.NotEmpty(t, info)
+    s.ReadCreateJoinMessages(t, client, info.PlayerId)
 	}
 
 	startGameMsg := network.RpcStartGameMsg{}
 	msgBytes, err := network.EncodeRpcMessage(startGameMsg)
-	require.Nil(t, err)
+	require.NoError(t, err)
 
 	err = client.Write(msgBytes)
 	require.NoError(t, err)
 
 	_, msg, err = client.Read()
-	require.Nil(t, err, "Should be able to read the message")
+	require.NoError(t, err, "Should be able to read the message")
 	require.True(t, len(msg) > 0, "Message should have a non-zero length")
 
 	rpcMsg, err := network.DecodeAs[network.RpcRoundInformationMsg](msg)
