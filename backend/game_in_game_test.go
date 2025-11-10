@@ -111,7 +111,7 @@ func (s *ServerTestSuite) TestStartGameEnoughPlayers() {
 		info, err := client.AddPlayer(name)
 		require.NoError(t, err)
 
-    s.ReadCreateJoinMessages(t, client, info.PlayerId)
+    s.ReadCreateMessage(t, client, info.PlayerId)
 	}
 
 	startGameMsg := network.RpcStartGameMsg{}
@@ -172,7 +172,7 @@ func (s *ServerTestSuite) TestPlayingCardInGame() {
 		info, err := client.AddPlayer(name)
 		require.NoError(t, err)
     require.NotEmpty(t, info)
-    s.ReadCreateJoinMessages(t, client, info.PlayerId)
+    s.ReadCreateMessage(t, client, info.PlayerId)
 	}
 
 	startGameMsg := network.RpcStartGameMsg{}
@@ -245,7 +245,7 @@ func (s *ServerTestSuite) TestPlayersGetRoundInfoAfterWinnerSelected() {
 		info, err := client.AddPlayer(name)
 		require.NoError(t, err)
 
-    s.ReadCreateJoinMessages(t, client, info.PlayerId)
+    s.ReadCreateMessage(t, client, info.PlayerId)
 	}
 
 	// Start game
@@ -369,7 +369,7 @@ func (s *ServerTestSuite) TestMulliganHand() {
 		info, err := client.AddPlayer(name)
 		require.NoError(t, err)
 
-    s.ReadCreateJoinMessages(t, client, info.PlayerId)
+    s.ReadCreateMessage(t, client, info.PlayerId)
 	}
 
 	startGameMsg := network.RpcStartGameMsg{}

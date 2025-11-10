@@ -235,11 +235,8 @@ func (s *ServerTestSuite) CreatePlayer(gameId uuid.UUID, name, password string) 
 	return TestGameData{Ids: GameCreatedResp{GameId: gameId, PlayerId: create.PlayerId}, Jar: &GameJoinCookieJar{GameId: gameId, PlayerId: create.PlayerId, Password: password}}
 }
 
-func (s *ServerTestSuite) ReadCreateJoinMessages(t *testing.T, client *TestGameConnection, pid uuid.UUID) {
+func (s *ServerTestSuite) ReadCreateMessage(t *testing.T, client *TestGameConnection, pid uuid.UUID) {
 	t.Helper()
-
-	create := false
-	join := false
 
 	_, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -257,17 +254,7 @@ func (s *ServerTestSuite) ReadCreateJoinMessages(t *testing.T, client *TestGameC
 			require.Nil(t, err)
 			require.Equal(t, pid, onPlayerCreateMsg.Id, "The current user should have joined the game")
 			t.Log("MsgOnPlayerCreate")
-
-			require.False(t, create)
-			create = true
-		case network.MsgOnPlayerJoin:
-			onPlayerJoinMsg, err := network.DecodeAs[network.RpcOnPlayerJoinMsg](msg)
-			require.Nil(t, err)
-			require.Equal(t, pid, onPlayerJoinMsg.Id, "The current user should have joined the game")
-			t.Log("MsgOnPlayerJoin")
-
-			require.False(t, join)
-			join = true
+			return
 		case network.MsgPing:
 			pong, err := network.EncodeRpcMessage(network.RpcPingMsg{})
 			require.NoError(t, err)
@@ -280,13 +267,9 @@ func (s *ServerTestSuite) ReadCreateJoinMessages(t *testing.T, client *TestGameC
 		default:
 			require.FailNowf(t, "Cannot parse message", "try %d msg %s", tries, rpcMessage.Type)
 		}
-
-		if create && join {
-			return
-		}
 	}
 
-	require.FailNowf(t, "Cannot read create and join messages", "create: %v, join: %v", create, join)
+	require.FailNow(t, "Cannot read create and join messages")
 }
 
 // Ignores pings that are sent
