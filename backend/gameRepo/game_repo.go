@@ -307,8 +307,8 @@ func (gr *GameRepo) EndOldGames() []uuid.UUID {
 
 	gr.lock.Lock()
 	defer gr.lock.Unlock()
-	for _, removeedGameId := range endedGames {
-		gr.removeGame(removeedGameId)
+	for _, removedGameId := range endedGames {
+		gr.removeGame(removedGameId)
 	}
 	return endedGames
 }
