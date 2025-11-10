@@ -374,6 +374,7 @@ func (c *WsConnection) readMessage(gid uuid.UUID) error {
 				logger.Logger.Error("Cannot encode message to send to players")
 			}
 
+      logger.Logger.Info("Hand skipped", "gameId", c.GameId, "playerId", c.PlayerId)
 			go GlobalConnectionManager.Broadcast(c.GameId, encodedMsg)
 			return nil
 		},
@@ -398,6 +399,7 @@ func (c *WsConnection) readMessage(gid uuid.UUID) error {
 				return errors.Join(errors.New("Cannot kick player"), err)
 			}
 
+      logger.Logger.Info("Player kicked", "gameId", c.GameId, "playerId", c.PlayerId, "target", msg.PlayerId)
 			return nil
 		},
 		MulliganHandler: func() error {
@@ -417,6 +419,7 @@ func (c *WsConnection) readMessage(gid uuid.UUID) error {
 				return err
 			}
 
+      logger.Logger.Info("Hand mulligan", "gameId", c.GameId, "playerId", c.PlayerId)
 			go GlobalConnectionManager.SendToPlayer(c.GameId, c.PlayerId, msg)
 			return nil
 		},
