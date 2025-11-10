@@ -1,0 +1,21 @@
+name: Coverage
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          submodules: yes
+      - name: Docker Build
+        run: |
+          docker compose up --build
