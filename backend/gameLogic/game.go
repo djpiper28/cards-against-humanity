@@ -945,3 +945,31 @@ func (g *Game) SkipBlackCard(pid uuid.UUID) (*BlackCard, error) {
 	logger.Logger.Info("Skipped the black card", "gameId", g.Id, "playerId", pid)
 	return g.CurrentBlackCard, nil
 }
+
+func (g *Game) MulliganHand(pid uuid.UUID) ([]*WhiteCard, error) {
+	g.Lock.Lock()
+	defer g.Lock.Unlock()
+
+	player, found := g.PlayersMap[pid]
+	if !found {
+		return nil, errors.New("Cannot find the player")
+	}
+
+	if !g.checkState(GameStateWhiteCardsBeingSelected) {
+		return nil, errors.New("Not in white card selection phase")
+	}
+
+	cards, err := g.CardDeck.GetNewWhiteCards(7)
+	if err != nil {
+		return nil, errors.New("Cannot get new cards")
+	}
+
+	player.Hand = make(map[int]*WhiteCard, 7)
+	for _, card := range cards {
+		player.Hand[card.Id] = card
+	}
+
+  player.CurrentPlay = make([]*WhiteCard, 0)
+
+	return cards, nil
+}
