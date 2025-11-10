@@ -240,12 +240,11 @@ func (s *ServerTestSuite) ReadCreateJoinMessages(t *testing.T, client *TestGameC
 
 	create := false
 	join := false
-	tries := 0
 
 	_, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	for ; tries < 4 && (!join || !create); tries++ {
+	for tries := range 5 {
 		var rpcMessage network.RpcMessageBody
 		msgType, msg, err := client.Read()
 		require.Equal(t, msgType, websocket.TextMessage)
@@ -273,18 +272,21 @@ func (s *ServerTestSuite) ReadCreateJoinMessages(t *testing.T, client *TestGameC
 			pong, err := network.EncodeRpcMessage(network.RpcPingMsg{})
 			require.NoError(t, err)
 			require.NoError(t, client.Write(pong))
+
+			t.Log("Ping")
+			continue
 		case network.MsgCommandError:
-			require.Fail(t, "MsgCommandError", string(msg))
+			require.FailNowf(t, "MsgCommandError", "try %d msg %s", tries, string(msg))
 		default:
-			err := fmt.Errorf("Cannot parse message %d", rpcMessage.Type)
-			t.Log(err)
-			panic(err)
+			require.FailNowf(t, "Cannot parse message", "try %d msg %s", tries, rpcMessage.Type)
+		}
+
+		if create && join {
+			return
 		}
 	}
 
-	if !create || !join {
-		require.FailNow(t, "Cannot read create and join messages", "create", create, "join", join)
-	}
+	require.FailNowf(t, "Cannot read create and join messages", "create: %v, join: %v", create, join)
 }
 
 // Ignores pings that are sent
@@ -296,7 +298,7 @@ func ReadMessage[T network.RpcMessage](s *ServerTestSuite, t *testing.T, client 
 		Data T                      `json:"data"`
 	}
 
-	for tries := 0; tries < 5; tries++ {
+	for tries := range 5 {
 		msgType, msg, err := client.Read()
 		require.Equal(t, msgType, websocket.TextMessage)
 		require.NoError(t, err)
@@ -312,11 +314,12 @@ func ReadMessage[T network.RpcMessage](s *ServerTestSuite, t *testing.T, client 
 			pong, err := network.EncodeRpcMessage(network.RpcPingMsg{})
 			require.NoError(t, err)
 			require.NoError(t, client.Write(pong))
+			t.Log("Ping")
 			continue
 		}
 
 		if proxy.Type == network.MsgCommandError {
-			require.FailNowf(t, "MSG Command Error was returned: %s", string(msg))
+			require.FailNowf(t, "MSG Command Error was returned", "try: %d msg: %s", tries, string(msg))
 		}
 
 		require.Equal(t, proxy.Data.Type(), proxy.Type)

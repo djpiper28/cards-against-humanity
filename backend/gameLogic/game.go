@@ -21,14 +21,14 @@ const (
 	MinPlayingToPoints = 2
 	MaxPlayingToPoints = 100
 
-	MaxPasswordLength = 50
+	MaxPasswordLength = 20
 
 	MinPlayers = 2
 	MaxPlayers = 50
 
 	MinCardPacks = 1
 
-	HandSize         = 7
+	HandSize = 7
 )
 
 // Game settings used for the internal state and game creation
@@ -968,7 +968,7 @@ func (g *Game) MulliganHand(pid uuid.UUID) ([]*WhiteCard, error) {
 		player.Hand[card.Id] = card
 	}
 
-  player.CurrentPlay = make([]*WhiteCard, 0)
+	player.CurrentPlay = make([]*WhiteCard, 0)
 
 	return cards, nil
 }
