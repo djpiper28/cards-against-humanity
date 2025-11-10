@@ -11,7 +11,6 @@ import (
 	"github.com/djpiper28/cards-against-humanity/backend/network"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -19,12 +18,12 @@ func (s *ServerTestSuite) BeforeGetGamesNotFullEmpty() {
 	t := s.T()
 
 	resp, err := http.Get(HttpBaseUrl + "/games/notFull")
-	assert.Nil(t, err, "There should not be an error getting the games")
-	assert.Equal(t, http.StatusOK, resp.StatusCode, "Should be OK")
+	require.Nil(t, err, "There should not be an error getting the games")
+	require.Equal(t, http.StatusOK, resp.StatusCode, "Should be OK")
 
 	body, err := io.ReadAll(resp.Body)
-	assert.Nil(t, err, "Should be able to read the body")
-	assert.Equal(t, string(body), "[]", "Should be an empty array")
+	require.Nil(t, err, "Should be able to read the body")
+	require.Equal(t, string(body), "[]", "Should be an empty array")
 }
 
 func (s *ServerTestSuite) BeforeInitialGameCreateTest() {
@@ -32,24 +31,24 @@ func (s *ServerTestSuite) BeforeInitialGameCreateTest() {
 	name := "Dave"
 
 	gid, pid, err := gameRepo.Repo.CreateGame(gameLogic.DefaultGameSettings(), name)
-	assert.Nil(t, err, "Should be able to make a game")
-	assert.NotEmpty(t, gid)
-	assert.NotEmpty(t, pid)
+	require.Nil(t, err, "Should be able to make a game")
+	require.NotEmpty(t, gid)
+	require.NotEmpty(t, pid)
 
 	resp, err := http.Get(HttpBaseUrl + "/games/notFull")
-	assert.Nil(t, err, "There should not be an error getting the games")
-	assert.Equal(t, http.StatusOK, resp.StatusCode, "Should be OK")
+	require.Nil(t, err, "There should not be an error getting the games")
+	require.Equal(t, http.StatusOK, resp.StatusCode, "Should be OK")
 
 	body, err := io.ReadAll(resp.Body)
-	assert.Nil(t, err, "Should be able to read the body")
+	require.Nil(t, err, "Should be able to read the body")
 
 	var games []gameLogic.GameInfo
 	err = json.Unmarshal(body, &games)
-	assert.Nil(t, err, "There should not be an error")
-	assert.Len(t, games, 1, "There should be one game")
+	require.Nil(t, err, "There should not be an error")
+	require.Len(t, games, 1, "There should be one game")
 
-	assert.Equal(t, games[0].Id, gid, "Game Id should match")
-	assert.Equal(t, games[0].PlayerCount, 1, "Should only be one player")
+	require.Equal(t, games[0].Id, gid, "Game Id should match")
+	require.Equal(t, games[0].PlayerCount, 1, "Should only be one player")
 }
 
 func (s *ServerTestSuite) TestGetMetrics() {
@@ -57,12 +56,12 @@ func (s *ServerTestSuite) TestGetMetrics() {
 	t.Parallel()
 
 	resp, err := http.Get(HttpBaseUrl + "/metrics")
-	assert.Nil(t, err, "There should not be an error getting the metrics")
-	assert.Equal(t, http.StatusOK, resp.StatusCode, "Should be OK")
+	require.Nil(t, err, "There should not be an error getting the metrics")
+	require.Equal(t, http.StatusOK, resp.StatusCode, "Should be OK")
 
 	body, err := io.ReadAll(resp.Body)
-	assert.Nil(t, err, "Should be able to read the body")
-	assert.NotEmpty(t, body, "Body should not be empty")
+	require.Nil(t, err, "Should be able to read the body")
+	require.NotEmpty(t, body, "Body should not be empty")
 }
 
 func (s *ServerTestSuite) TestGetCardPacks() {
@@ -70,15 +69,15 @@ func (s *ServerTestSuite) TestGetCardPacks() {
 	t.Parallel()
 
 	resp, err := http.Get(HttpBaseUrl + "/res/packs")
-	assert.Nil(t, err, "Should not get an error getting packs")
-	assert.Equal(t, http.StatusOK, resp.StatusCode, "Should return a 200")
+	require.Nil(t, err, "Should not get an error getting packs")
+	require.Equal(t, http.StatusOK, resp.StatusCode, "Should return a 200")
 
 	body, err := io.ReadAll(resp.Body)
-	assert.Nil(t, err, "Should be able to read the body")
+	require.Nil(t, err, "Should be able to read the body")
 
 	var packs map[uuid.UUID]gameLogic.CardPack
 	err = json.Unmarshal(body, &packs)
-	assert.Nil(t, err, "There should not be any errors getting the card packs")
+	require.Nil(t, err, "There should not be any errors getting the card packs")
 }
 
 func (s *ServerTestSuite) TestLeaveGame() {
@@ -86,33 +85,33 @@ func (s *ServerTestSuite) TestLeaveGame() {
 	t.Parallel()
 
 	client, err := NewTestGameConnection()
-	assert.NoError(t, err)
-	assert.NotNil(t, client)
+	require.NoError(t, err)
+	require.NotNil(t, client)
 	defer client.Close()
 
 	// First message should be the player join broadcast, which we ignore
 	msgType, msg, err := client.Read()
 
-	assert.Nil(t, err, "Should be able to read (the initial game state)")
-	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
-	assert.Equal(t, msgType, websocket.TextMessage)
+	require.Nil(t, err, "Should be able to read (the initial game state)")
+	require.True(t, len(msg) > 0, "Message should have a non-zero length")
+	require.Equal(t, msgType, websocket.TextMessage)
 
 	onPlayerJoinMsg, err := network.DecodeAs[network.RpcOnPlayerJoinMsg](msg)
-	assert.Nil(t, err)
-	assert.Equal(t, client.PlayerId, onPlayerJoinMsg.Id, "The current user should have joined the game")
+	require.Nil(t, err)
+	require.Equal(t, client.PlayerId, onPlayerJoinMsg.Id, "The current user should have joined the game")
 
 	// Second message should be the state
 	msgType, msg, err = client.Read()
 
-	assert.Nil(t, err, "Should be able to read (the initial game state)")
-	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
-	assert.Equal(t, msgType, websocket.TextMessage)
+	require.Nil(t, err, "Should be able to read (the initial game state)")
+	require.True(t, len(msg) > 0, "Message should have a non-zero length")
+	require.Equal(t, msgType, websocket.TextMessage)
 
 	onJoinMsg, err := network.DecodeAs[network.RpcOnJoinMsg](msg)
-	assert.NoError(t, err, "Should be a join message")
-	assert.Equal(t, client.GameId, onJoinMsg.State.Id)
-	assert.Len(t, onJoinMsg.State.Players, 1)
-	assert.Contains(t, onJoinMsg.State.Players, gameLogic.Player{
+	require.NoError(t, err, "Should be a join message")
+	require.Equal(t, client.GameId, onJoinMsg.State.Id)
+	require.Len(t, onJoinMsg.State.Players, 1)
+	require.Contains(t, onJoinMsg.State.Players, gameLogic.Player{
 		Id:        client.PlayerId,
 		Name:      "Dave",
 		Points:    0,
@@ -121,16 +120,16 @@ func (s *ServerTestSuite) TestLeaveGame() {
 	// Add the player who will leave
 	name := "Player who will leave"
 	leavingPlayerInfo, err := client.AddPlayer(name)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	_, msg, err = client.Read()
-	assert.Nil(t, err, "Should be able to read the message")
-	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
+	require.Nil(t, err, "Should be able to read the message")
+	require.True(t, len(msg) > 0, "Message should have a non-zero length")
 
 	rpcMsg, err := network.DecodeAs[network.RpcOnPlayerJoinMsg](msg)
-	assert.NoError(t, err)
-	assert.Equal(t, leavingPlayerInfo.PlayerId, rpcMsg.Id)
-	assert.Equal(t, name, rpcMsg.Name)
+	require.NoError(t, err)
+	require.Equal(t, leavingPlayerInfo.PlayerId, rpcMsg.Id)
+	require.Equal(t, name, rpcMsg.Name)
 
 	// Leave the game
 	leaveClient := http.Client{
@@ -145,10 +144,10 @@ func (s *ServerTestSuite) TestLeaveGame() {
 		Method: http.MethodDelete,
 	}
 	resp, err := leaveClient.Do(req)
-	assert.Nil(t, err, "There should not be an error getting the games")
-	assert.Equal(t, http.StatusOK, resp.StatusCode, "Should be OK")
+	require.Nil(t, err, "There should not be an error getting the games")
+	require.Equal(t, http.StatusOK, resp.StatusCode, "Should be OK")
 
 	onLeaveMsg, err := network.DecodeAs[network.RpcOnPlayerLeaveMsg](msg)
-	assert.NoError(t, err, "Should be a join message")
-	assert.Equal(t, client.GameId, onLeaveMsg.Id)
+	require.NoError(t, err, "Should be a join message")
+	require.Equal(t, client.GameId, onLeaveMsg.Id)
 }

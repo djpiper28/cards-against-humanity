@@ -13,7 +13,7 @@ import (
 	"github.com/djpiper28/cards-against-humanity/backend/gameLogic"
 	"github.com/djpiper28/cards-against-humanity/backend/logger"
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -32,12 +32,12 @@ func (s *ServerTestSuite) SetupSuite() {
 	t.Log("Sleeping while the server starts")
 	time.Sleep(time.Second)
 	resp, err := http.Get(HttpBaseUrl + "/healthcheck")
-	assert.Nil(t, err, "There should not be an error on the started server", err)
-	assert.Equal(t, resp.StatusCode, http.StatusOK, "Healthcheck should work")
+	require.Nil(t, err, "There should not be an error on the started server", err)
+	require.Equal(t, resp.StatusCode, http.StatusOK, "Healthcheck should work")
 
 	body, err := io.ReadAll(resp.Body)
-	assert.Nil(t, err, "Should be able to read the body")
-	assert.Equal(t, `{"healthy":true}`, string(body), "Should return healthy")
+	require.Nil(t, err, "Should be able to read the body")
+	require.Equal(t, `{"healthy":true}`, string(body), "Should return healthy")
 
 	// Initial state checks
 	s.BeforeGetGamesNotFullEmpty()
@@ -110,7 +110,7 @@ func createTestGame_2() (TestGameData, error) {
 // This game has no password
 func createTestGame(t *testing.T) TestGameData {
 	data, err := createTestGame_2()
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	return data
 }
 
@@ -164,7 +164,7 @@ func Test_GameJoinCookiesIsCookieJar(t *testing.T) {
 
 	var jar http.CookieJar
 	jar = &GameJoinCookieJar{}
-	assert.NotNil(t, jar, "Should be able to create a cookie jar")
+	require.NotNil(t, jar, "Should be able to create a cookie jar")
 }
 
 type TestGameInfo struct {
@@ -180,22 +180,22 @@ func (s *ServerTestSuite) CreateDefaultGame() TestGameInfo {
 	gs := DefaultGameSettings()
 
 	postBody, err := json.Marshal(GameCreateRequest{Settings: gs, PlayerName: name})
-	assert.Nil(t, err, "Should be able to create json body")
+	require.Nil(t, err, "Should be able to create json body")
 
 	reader := bytes.NewReader(postBody)
 
 	resp, err := http.Post(HttpBaseUrl+"/games/create", jsonContentType, reader)
-	assert.Nil(t, err, "Should be able to POST")
-	assert.Equal(t, http.StatusCreated, resp.StatusCode, "Game should have been made and is ready for connecting to")
+	require.Nil(t, err, "Should be able to POST")
+	require.Equal(t, http.StatusCreated, resp.StatusCode, "Game should have been made and is ready for connecting to")
 
 	body, err := io.ReadAll(resp.Body)
-	assert.Nil(t, err, "Should be able to read the body")
+	require.Nil(t, err, "Should be able to read the body")
 
 	var gameIds GameCreatedResp
 	err = json.Unmarshal(body, &gameIds)
-	assert.Nil(t, err, "There should not be an error reading the game ids")
-	assert.NotEmpty(t, gameIds.GameId, "Game ID should be set")
-	assert.NotEmpty(t, gameIds.PlayerId, "Player ID should be set")
+	require.Nil(t, err, "There should not be an error reading the game ids")
+	require.NotEmpty(t, gameIds.GameId, "Game ID should be set")
+	require.NotEmpty(t, gameIds.PlayerId, "Player ID should be set")
 
 	return TestGameInfo{gameId: gameIds.GameId, playerId: gameIds.PlayerId, maxPlayers: gs.MaxPlayers, password: gs.Password}
 }
@@ -208,24 +208,24 @@ func (s *ServerTestSuite) CreatePlayer(gameId uuid.UUID, name, password string) 
 		GameId:     gameId,
 	}
 	body, err := json.Marshal(jsonBody)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	client := http.Client{
 		Jar: &GameJoinCookieJar{GameId: gameId, Password: password},
 	}
 
 	resp, err := client.Post(HttpBaseUrl+"/games/join", jsonContentType, bytes.NewReader(body))
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
-	assert.Equal(t, http.StatusCreated, resp.StatusCode)
+	require.Equal(t, http.StatusCreated, resp.StatusCode)
 
 	respBody, err := io.ReadAll(resp.Body)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	var create CreatePlayerResponse
 	err = json.Unmarshal(respBody, &create)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
-	assert.NotEmpty(t, create.PlayerId)
+	require.NotEmpty(t, create.PlayerId)
 	return TestGameData{Ids: GameCreatedResp{GameId: gameId, PlayerId: create.PlayerId}, Jar: &GameJoinCookieJar{GameId: gameId, PlayerId: create.PlayerId, Password: password}}
 }

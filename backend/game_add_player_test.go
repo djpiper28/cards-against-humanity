@@ -12,7 +12,7 @@ import (
 
 	"github.com/djpiper28/cards-against-humanity/backend/network"
 	"github.com/gorilla/websocket"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func (s *ServerTestSuite) TestCreatePlayerValid() {
@@ -20,7 +20,7 @@ func (s *ServerTestSuite) TestCreatePlayerValid() {
 	t.Parallel()
 
 	details := s.CreateDefaultGame()
-	assert.NotEmpty(t, s.CreatePlayer(details.gameId, "Bob", ""))
+	require.NotEmpty(t, s.CreatePlayer(details.gameId, "Bob", ""))
 }
 
 func (s *ServerTestSuite) TestCreatePlayerInvalidBodyFails() {
@@ -28,8 +28,8 @@ func (s *ServerTestSuite) TestCreatePlayerInvalidBodyFails() {
 	t.Parallel()
 
 	resp, err := http.Post(HttpBaseUrl+"/games/join", jsonContentType, strings.NewReader("aaaaaaaa"))
-	assert.Nil(t, err)
-	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+	require.Nil(t, err)
+	require.Equal(t, http.StatusBadRequest, resp.StatusCode)
 }
 
 func (s *ServerTestSuite) TestCreatePlayerDuplicateNameFails() {
@@ -38,19 +38,19 @@ func (s *ServerTestSuite) TestCreatePlayerDuplicateNameFails() {
 
 	const name = "Bob"
 	details := s.CreateDefaultGame()
-	assert.NotEmpty(t, s.CreatePlayer(details.gameId, name, ""))
+	require.NotEmpty(t, s.CreatePlayer(details.gameId, name, ""))
 
 	jsonBody := CreatePlayerRequest{
 		PlayerName: name,
 		GameId:     details.gameId,
 	}
 	body, err := json.Marshal(jsonBody)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	resp, err := http.Post(HttpBaseUrl+"/games/join", jsonContentType, bytes.NewReader(body))
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
-	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+	require.Equal(t, http.StatusInternalServerError, resp.StatusCode)
 }
 
 func (s *ServerTestSuite) TestCreatePlayerInvalidPasswordFails() {
@@ -66,12 +66,12 @@ func (s *ServerTestSuite) TestCreatePlayerInvalidPasswordFails() {
 		Password:   "wrong password",
 	}
 	body, err := json.Marshal(jsonBody)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	resp, err := http.Post(HttpBaseUrl+"/games/join", jsonContentType, bytes.NewReader(body))
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
-	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+	require.Equal(t, http.StatusInternalServerError, resp.StatusCode)
 }
 
 func (s *ServerTestSuite) TestCreatePlayerGameFullFails() {
@@ -83,7 +83,7 @@ func (s *ServerTestSuite) TestCreatePlayerGameFullFails() {
 	// A player has already joined on line 275
 	var i uint
 	for i = 1; i < details.maxPlayers; i++ {
-		assert.NotEmpty(t, s.CreatePlayer(details.gameId, fmt.Sprintf("Player #%d", i), ""))
+		require.NotEmpty(t, s.CreatePlayer(details.gameId, fmt.Sprintf("Player #%d", i), ""))
 	}
 
 	jsonBody := CreatePlayerRequest{
@@ -91,12 +91,12 @@ func (s *ServerTestSuite) TestCreatePlayerGameFullFails() {
 		GameId:     details.gameId,
 	}
 	body, err := json.Marshal(jsonBody)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	resp, err := http.Post(HttpBaseUrl+"/games/join", jsonContentType, bytes.NewReader(body))
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
-	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+	require.Equal(t, http.StatusInternalServerError, resp.StatusCode)
 }
 
 func (s *ServerTestSuite) TestCreateJoinAndLeaveMessagesAreSent() {
@@ -111,27 +111,27 @@ func (s *ServerTestSuite) TestCreateJoinAndLeaveMessagesAreSent() {
 
 	log.Print("Dialing server")
 	conn, _, err := dialer.Dial(url, game.Jar.Headers())
-	assert.Nil(t, err, "Should have connected to the ws server successfully")
+	require.Nil(t, err, "Should have connected to the ws server successfully")
 	defer conn.Close()
-	assert.NotNil(t, conn)
+	require.NotNil(t, conn)
 
 	// First message should be the player join broadcast
 	msgType, msg, err := conn.ReadMessage()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	onPlayerJoinMsg, err := network.DecodeAs[network.RpcOnPlayerJoinMsg](msg)
-	assert.NoError(t, err)
-	assert.Equal(t, game.Ids.PlayerId, onPlayerJoinMsg.Id, "The current user should have joined the game")
+	require.NoError(t, err)
+	require.Equal(t, game.Ids.PlayerId, onPlayerJoinMsg.Id, "The current user should have joined the game")
 
 	// Second message should be the state
 	msgType, msg, err = conn.ReadMessage()
-	assert.NoError(t, err)
-	assert.Equal(t, msgType, websocket.TextMessage)
+	require.NoError(t, err)
+	require.Equal(t, msgType, websocket.TextMessage)
 
 	onJoinMsg, err := network.DecodeAs[network.RpcOnJoinMsg](msg)
 
-	assert.Nil(t, err, "Should be a join message")
-	assert.Equal(t, game.Ids.GameId, onJoinMsg.State.Id)
+	require.Nil(t, err, "Should be a join message")
+	require.Equal(t, game.Ids.GameId, onJoinMsg.State.Id)
 
 	// Check that player create is sent
 	// Create the player
@@ -140,36 +140,36 @@ func (s *ServerTestSuite) TestCreateJoinAndLeaveMessagesAreSent() {
 		GameId:     game.Ids.GameId,
 	}
 	createPlayerReqBody, err := json.Marshal(createPlayerReq)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	cookies := GameJoinCookieJar{GameId: game.Ids.GameId, Password: ""}
 	client := &http.Client{
 		Jar: &cookies,
 	}
 	resp, err := client.Post(HttpBaseUrl+"/games/join", jsonContentType, bytes.NewReader(createPlayerReqBody))
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	respBytes, err := io.ReadAll(resp.Body)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	var create CreatePlayerResponse
 	err = json.Unmarshal(respBytes, &create)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	cookies.PlayerId = create.PlayerId
 
 	// Read the create message
 	msgType, msg, err = conn.ReadMessage()
 
-	assert.Nil(t, err, "Should be able to read (the initial game state)")
-	assert.True(t, len(msg) > 0, "Message should have a non-zero length")
-	assert.Equal(t, msgType, websocket.TextMessage)
+	require.Nil(t, err, "Should be able to read (the initial game state)")
+	require.True(t, len(msg) > 0, "Message should have a non-zero length")
+	require.Equal(t, msgType, websocket.TextMessage)
 
 	onCreateMsg, err := network.DecodeAs[network.RpcOnPlayerCreateMsg](msg)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
-	assert.Equal(t, create.PlayerId, onCreateMsg.Id)
-	assert.Equal(t, createPlayerReq.PlayerName, onCreateMsg.Name)
+	require.Equal(t, create.PlayerId, onCreateMsg.Id)
+	require.Equal(t, createPlayerReq.PlayerName, onCreateMsg.Name)
 
 	// Check that player join is sent
 
@@ -178,29 +178,29 @@ func (s *ServerTestSuite) TestCreateJoinAndLeaveMessagesAreSent() {
 
 	log.Print("Dialing server")
 	newPlayerConn, _, err := dialerPlayer.Dial(url, cookies.Headers())
-	assert.Nil(t, err, "Should have connected to the ws server successfully")
-	assert.NotNil(t, conn)
+	require.Nil(t, err, "Should have connected to the ws server successfully")
+	require.NotNil(t, conn)
 
 	// Check that the conn message is sent
 	msgType, msg, err = conn.ReadMessage()
-	assert.Nil(t, err, "Should be able to read the message")
-	assert.Equal(t, msgType, websocket.TextMessage)
+	require.Nil(t, err, "Should be able to read the message")
+	require.Equal(t, msgType, websocket.TextMessage)
 
 	onPlayerJoinMsg, err = network.DecodeAs[network.RpcOnPlayerJoinMsg](msg)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
-	assert.Equal(t, create.PlayerId, onPlayerJoinMsg.Id)
-	assert.Equal(t, createPlayerReq.PlayerName, onPlayerJoinMsg.Name)
+	require.Equal(t, create.PlayerId, onPlayerJoinMsg.Id)
+	require.Equal(t, createPlayerReq.PlayerName, onPlayerJoinMsg.Name)
 
 	// Check taht the leave message is sent
 	newPlayerConn.Close()
 
 	msgType, msg, err = conn.ReadMessage()
-	assert.Nil(t, err, "Should be able to read the message")
-	assert.Equal(t, msgType, websocket.TextMessage)
+	require.Nil(t, err, "Should be able to read the message")
+	require.Equal(t, msgType, websocket.TextMessage)
 
 	onDisconnectMsg, err := network.DecodeAs[network.RpcOnPlayerDisconnectMsg](msg)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
-	assert.Equal(t, create.PlayerId, onDisconnectMsg.Id)
+	require.Equal(t, create.PlayerId, onDisconnectMsg.Id)
 }

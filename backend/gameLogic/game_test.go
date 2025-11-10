@@ -782,6 +782,7 @@ func TestPlayingCardSuccessCase(t *testing.T) {
 
 	_, err = game.StartGame()
 	assert.NoError(t, err)
+  game.CurrentBlackCard.CardsToPlay = 1 // This is cursed
 
 	cardId := 1
 	card, err := gameLogic.GetWhiteCard(cardId)
