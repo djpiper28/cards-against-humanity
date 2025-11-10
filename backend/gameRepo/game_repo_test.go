@@ -8,6 +8,7 @@ import (
 	"github.com/djpiper28/cards-against-humanity/backend/gameRepo"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPacksAreLaoded(t *testing.T) {
@@ -426,7 +427,7 @@ func TestCzarSelectsCardGameIdLookupFails(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestCzarSleectsCardSuccess(t *testing.T) {
+func TestCzarSelectsCardSuccess(t *testing.T) {
 	t.Parallel()
 
 	repo := gameRepo.New()
@@ -472,4 +473,41 @@ func TestCzarSleectsCardSuccess(t *testing.T) {
 
 	_, err = repo.CzarSelectsCard(gid, game.CurrentCardCzarId, lastPlay)
 	assert.NoError(t, err)
+}
+
+func TestMulliganHandGameNotFound(t *testing.T) {
+	t.Parallel()
+
+	repo := gameRepo.New()
+	_, err := repo.MulliganHand(uuid.New(), uuid.New())
+	require.Error(t, err)
+}
+
+func TestMulliganHand(t *testing.T) {
+	t.Parallel()
+
+	repo := gameRepo.New()
+
+	settings := gameLogic.DefaultGameSettings()
+	gid, _, err := repo.CreateGame(settings, "Dave")
+	assert.NoError(t, err)
+
+	game, err := repo.GetGame(gid)
+	assert.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 1")
+	assert.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 2")
+	assert.NoError(t, err)
+
+	startGameInfo, err := game.StartGame()
+	assert.NoError(t, err)
+
+	for _, pid := range game.Players {
+		newCards, err := repo.MulliganHand(gid, pid)
+		require.NoError(t, err)
+
+		require.NotEqual(t, newCards, startGameInfo.PlayerHands[pid])
+	}
 }

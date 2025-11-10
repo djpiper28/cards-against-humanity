@@ -145,7 +145,7 @@ func TestNewGame(t *testing.T) {
 	assert.NotEmpty(t, game.Id)
 	assert.NotEmpty(t, game.LastAction)
 	assert.NotEmpty(t, game.TimeSinceLastAction())
-  assert.Empty(t, game.PreviousWinner)
+	assert.Empty(t, game.PreviousWinner)
 }
 
 func TestGameInfo(t *testing.T) {
@@ -201,7 +201,7 @@ func TestGameStateInfo(t *testing.T) {
 	assert.Empty(t, info.RoundInfo.BlackCard)
 	assert.Empty(t, info.RoundInfo.CardCzarId)
 	assert.Empty(t, info.RoundInfo.RoundNumber)
-  assert.Empty(t, info.RoundInfo.PreviousWinner)
+	assert.Empty(t, info.RoundInfo.PreviousWinner)
 }
 
 func TestGameStateInfoMidRound(t *testing.T) {
@@ -231,7 +231,7 @@ func TestGameStateInfoMidRound(t *testing.T) {
 	assert.Equal(t, game.CreationTime, info.CreationTime)
 	assert.Equal(t, game.GameState, info.GameState)
 	assert.Equal(t, game.GameOwnerId, info.GameOwnerId)
-  assert.Equal(t, game.PreviousWinner, info.RoundInfo.PreviousWinner)
+	assert.Equal(t, game.PreviousWinner, info.RoundInfo.PreviousWinner)
 }
 
 func TestAddInvalidPlayer(t *testing.T) {
@@ -782,6 +782,7 @@ func TestPlayingCardSuccessCase(t *testing.T) {
 
 	_, err = game.StartGame()
 	assert.NoError(t, err)
+  game.CurrentBlackCard.CardsToPlay = 1 // This is cursed
 
 	cardId := 1
 	card, err := gameLogic.GetWhiteCard(cardId)
@@ -1246,4 +1247,61 @@ func TestSkipBlackCard(t *testing.T) {
 		require.Len(t, player.CurrentPlay, 0)
 		require.Len(t, player.Hand, gameLogic.HandSize)
 	}
+}
+
+func TestMulliganCardPlayerNotFound(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	require.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 2")
+	require.NoError(t, err)
+
+	_, err = game.StartGame()
+	require.NoError(t, err)
+
+	_, err = game.MulliganHand(uuid.New())
+	require.Error(t, err)
+}
+
+func TestMulliganCardNotWhiteCardSelectionPhase(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	require.NoError(t, err)
+
+	pid, err := game.AddPlayer("Player 2")
+	require.NoError(t, err)
+
+	_, err = game.MulliganHand(pid)
+	require.Error(t, err)
+}
+
+func TestMulliganCzarHand(t *testing.T) {
+	t.Parallel()
+
+	settings := gameLogic.DefaultGameSettings()
+	game, err := gameLogic.NewGame(settings, "Dave")
+	require.NoError(t, err)
+
+	_, err = game.AddPlayer("Player 2")
+	require.NoError(t, err)
+
+	_, err = game.StartGame()
+	require.NoError(t, err)
+
+	oldCards := game.PlayersMap[game.CurrentCardCzarId].Hand
+	cards, err := game.MulliganHand(game.CurrentCardCzarId)
+	require.NoError(t, err)
+
+	require.Len(t, cards, gameLogic.HandSize)
+	require.NotEqual(t, cards, oldCards)
+	for _, card := range cards {
+		require.NotNil(t, card)
+	}
+
+	require.Len(t, game.PlayersMap[game.CurrentCardCzarId].CurrentPlay, 0)
 }

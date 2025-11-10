@@ -307,8 +307,8 @@ func (gr *GameRepo) EndOldGames() []uuid.UUID {
 
 	gr.lock.Lock()
 	defer gr.lock.Unlock()
-	for _, removeedGameId := range endedGames {
-		gr.removeGame(removeedGameId)
+	for _, removedGameId := range endedGames {
+		gr.removeGame(removedGameId)
 	}
 	return endedGames
 }
@@ -335,4 +335,16 @@ func (gr *GameRepo) CzarSkipsCard(gameId, pid uuid.UUID) (*gameLogic.BlackCard, 
 	}
 
 	return game.SkipBlackCard(pid)
+}
+
+func (gr *GameRepo) MulliganHand(gameId, pid uuid.UUID) ([]*gameLogic.WhiteCard, error) {
+	gr.lock.RLock()
+	defer gr.lock.RUnlock()
+
+	game, found := gr.GameMap[gameId]
+	if !found {
+		return nil, errors.New("Cannot find game")
+	}
+
+	return game.MulliganHand(pid)
 }

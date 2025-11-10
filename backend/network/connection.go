@@ -1,6 +1,7 @@
 package network
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -60,10 +61,23 @@ type WsConnection struct {
 }
 
 func (wsconn *WsConnection) Send(msg []byte) error {
+	_, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	var err error
+	defer func() {
+		if r := recover(); err != nil {
+			logger.Logger.Error("Panic whilst sending message", "err", r)
+			err = errors.Join(errors.New("Cannot send message"), fmt.Errorf("%+v", r))
+		}
+	}()
+
 	wsconn.lock.Lock()
 	defer wsconn.lock.Unlock()
 	go gameRepo.AddMessageSent()
-	return wsconn.conn.Send(msg)
+
+	err = wsconn.conn.Send(msg)
+	return err
 }
 
 func (wsconn *WsConnection) Close() {
@@ -294,10 +308,12 @@ func (c *WsConnection) readMessage(gid uuid.UUID) error {
 				return err
 			}
 
-			go GlobalConnectionManager.Broadcast(gid, broadcastMessage)
-			if info.MovedToNextCardCzarPhase {
-				go GlobalConnectionManager.MoveToCzarJudgingPhase(gid, info.CzarJudingPhaseInfo)
-			}
+			go func() {
+				GlobalConnectionManager.Broadcast(gid, broadcastMessage)
+				if info.MovedToNextCardCzarPhase {
+					GlobalConnectionManager.MoveToCzarJudgingPhase(gid, info.CzarJudingPhaseInfo)
+				}
+			}()
 			return nil
 		},
 		CzarSelectCardHandler: func(msg RpcCzarSelectCardMsg) error {
@@ -382,6 +398,26 @@ func (c *WsConnection) readMessage(gid uuid.UUID) error {
 				return errors.Join(errors.New("Cannot kick player"), err)
 			}
 
+			return nil
+		},
+		MulliganHandler: func() error {
+			handler = "Mulligan Hand"
+
+			newCards, err := gameRepo.Repo.MulliganHand(c.GameId, c.PlayerId)
+			if err != nil {
+				return errors.Join(errors.New("Cannot mulligan hand"), err)
+			}
+
+			rpcMessage := RpcOnNewHand{
+				WhiteCards: newCards,
+			}
+
+			msg, err := EncodeRpcMessage(rpcMessage)
+			if err != nil {
+				return err
+			}
+
+			go GlobalConnectionManager.SendToPlayer(c.GameId, c.PlayerId, msg)
 			return nil
 		},
 	})
